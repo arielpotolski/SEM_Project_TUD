@@ -1,0 +1,31 @@
+Notes meeting 1-12
+
+Should start coding ASAP
+
+Microservice Design
+- Request information is spread out => not microservice
+- so all requests should be stored and kept on request service (not user service)
+
+
+- who made request => stored in userservice
+- request entity is a class that should not be autheticated (do that in user service)
+- same for cluster service
+
+- sysadmin acces not needed in cluster service. But it works there so let's keep it that way
+
+- User service will be the most work in the beginning
+
+We decided we will work in duos
+- User Service (Kasper & Bart)
+- Request Service (Alexander & Vladimir)
+- Cluster Service (Ariel & Alan)
+
+Naming comvention: delft blue => db
+DO MOSCOW ASAP
+week 5 midterm => lab non mandatory. We should decide 1 week before if we want to meet
+
+Do a sprint retrospective
+all submissions on gitlab in the folder/merge to main
+
+Look into delft blue documenation for inspiration.
+What kind of database will we use. In memory probably.
