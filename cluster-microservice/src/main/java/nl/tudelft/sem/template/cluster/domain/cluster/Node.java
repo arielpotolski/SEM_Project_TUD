@@ -1,11 +1,37 @@
-package nl.tudelft.sem.template.example.domain;
+package nl.tudelft.sem.template.cluster.domain.cluster;
 
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.Objects;
+
+@Entity
+@Table(name = "nodes")
+@NoArgsConstructor
 public class Node {
 
-	private double[] resources;  // GPU, CPU, Memory
+	/**
+	 * Identifier for the node in the cluster.
+	 */
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false, unique = true)
+	private long id;
+
+	@Column(name = "cpu_resource", nullable = false)
+	private double cpu_resources;
+
+	@Column(name = "gpu_resource", nullable = false)
+	private double gpu_resources;
+
+	@Column(name = "memory_resource", nullable = false)
+	private double memory_resources;
+
+	@Column(name = "node_name", nullable = false)
 	private String name;
+
+	@Column(name = "url", nullable = false, unique = true)
 	private String url;
-	private String token;
 
 	/**
 	 * Constructor of the class.
@@ -13,16 +39,15 @@ public class Node {
 	 * @param gpuRes first value of the resources array.
 	 * @param cpuRes second value of the resources array.
 	 * @param memRes third value of the resources array.
-	 * @param token initializes the token of the node.
 	 * @param url initializes the url of the node.
 	 * @param name initializes the name given to the node.
 	 */
-	public Node(double gpuRes, double cpuRes, double memRes, String name,
-				String url, String token) {
-		this.resources = new double[] {gpuRes, cpuRes, memRes};
+	public Node(double gpuRes, double cpuRes, double memRes, String name, String url) {
+		this.cpu_resources = cpuRes;
+		this.gpu_resources = gpuRes;
+		this.memory_resources = memRes;
 		this.name = name;
 		this.url = url;
-		this.token = token;
 	}
 
 	/**
@@ -31,7 +56,7 @@ public class Node {
 	 * @return GPU resources of this node.
 	 */
 	public double getGPU() {
-		return this.resources[0];
+		return this.gpu_resources;
 	}
 
 	/**
@@ -40,7 +65,7 @@ public class Node {
 	 * @param gpuRes the amount of GPU resources.
 	 */
 	public void setGPU(double gpuRes) {
-		this.resources[0] = gpuRes;
+		this.gpu_resources = gpuRes;
 	}
 
 	/**
@@ -49,7 +74,7 @@ public class Node {
 	 * @return CPU resources of this node.
 	 */
 	public double getCPU() {
-		return this.resources[1];
+		return this.cpu_resources;
 	}
 
 	/**
@@ -58,7 +83,7 @@ public class Node {
 	 * @param cpuRes the amount of CPU resources.
 	 */
 	public void setCPU(double cpuRes) {
-		this.resources[1] = cpuRes;
+		this.cpu_resources = cpuRes;
 	}
 
 	/**
@@ -67,7 +92,7 @@ public class Node {
 	 * @return memory resources of this node.
 	 */
 	public double getMemory() {
-		return this.resources[2];
+		return this.memory_resources;
 	}
 
 	/**
@@ -76,7 +101,7 @@ public class Node {
 	 * @param memRes the amount of memory resources.
 	 */
 	public void setMemory(double memRes) {
-		this.resources[2] = memRes;
+		this.memory_resources = memRes;
 	}
 
 	/**
@@ -116,24 +141,6 @@ public class Node {
 	}
 
 	/**
-	 * Gets and returns the token of this node.
-	 *
-	 * @return the token of this node.
-	 */
-	public String getToken() {
-		return token;
-	}
-
-	/**
-	 * Sets the token of this node to the token passed as a parameter.
-	 *
-	 * @param token the token that this node will have.
-	 */
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	/**
 	 * This method checks if the node is valid to be added. For a node to be valid,
 	 * it should have as much CPU resource as it has GPU and memory resources.
 	 *
@@ -141,17 +148,44 @@ public class Node {
 	 * 		   or the reason why the node was considered invalid.
 	 */
 	public String enoughCPU() {
-		if (this.resources[1] < this.resources[0] && this.resources[1] < this.resources[2]) {
+		if (this.cpu_resources < this.gpu_resources && this.cpu_resources < this.memory_resources) {
 			return "The amount of CPU resources should be at least as much as the amount of GPU" +
 					" resources and at least as much as the amount of memory resources.";
-		} else if (this.resources[1] < this.resources[0]) {
+		} else if (this.cpu_resources < this.gpu_resources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of GPU resources.";
-		} else if (this.resources[1] < this.resources[3]) {
+		} else if (this.cpu_resources < this.memory_resources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of memory resources.";
 		} else {
 			return "Your node has been successfully added.";
 		}
+	}
+
+	/**
+	 * Compare this node to another. Use all parameters besides ID.
+	 *
+	 * @param o the other to compare this node to.
+	 * @return boolean indicating whether this is the same node as o.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Node node = (Node) o;
+		return Double.compare(node.cpu_resources, cpu_resources) == 0
+				&& Double.compare(node.gpu_resources, gpu_resources) == 0
+				&& Double.compare(node.memory_resources, memory_resources) == 0
+				&& name.equals(node.name) && url.equals(node.url);
+	}
+
+	/**
+	 * Hash this node.
+	 *
+	 * @return the integer hash code of this node object.
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(cpu_resources, gpu_resources, memory_resources, name, url);
 	}
 }

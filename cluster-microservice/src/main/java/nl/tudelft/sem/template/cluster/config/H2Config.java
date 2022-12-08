@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.example.config;
+package nl.tudelft.sem.template.cluster.config;
 
 import javax.sql.DataSource;
 import lombok.Getter;
@@ -10,12 +10,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.util.Objects;
+
 
 /**
  * The H2 config.
  */
 @Configuration
-@EnableJpaRepositories("nl.tudelft.sem.template.example.domain")
+@EnableJpaRepositories("nl.tudelft.sem.template.cluster.domain")
 @PropertySource("classpath:application-dev.properties")
 @EnableTransactionManagement
 public class H2Config {
@@ -35,7 +37,7 @@ public class H2Config {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(environment.getProperty("jdbc.driverClassName"));
+        dataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("jdbc.driverClassName")));
         dataSource.setUrl(environment.getProperty("jdbc.url"));
         dataSource.setUsername(environment.getProperty("jdbc.user"));
         dataSource.setPassword(environment.getProperty("jdbc.pass"));

@@ -1,10 +1,10 @@
-package nl.tudelft.sem.template.example;
+package nl.tudelft.sem.template.cluster;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Example microservice application.
+ * Cluster microservice application.
  */
 @SpringBootApplication
 public class Application {
