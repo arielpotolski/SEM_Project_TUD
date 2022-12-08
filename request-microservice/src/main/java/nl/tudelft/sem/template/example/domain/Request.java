@@ -1,8 +1,16 @@
 package nl.tudelft.sem.template.example.domain;
 
+import javax.persistence.*;
 import java.util.Date;
 
+
+@Entity
+@Table(name = "request")
 public class Request {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private String name;
     private String description;
@@ -12,18 +20,26 @@ public class Request {
     private Double gpu;
     private Double memory;
 
+    private boolean approved;
+
     private Date preferredDate;
 
-
-    public Request(String name, String description,
-                   String faculty, Double cpu, Double gpu, Double memory, Date preferredDate) {
+    public Request(Long id, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory,
+                   boolean approved, Date preferredDate) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.faculty = faculty;
         this.cpu = cpu;
         this.gpu = gpu;
         this.memory = memory;
+        this.approved = approved;
         this.preferredDate = preferredDate;
+    }
+
+    public Request() {
+
     }
 
     public String getName() {
@@ -80,5 +96,21 @@ public class Request {
 
     public void setPreferredDate(Date preferredDate) {
         this.preferredDate = preferredDate;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }
