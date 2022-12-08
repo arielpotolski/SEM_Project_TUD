@@ -1,7 +1,7 @@
-package nl.tudelft.sem.template.example.config;
+package nl.tudelft.sem.template.cluster.config;
 
-import nl.tudelft.sem.template.example.authentication.JwtAuthenticationEntryPoint;
-import nl.tudelft.sem.template.example.authentication.JwtRequestFilter;
+import nl.tudelft.sem.template.cluster.authentication.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.cluster.authentication.JwtRequestFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;

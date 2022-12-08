@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.example.controllers;
+package nl.tudelft.sem.template.cluster.controllers;
 
 public class ClusterController {
 

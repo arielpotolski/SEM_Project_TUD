@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.example.integration;
+package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import nl.tudelft.sem.template.example.authentication.AuthManager;
-import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
+import nl.tudelft.sem.template.cluster.authentication.AuthManager;
+import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
