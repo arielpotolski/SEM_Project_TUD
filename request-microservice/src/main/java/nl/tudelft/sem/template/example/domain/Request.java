@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.NonNull;
 
 import javax.persistence.*;
 import java.util.Date;

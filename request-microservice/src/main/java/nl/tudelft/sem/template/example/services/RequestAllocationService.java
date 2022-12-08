@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.example.services;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.Resource;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.domain.VerificationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -75,6 +76,20 @@ public class RequestAllocationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<Request> result = restTemplate.postForEntity(url, request, Request.class);
+
+    }
+
+    public boolean verifyUser(String netId, String token, String faculty) {
+
+        String url = "";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        VerificationDTO dto = new VerificationDTO(netId,token,faculty);
+
+
+        ResponseEntity<Boolean> result = restTemplate.postForEntity(url, dto, Boolean.class);
+
+        return Boolean.TRUE.equals(result.getBody());
 
     }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -60,4 +61,26 @@ public class ExampleTest {
         assertThat(response).isEqualTo("Hello ExampleUser");
 
     }
+
+    @Test
+    public void pendingRequestsTest() throws Exception {
+
+        when(mockAuthenticationManager.getNetId()).thenReturn("ExampleUser");
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ExampleUser");
+
+
+        ResultActions result = mockMvc.perform(get("/job/pendingRequests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        // This is run prior to any request dispatch
+        assertThat(response).isEqualTo("[]");
+
+    }
+
+
 }

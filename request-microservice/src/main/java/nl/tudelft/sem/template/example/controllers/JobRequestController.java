@@ -7,6 +7,7 @@ import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import nl.tudelft.sem.template.example.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,16 +45,31 @@ public class JobRequestController {
 
 
     @PostMapping("/sendRequest")
-    public ResponseEntity<Request> sendRequest(@RequestBody Request request){
+    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request){
 
         //check if the user is from the corresponding faculty
 
-        request.setApproved(false);
-        requestRepository.save(request);
-        publishRequest();
+        if(request.getFaculty() == null){
+            return ResponseEntity.ok()
+                    .body("You are not verified to send requests to this faculty");
+        }
+
+        List<String> token = headers.get("token");
+
+        boolean verified = requestAllocationService.verifyUser(authManager.getNetId(), token.get(0),request.getFaculty());
+
+        if(verified){
+            request.setApproved(false);
+            requestRepository.save(request);
+            publishRequest();
+
+            return ResponseEntity.ok()
+                    .body("The request was sent. Now it is to be approved by faculty.");
+        }
 
         return ResponseEntity.ok()
-                .body(request);
+                .body("You are not verified to send requests to this faculty");
+
     }
 
     @GetMapping("pendingRequests")
