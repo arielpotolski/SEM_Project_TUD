@@ -1,19 +1,16 @@
-package nl.tudelft.sem.template.example.controllers;
+package nl.tudelft.sem.template.userservice.controllers;
 
-import nl.tudelft.sem.template.example.authentication.AuthManager;
+import nl.tudelft.sem.template.userservice.authentication.AuthManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Hello World example controller.
- * <p>
- * This controller shows how you can extract information from the JWT token.
- * </p>
+ * Class which will handle assigning Employees to Faculties
  */
 @RestController
-public class DefaultController {
+public class EmployeeController {
 
     private final transient AuthManager authManager;
 
@@ -23,7 +20,7 @@ public class DefaultController {
      * @param authManager Spring Security component used to authenticate and authorize the user
      */
     @Autowired
-    public DefaultController(AuthManager authManager) {
+    public EmployeeController(AuthManager authManager) {
         this.authManager = authManager;
     }
 
@@ -34,8 +31,8 @@ public class DefaultController {
      */
     @GetMapping("/hello")
     public ResponseEntity<String> helloWorld() {
-        return ResponseEntity.ok("Hello " + authManager.getNetId());
+        return ResponseEntity.ok("Employee has been added");
 
     }
-
 }
+
