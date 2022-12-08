@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.example.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -22,6 +24,8 @@ public class Request {
 
     private boolean approved;
 
+
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date preferredDate;
 
     public Request(Long id, String name, String description, String faculty,

@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import nl.tudelft.sem.template.example.authentication.AuthManager;
+import nl.tudelft.sem.template.example.domain.ApprovalInformation;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
@@ -41,19 +42,13 @@ public class JobRequestController {
         this.requestRepository = requestRepository;
     }
 
-    /**
-     * Gets example by id.
-     *
-     * @return the example found in the database with the given id
-     */
-    public ResponseEntity<String> helloWorld() {
-        return ResponseEntity.ok("Hello " + authManager.getNetId());
-
-    }
 
     @PostMapping("/sendRequest")
     public ResponseEntity<Request> sendRequest(@RequestBody Request request){
 
+        //check if the user is from the corresponding faculty
+
+        request.setApproved(false);
         requestRepository.save(request);
         publishRequest();
 
@@ -68,11 +63,11 @@ public class JobRequestController {
     }
 
     @PostMapping("sendApprovals")
-    public ResponseEntity<List<Request>> sendApprovals(@RequestBody Long[] idsOfApprovedRequests){
+    public ResponseEntity<List<Request>> sendApprovals(@RequestBody ApprovalInformation approvalInformation){
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
         List<Request> requests = requestRepository.findAll().stream()
-                .filter(x -> Utils.idIsContained(idsOfApprovedRequests, x.getId())).collect(Collectors.toList());
+                .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId())).collect(Collectors.toList());
 
         for (Request request : requests) {
             request.setApproved(true);
@@ -96,8 +91,5 @@ public class JobRequestController {
         return ResponseEntity.ok().body(requests);
 
     }
-
-
-
 
 }
