@@ -17,10 +17,19 @@
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/cluster-microservice" />
-        <option name="gradleHome" value="$USER_HOME$/Documents/Gradle/gradle-7.4" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../Gradle/gradle-7.4" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/cluster-microservice" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/user-microservice" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/user-microservice" />
           </set>
         </option>
       </GradleProjectSettings>
