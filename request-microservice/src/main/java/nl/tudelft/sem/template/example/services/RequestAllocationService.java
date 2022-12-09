@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class RequestAllocationService {
 
@@ -23,6 +26,27 @@ public class RequestAllocationService {
     public RequestAllocationService(RestTemplateBuilder restTemplateBuilder, RequestRepository requestRepository) {
         this.restTemplate = restTemplateBuilder.build();
         this.requestRepository = requestRepository;
+    }
+
+
+
+    public List<String> getFacultyUserFaculties(String token) {
+
+        return new ArrayList<>();
+        // To be impl
+//        String url = "to be decided";
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.add("token", token);
+//
+//
+//
+//        ResponseEntity<List<String>> response = restTemplate.postForEntity(url, entity, String.class);
+
+
+
+
     }
 
     public Resource getReservedResource(String facultyName){
@@ -71,7 +95,7 @@ public class RequestAllocationService {
     public void sendDeclinedRequestToUserService(Request request) {
 
         // URL to be determined
-        String url = "";
+        String url = "to be decided";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -81,7 +105,7 @@ public class RequestAllocationService {
 
     public boolean verifyUser(String netId, String token, String faculty) {
 
-        String url = "";
+        String url = "to be decided";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         VerificationDTO dto = new VerificationDTO(netId,token,faculty);

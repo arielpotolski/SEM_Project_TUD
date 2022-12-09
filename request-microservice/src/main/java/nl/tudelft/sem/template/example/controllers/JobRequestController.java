@@ -79,11 +79,15 @@ public class JobRequestController {
     }
 
     @PostMapping("sendApprovals")
-    public ResponseEntity<List<Request>> sendApprovals(@RequestBody ApprovalInformation approvalInformation){
+    public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers, @RequestBody ApprovalInformation approvalInformation){
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
+        List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
+
         List<Request> requests = requestRepository.findAll().stream()
-                .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId())).collect(Collectors.toList());
+                .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
+                .filter(x->facultiesOfFacultyUser.contains(x.getFaculty()))
+                .collect(Collectors.toList());
 
         for (Request request : requests) {
             request.setApproved(true);
