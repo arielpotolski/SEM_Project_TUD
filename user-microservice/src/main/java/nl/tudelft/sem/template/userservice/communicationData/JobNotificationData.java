@@ -51,6 +51,7 @@ public class JobNotificationData {
                 '}';
     }
 }
+//local date from java.tuime
 
 enum State{
     SCHEDULED,

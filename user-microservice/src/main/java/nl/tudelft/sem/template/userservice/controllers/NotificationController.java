@@ -50,6 +50,7 @@ public class NotificationController {
             @RequestParam("message") String message,
             @RequestBody Data data
     ){
+
         String netId = authManager.getNetId();
         JobNotificationData notificationData = JobNotificationData.createJobNotification(state, date, message);
         notificationService.addJobNotification(netId, notificationData);
