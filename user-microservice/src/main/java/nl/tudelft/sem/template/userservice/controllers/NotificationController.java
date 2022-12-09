@@ -1,16 +1,14 @@
 package nl.tudelft.sem.template.userservice.controllers;
 
 import nl.tudelft.sem.template.userservice.authentication.AuthManager;
+import nl.tudelft.sem.template.userservice.communicationUtil.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Class which will handle assigning Employees to Faculties
- */
+
 @RestController
-public class EmployeeController {
+public class NotificationController {
 
     private final transient AuthManager authManager;
 
@@ -20,7 +18,7 @@ public class EmployeeController {
      * @param authManager Spring Security component used to authenticate and authorize the user
      */
     @Autowired
-    public EmployeeController(AuthManager authManager) {
+    public NotificationController(AuthManager authManager) {
         this.authManager = authManager;
     }
 
@@ -29,10 +27,21 @@ public class EmployeeController {
      *
      * @return the example found in the database with the given id
      */
-    @GetMapping("/hello2")
+    @GetMapping("/hello")
     public ResponseEntity<String> helloWorld() {
         return ResponseEntity.ok("Employee has been added");
 
     }
-}
+    @PostMapping("/jobNotification")
+    public ResponseEntity<String> receiveJobNotification(
+            @RequestParam("State") String state
+    ){
 
+        return ResponseEntity.ok("a");
+    }
+
+
+
+
+
+}
