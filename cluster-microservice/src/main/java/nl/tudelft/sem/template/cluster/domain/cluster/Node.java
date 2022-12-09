@@ -1,13 +1,12 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
 @Table(name = "nodes")
-@NoArgsConstructor
+@SecondaryTable(name = "nodeFacultyAssignment", pkJoinColumns = @PrimaryKeyJoinColumn(name = "id"))
 public class Node {
 
 	/**
@@ -33,6 +32,18 @@ public class Node {
 	@Column(name = "url", nullable = false, unique = true)
 	private String url;
 
+	@Column(name = "userId", nullable = false)
+	private final String userNetId;
+
+	@Column(name = "facultyId", table = "nodeFacultyAssignment")
+	private String facultyId;
+
+	// private LocalDate freeUntil; // for the future implementation of "freeing" resources by a faculty
+
+	public Node() {
+		this.userNetId = "placeholder";
+	} // necessary because userNetId is final
+
 	/**
 	 * Constructor of the class.
 	 *
@@ -41,13 +52,16 @@ public class Node {
 	 * @param memRes third value of the resources array.
 	 * @param url initializes the url of the node.
 	 * @param name initializes the name given to the node.
+	 * @param userNetId assigns this node's user to the current netId.
 	 */
-	public Node(double gpuRes, double cpuRes, double memRes, String name, String url) {
+	public Node(double gpuRes, double cpuRes, double memRes, String name,
+				String url, String userNetId) {
 		this.cpu_resources = cpuRes;
 		this.gpu_resources = gpuRes;
 		this.memory_resources = memRes;
 		this.name = name;
 		this.url = url;
+		this.userNetId = userNetId;
 	}
 
 	/**
@@ -55,7 +69,7 @@ public class Node {
 	 *
 	 * @return GPU resources of this node.
 	 */
-	public double getGPU() {
+	public double getGPUResources() {
 		return this.gpu_resources;
 	}
 
@@ -64,7 +78,7 @@ public class Node {
 	 *
 	 * @param gpuRes the amount of GPU resources.
 	 */
-	public void setGPU(double gpuRes) {
+	public void changeGPUResources(double gpuRes) {
 		this.gpu_resources = gpuRes;
 	}
 
@@ -73,7 +87,7 @@ public class Node {
 	 *
 	 * @return CPU resources of this node.
 	 */
-	public double getCPU() {
+	public double getCPUResources() {
 		return this.cpu_resources;
 	}
 
@@ -82,7 +96,7 @@ public class Node {
 	 *
 	 * @param cpuRes the amount of CPU resources.
 	 */
-	public void setCPU(double cpuRes) {
+	public void changeCPUResources(double cpuRes) {
 		this.cpu_resources = cpuRes;
 	}
 
@@ -91,7 +105,7 @@ public class Node {
 	 *
 	 * @return memory resources of this node.
 	 */
-	public double getMemory() {
+	public double getMemoryResources() {
 		return this.memory_resources;
 	}
 
@@ -100,7 +114,7 @@ public class Node {
 	 *
 	 * @param memRes the amount of memory resources.
 	 */
-	public void setMemory(double memRes) {
+	public void changeMemoryResources(double memRes) {
 		this.memory_resources = memRes;
 	}
 
@@ -109,7 +123,7 @@ public class Node {
 	 *
 	 * @return the name of this node.
  	 */
-	public String getName() {
+	public String getNameOfNode() {
 		return name;
 	}
 
@@ -118,7 +132,7 @@ public class Node {
 	 *
 	 * @param name the name that this node should receive.
 	 */
-	public void setName(String name) {
+	public void changeNameOfNode(String name) {
 		this.name = name;
 	}
 
@@ -127,7 +141,7 @@ public class Node {
 	 *
 	 * @return the url of this node.
 	 */
-	public String getUrl() {
+	public String getUrlOfNode() {
 		return url;
 	}
 
@@ -136,8 +150,35 @@ public class Node {
 	 *
 	 * @param url the url that will be set to this node.
 	 */
-	public void setUrl(String url) {
+	public void changeUrlOfNode(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * Gets and returns the netId of the user who contributed this node.
+	 *
+	 * @return the user id of the contributing user of this node.
+	 */
+	public String getNodeOwnerUserNetId() {
+		return userNetId;
+	}
+
+	/**
+	 * Gets and returns the facultyId of the faculty to which this node is assigned.
+	 *
+	 * @return the String facultyId to which this node is assigned.
+	 */
+	public String getNodeAssignedFacultyId() {
+		return this.facultyId;
+	}
+
+	/**
+	 * Sets the assigned faculty of this node to the one provided as the parameter.
+	 *
+	 * @param facultyId the new faculty assigned to this node.
+	 */
+	public void changeNodeAssignedFacultyId(String facultyId) {
+		this.facultyId = facultyId;
 	}
 
 	/**
@@ -176,7 +217,9 @@ public class Node {
 		return Double.compare(node.cpu_resources, cpu_resources) == 0
 				&& Double.compare(node.gpu_resources, gpu_resources) == 0
 				&& Double.compare(node.memory_resources, memory_resources) == 0
-				&& name.equals(node.name) && url.equals(node.url);
+				&& Objects.equals(name, node.name) && Objects.equals(url, node.url)
+				&& Objects.equals(userNetId, node.userNetId)
+				&& Objects.equals(facultyId, node.facultyId);
 	}
 
 	/**
@@ -186,6 +229,9 @@ public class Node {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(cpu_resources, gpu_resources, memory_resources, name, url);
+		return Objects.hash(cpu_resources, gpu_resources, memory_resources,
+				name, url, userNetId, facultyId);
 	}
+
+	// add toString in JSON format
 }
