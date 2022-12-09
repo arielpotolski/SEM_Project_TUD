@@ -17,14 +17,14 @@ public class Node {
 	@Column(name = "id", nullable = false, unique = true)
 	private long id;
 
-	@Column(name = "cpu_resource", nullable = false)
-	private double cpu_resources;
+	@Column(name = "cpuResources", nullable = false)
+	private double cpuResources;
 
-	@Column(name = "gpu_resource", nullable = false)
-	private double gpu_resources;
+	@Column(name = "gpuResources", nullable = false)
+	private double gpuResources;
 
-	@Column(name = "memory_resource", nullable = false)
-	private double memory_resources;
+	@Column(name = "memoryResources", nullable = false)
+	private double memoryResources;
 
 	@Column(name = "node_name", nullable = false)
 	private String name;
@@ -188,14 +188,14 @@ public class Node {
 	 * @return a string that either says the node has been added (in case its valid),
 	 * 		   or the reason why the node was considered invalid.
 	 */
-	public String enoughCPU() {
-		if (this.cpu_resources < this.gpu_resources && this.cpu_resources < this.memory_resources) {
+	public String hasEnoughCPU() {
+		if (this.cpuResources < this.gpuResources && this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount of GPU" +
 					" resources and at least as much as the amount of memory resources.";
-		} else if (this.cpu_resources < this.gpu_resources) {
+		} else if (this.cpuResources < this.gpuResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of GPU resources.";
-		} else if (this.cpu_resources < this.memory_resources) {
+		} else if (this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of memory resources.";
 		} else {
