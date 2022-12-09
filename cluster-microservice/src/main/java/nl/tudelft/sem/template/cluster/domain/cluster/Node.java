@@ -6,7 +6,6 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "nodes")
-@SecondaryTable(name = "nodeFacultyAssignment", pkJoinColumns = @PrimaryKeyJoinColumn(name = "id"))
 public class Node {
 
 	/**
@@ -35,7 +34,7 @@ public class Node {
 	@Column(name = "userId", nullable = false)
 	private final String userNetId;
 
-	@Column(name = "facultyId", table = "nodeFacultyAssignment")
+	@Column(name = "facultyId")
 	private String facultyId;
 
 	// private LocalDate freeUntil; // for the future implementation of "freeing" resources by a faculty
@@ -56,9 +55,9 @@ public class Node {
 	 */
 	public Node(double gpuRes, double cpuRes, double memRes, String name,
 				String url, String userNetId) {
-		this.cpu_resources = cpuRes;
-		this.gpu_resources = gpuRes;
-		this.memory_resources = memRes;
+		this.cpuResources = cpuRes;
+		this.gpuResources = gpuRes;
+		this.memoryResources = memRes;
 		this.name = name;
 		this.url = url;
 		this.userNetId = userNetId;
@@ -70,7 +69,7 @@ public class Node {
 	 * @return GPU resources of this node.
 	 */
 	public double getGPUResources() {
-		return this.gpu_resources;
+		return this.gpuResources;
 	}
 
 	/**
@@ -79,7 +78,7 @@ public class Node {
 	 * @param gpuRes the amount of GPU resources.
 	 */
 	public void changeGPUResources(double gpuRes) {
-		this.gpu_resources = gpuRes;
+		this.gpuResources = gpuRes;
 	}
 
 	/**
@@ -88,7 +87,7 @@ public class Node {
 	 * @return CPU resources of this node.
 	 */
 	public double getCPUResources() {
-		return this.cpu_resources;
+		return this.cpuResources;
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class Node {
 	 * @param cpuRes the amount of CPU resources.
 	 */
 	public void changeCPUResources(double cpuRes) {
-		this.cpu_resources = cpuRes;
+		this.cpuResources = cpuRes;
 	}
 
 	/**
@@ -106,7 +105,7 @@ public class Node {
 	 * @return memory resources of this node.
 	 */
 	public double getMemoryResources() {
-		return this.memory_resources;
+		return this.memoryResources;
 	}
 
 	/**
@@ -115,7 +114,7 @@ public class Node {
 	 * @param memRes the amount of memory resources.
 	 */
 	public void changeMemoryResources(double memRes) {
-		this.memory_resources = memRes;
+		this.memoryResources = memRes;
 	}
 
 	/**
@@ -214,9 +213,9 @@ public class Node {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Node node = (Node) o;
-		return Double.compare(node.cpu_resources, cpu_resources) == 0
-				&& Double.compare(node.gpu_resources, gpu_resources) == 0
-				&& Double.compare(node.memory_resources, memory_resources) == 0
+		return Double.compare(node.cpuResources, cpuResources) == 0
+				&& Double.compare(node.gpuResources, gpuResources) == 0
+				&& Double.compare(node.memoryResources, memoryResources) == 0
 				&& Objects.equals(name, node.name) && Objects.equals(url, node.url)
 				&& Objects.equals(userNetId, node.userNetId)
 				&& Objects.equals(facultyId, node.facultyId);
@@ -229,7 +228,7 @@ public class Node {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(cpu_resources, gpu_resources, memory_resources,
+		return Objects.hash(cpuResources, gpuResources, memoryResources,
 				name, url, userNetId, facultyId);
 	}
 

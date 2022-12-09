@@ -1,7 +1,5 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -39,11 +37,11 @@ public class Job {
     @Column(name = "requiredMemory", nullable = false)
     private double requiredMemory;
 
-    @Column(name = "scheduledFor", nullable = false)
-    private LocalDate scheduledFor;
-
     @Column(name = "preferredCompletionDate", nullable = false)
     private LocalDate preferredCompletionDate;
+
+    @Column(name = "scheduledFor", nullable = false)
+    private LocalDate scheduledFor;
 
     /**
      * Create a new Job (no-parameters constructor).
@@ -62,12 +60,12 @@ public class Job {
      * @param requiredCPU the cpu resources that this job requires.
      * @param requiredGPU the gpu resources that this job requires.
      * @param requiredMemory the memory resources that this job requires.
-     * @param scheduledFor the date for which this job is scheduled currently.
      * @param preferredCompletionDate the preferred date before which this job should be scheduled.
+     * @param scheduledFor the date for which this job is scheduled currently.
      */
     public Job(String facultyId, String userNetId, String jobName, String jobDescription,
-               double requiredCPU, double requiredGPU, double requiredMemory,
-               LocalDate scheduledFor, LocalDate preferredCompletionDate) {
+               double requiredCPU, double requiredGPU, double requiredMemory, LocalDate preferredCompletionDate,
+               LocalDate scheduledFor) {
         this.facultyId = facultyId;
         this.userNetId = userNetId;
         this.jobName = jobName;
@@ -75,8 +73,8 @@ public class Job {
         this.requiredCPU = requiredCPU;
         this.requiredGPU = requiredGPU;
         this.requiredMemory = requiredMemory;
-        this.scheduledFor = scheduledFor;
         this.preferredCompletionDate = preferredCompletionDate;
+        this.scheduledFor = scheduledFor;
     }
 
     /**
@@ -197,24 +195,6 @@ public class Job {
     }
 
     /**
-     * Gets and return the date that this job is currently scheduled for.
-     *
-     * @return the date this job is currently scheduled for.
-     */
-    public LocalDate getDateJobIsScheduledFor() {
-        return scheduledFor;
-    }
-
-    /**
-     * Changes the date this job is scheduled for to the provided one.
-     *
-     * @param scheduledFor the new scheduled date to be assigned to this job.
-     */
-    public void changeDateJobIsScheduledFor(LocalDate scheduledFor) {
-        this.scheduledFor = scheduledFor;
-    }
-
-    /**
      * Gets and returns the preferred date before which this job should be completed.
      *
      * @return the preferred date before which this job should be completed.
@@ -230,6 +210,24 @@ public class Job {
      */
     public void changePreferredCompletionDate(LocalDate preferredCompletionDate) {
         this.preferredCompletionDate = preferredCompletionDate;
+    }
+
+    /**
+     * Gets and return the date that this job is currently scheduled for.
+     *
+     * @return the date this job is currently scheduled for.
+     */
+    public LocalDate getDateJobIsScheduledFor() {
+        return scheduledFor;
+    }
+
+    /**
+     * Changes the date this job is scheduled for to the provided one.
+     *
+     * @param scheduledFor the new scheduled date to be assigned to this job.
+     */
+    public void changeDateJobIsScheduledFor(LocalDate scheduledFor) {
+        this.scheduledFor = scheduledFor;
     }
 
     /**
@@ -263,7 +261,7 @@ public class Job {
     @Override
     public int hashCode() {
         return Objects.hash(facultyId, userNetId, jobName, jobDescription,
-                requiredCPU, requiredGPU, requiredMemory,
-                scheduledFor, preferredCompletionDate);
+                requiredCPU, requiredGPU, requiredMemory, preferredCompletionDate,
+                scheduledFor);
     }
 }

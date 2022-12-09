@@ -1,8 +1,7 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
-import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.cluster.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +18,9 @@ public class ClusterController {
 
 	private final transient AuthManager authManager;
 	private final transient NodeRepository nodeRep;
+	private final transient JobScheduleRepository jobScheduleRep;
+	private final transient JobSchedulingService scheduling;
+	private final transient NodeAssignmentService assigning;
 
 	/**
 	 * Instantiates a new controller.
@@ -26,9 +28,14 @@ public class ClusterController {
 	 * @param authManager Spring Security component used to authenticate and authorize the user
 	 */
 	@Autowired
-	public ClusterController(AuthManager authManager, NodeRepository nodeRep) {
+	public ClusterController(AuthManager authManager, NodeRepository nodeRep,
+							 JobScheduleRepository jobScheduleRep, JobSchedulingService scheduling,
+							 NodeAssignmentService assigning) {
 		this.authManager = authManager;
 		this.nodeRep = nodeRep;
+		this.jobScheduleRep = jobScheduleRep;
+		this.scheduling = scheduling;
+		this.assigning = assigning;
 	}
 
 	/**
@@ -73,7 +80,7 @@ public class ClusterController {
 	 */
 	@PostMapping(path = {"/add"})
 	public ResponseEntity<String>  addNode(@RequestBody Node node) {
-		if (this.nodeRep.existsByUrl(node.getUrl())) {
+		if (this.nodeRep.existsByUrl(node.getUrlOfNode())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
 		if (node.hasEnoughCPU().equals("Your node has been successfully added.")) {
@@ -102,6 +109,8 @@ public class ClusterController {
 	}
 
 	/**
+	 * TODO: change this to post when we have a queue
+	 *
 	 * Deletes all the nodes from the cluster.
 	 *
 	 * @return a string saying if the deletion was successful
@@ -111,4 +120,19 @@ public class ClusterController {
 		this.nodeRep.deleteAll();
 		return ResponseEntity.ok("All nodes have been deleted from the cluster.");
 	}
+
+	@GetMapping("/resources")
+	public List<FacultyTotalResources> getResourcesByFaculty() {
+		return this.nodeRep.findTotalResourcesPerFaculty();
+	}
+
+	@GetMapping("/resources/{facultyId}")
+	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
+		return this.nodeRep.findTotalResourcesForGivenFaculty(facultyId);
+	}
+
+	// free resources per day
+
+	// free resources per day for given faculty
+
 }
