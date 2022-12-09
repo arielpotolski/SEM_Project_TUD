@@ -18,14 +18,14 @@ public class Node {
 	@Column(name = "id", nullable = false, unique = true)
 	private long id;
 
-	@Column(name = "cpu_resource", nullable = false)
-	private double cpu_resources;
+	@Column(name = "cpuResources", nullable = false)
+	private double cpuResources;
 
-	@Column(name = "gpu_resource", nullable = false)
-	private double gpu_resources;
+	@Column(name = "gpuResources", nullable = false)
+	private double gpuResources;
 
-	@Column(name = "memory_resource", nullable = false)
-	private double memory_resources;
+	@Column(name = "memoryResources", nullable = false)
+	private double memoryResources;
 
 	@Column(name = "node_name", nullable = false)
 	private String name;
@@ -42,10 +42,10 @@ public class Node {
 	 * @param url initializes the url of the node.
 	 * @param name initializes the name given to the node.
 	 */
-	public Node(double gpuRes, double cpuRes, double memRes, String name, String url) {
-		this.cpu_resources = cpuRes;
-		this.gpu_resources = gpuRes;
-		this.memory_resources = memRes;
+	public Node(double cpuRes, double gpuRes, double memRes, String name, String url) {
+		this.cpuResources = cpuRes;
+		this.gpuResources = gpuRes;
+		this.memoryResources = memRes;
 		this.name = name;
 		this.url = url;
 	}
@@ -56,7 +56,7 @@ public class Node {
 	 * @return GPU resources of this node.
 	 */
 	public double getGPU() {
-		return this.gpu_resources;
+		return this.gpuResources;
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class Node {
 	 * @param gpuRes the amount of GPU resources.
 	 */
 	public void setGPU(double gpuRes) {
-		this.gpu_resources = gpuRes;
+		this.gpuResources = gpuRes;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class Node {
 	 * @return CPU resources of this node.
 	 */
 	public double getCPU() {
-		return this.cpu_resources;
+		return this.cpuResources;
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class Node {
 	 * @param cpuRes the amount of CPU resources.
 	 */
 	public void setCPU(double cpuRes) {
-		this.cpu_resources = cpuRes;
+		this.cpuResources = cpuRes;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class Node {
 	 * @return memory resources of this node.
 	 */
 	public double getMemory() {
-		return this.memory_resources;
+		return this.memoryResources;
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class Node {
 	 * @param memRes the amount of memory resources.
 	 */
 	public void setMemory(double memRes) {
-		this.memory_resources = memRes;
+		this.memoryResources = memRes;
 	}
 
 	/**
@@ -147,14 +147,14 @@ public class Node {
 	 * @return a string that either says the node has been added (in case its valid),
 	 * 		   or the reason why the node was considered invalid.
 	 */
-	public String enoughCPU() {
-		if (this.cpu_resources < this.gpu_resources && this.cpu_resources < this.memory_resources) {
+	public String hasEnoughCPU() {
+		if (this.cpuResources < this.gpuResources && this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount of GPU" +
 					" resources and at least as much as the amount of memory resources.";
-		} else if (this.cpu_resources < this.gpu_resources) {
+		} else if (this.cpuResources < this.gpuResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of GPU resources.";
-		} else if (this.cpu_resources < this.memory_resources) {
+		} else if (this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
 					"of memory resources.";
 		} else {
@@ -173,10 +173,10 @@ public class Node {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Node node = (Node) o;
-		return Double.compare(node.cpu_resources, cpu_resources) == 0
-				&& Double.compare(node.gpu_resources, gpu_resources) == 0
-				&& Double.compare(node.memory_resources, memory_resources) == 0
-				&& name.equals(node.name) && url.equals(node.url);
+		return Double.compare(node.cpuResources, this.cpuResources) == 0
+				&& Double.compare(node.gpuResources, this.gpuResources) == 0
+				&& Double.compare(node.memoryResources, this.memoryResources) == 0
+				&& this.name.equals(node.name) && this.url.equals(node.url);
 	}
 
 	/**
@@ -186,6 +186,7 @@ public class Node {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(cpu_resources, gpu_resources, memory_resources, name, url);
+		return Objects.hash(this.cpuResources, this.gpuResources,
+			this.memoryResources, this.name, this.url);
 	}
 }
