@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -49,11 +50,11 @@ public class RequestAllocationService {
 
     }
 
-    public Resource getReservedResource(String facultyName){
+    public List<Resource> getReservedResource(String facultyName, Date preferredDate){
 
 
         // Needs to be confirmed by Cluster team
-        String url = "https://localhost:8082/cluster/facultyResource";
+        String url = "https://localhost:8085/resources/" + facultyName + "/" + preferredDate.toString();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -63,32 +64,39 @@ public class RequestAllocationService {
         Resource resourceRet =
                 restTemplate.postForObject(url, request, Resource.class);
 
-        return resourceRet;
+        return new ArrayList<>();
 
     }
 
     public boolean enoughResourcesForJob(Request request){
 
-        Resource currentResource = getReservedResource(request.getFaculty());
+        List<Resource> resources = getReservedResource(request.getFaculty(),request.getPreferredDate());
+        boolean flag = false;
 
-        if(currentResource.getResourceCPU() < request.getCpu()){
-            return false;
+        for (int i = 0; i < resources.size(); i++) {
+            Resource currentResource = resources.get(i);
+
+            if(currentResource.getResourceCPU() >= request.getCpu() &&
+                    currentResource.getResourceGPU() >= request.getGpu() &&
+                    currentResource.getResourceMemory() >= request.getMemory()){
+                return true;
+            }
+
         }
-        if(currentResource.getResourceGPU() < request.getGpu()){
-            return false;
-        }
-        return currentResource.getResourceMemory() >= request.getMemory();
+        return false;
+
+
 
     }
 
 
     public void sendRequestToCluster(Request request) {
 
-        String url = "https://localhost:8082/cluster/sendVerifiedRequest";
+        String url = "https://localhost:8085/cluster/request";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<Request> result = restTemplate.postForEntity(url, request, Request.class);
+        ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
 
     }
 

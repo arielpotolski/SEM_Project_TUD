@@ -15,24 +15,35 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @NonNull
+    private String netId;
+
+    @NonNull
     private String name;
+    @NonNull
     private String description;
+    @NonNull
     private String faculty;
 
+    @NonNull
     private Double cpu;
+    @NonNull
     private Double gpu;
+    @NonNull
     private Double memory;
 
+    @NonNull
     private boolean approved;
 
-
+    @NonNull
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date preferredDate;
 
-    public Request(Long id, String name, String description, String faculty,
+    public Request(Long id, String netId, String name, String description, String faculty,
                    Double cpu, Double gpu, Double memory,
                    boolean approved, Date preferredDate) {
         this.id = id;
+        this.netId = netId;
         this.name = name;
         this.description = description;
         this.faculty = faculty;
@@ -45,6 +56,14 @@ public class Request {
 
     public Request() {
 
+    }
+
+    public String getNetId() {
+        return netId;
+    }
+
+    public void setNetId(String netId) {
+        this.netId = netId;
     }
 
     public String getName() {
