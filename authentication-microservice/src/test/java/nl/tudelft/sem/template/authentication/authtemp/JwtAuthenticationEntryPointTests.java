@@ -1,21 +1,17 @@
-package nl.tudelft.sem.template.userservice.authentication;
+package nl.tudelft.sem.template.authentication.authtemp;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import nl.tudelft.sem.template.userservice.authentication.JwtAuthenticationEntryPoint;
-import nl.tudelft.sem.template.userservice.authentication.JwtRequestFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import static org.mockito.Mockito.*;
 
 public class JwtAuthenticationEntryPointTests {
     private transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;

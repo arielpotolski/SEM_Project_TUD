@@ -37,7 +37,7 @@ public class NotificationController {
      */
     @GetMapping("/hello")
     public ResponseEntity<String> helloWorld() {
-        return ResponseEntity.ok("Employee has been added");
+        return ResponseEntity.ok("Hello " + authManager.getNetId());
 
     }
     @PostMapping("/jobNotification")
