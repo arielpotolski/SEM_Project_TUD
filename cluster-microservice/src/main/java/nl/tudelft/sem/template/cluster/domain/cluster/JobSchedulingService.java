@@ -11,17 +11,34 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobSchedulingService {
 
+    /**
+     * The schedule repository to save scheduled jobs into.
+     */
     private final transient JobScheduleRepository repo;
+
+    /**
+     * Current strategy of scheduling jobs.
+     */
     private transient JobSchedulingStrategy strategy;
 
+    /**
+     * Creates a new JobSchedulingService object and injects the repository.
+     *
+     * @param repo the JobScheduleRepository that jobs are scheduled in.
+     */
     @Autowired
     public JobSchedulingService(JobScheduleRepository repo) {
         this.repo = repo;
 
-        // default strategy: first come, first served, the earliest possible date
+        // default strategy: first come, first served; the earliest possible date
         this.strategy = new EarliestPossibleDateStrategy();
     }
 
+    /**
+     * Changes the scheduling strategy to the provided one.
+     *
+     * @param strategy the scheduling strategy by which this service will be scheduling jobs.
+     */
     public void changeSchedulingStrategy(JobSchedulingStrategy strategy) {
         this.strategy = strategy;
     }
