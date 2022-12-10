@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -73,7 +74,7 @@ public class ClusterController {
 	 */
 	@PostMapping(path = {"/add"})
 	public ResponseEntity<String>  addNode(@RequestBody Node node) {
-		if (this.nodeRep.existsByUrl(node.getUrl())) {
+		if (this.nodeRep.existsByUrl(node.getUrlOfNode())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
 		if (node.hasEnoughCPU().equals("Your node has been successfully added.")) {
@@ -110,5 +111,18 @@ public class ClusterController {
 	public ResponseEntity<String> removeAll() {
 		this.nodeRep.deleteAll();
 		return ResponseEntity.ok("All nodes have been deleted from the cluster.");
+	}
+
+	@GetMapping("/resources/{faculty}/{date}")
+	public ResponseEntity<String> getAvailableFacultyResourcesPerDayForGivenDayOrEarlier(
+			@PathVariable("faculty") String facultyId, @PathVariable("date") String date) {
+		// change the String to FacultyResource from the other branch
+
+		// query the two repositories, get list of FacultyResource for the same faculty but for different days
+
+		// return
+		return ResponseEntity.ok("Hi " + facultyId + "! On " + date +
+				" the cluster has 30 available CPU, 15 available GPU," +
+				" and 10 available memory.");
 	}
 }
