@@ -2,10 +2,9 @@ package nl.tudelft.sem.template.authentication.config;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtRequestFilter;
 import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtAuthenticationEntryPoint;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtTokenVerifier;
+import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,7 +62,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/register").permitAll().and()
+        http
+                .authorizeRequests().antMatchers("/register", "/authenticate").permitAll().and()
                 .csrf().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated()

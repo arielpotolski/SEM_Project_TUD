@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.authentication.authentication.authentication;
+package nl.tudelft.sem.template.authentication.authtemp;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

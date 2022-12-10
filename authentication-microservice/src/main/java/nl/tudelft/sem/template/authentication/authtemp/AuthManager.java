@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.authentication.authentication.authentication;
+package nl.tudelft.sem.template.authentication.authtemp;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
