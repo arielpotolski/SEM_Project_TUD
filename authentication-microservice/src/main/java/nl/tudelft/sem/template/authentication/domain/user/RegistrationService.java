@@ -1,6 +1,9 @@
 package nl.tudelft.sem.template.authentication.domain.user;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * A DDD service for registering a new user.
@@ -36,6 +39,7 @@ public class RegistrationService {
 
             // Create new account
             AppUser user = new AppUser(netId, hashedPassword);
+
             userRepository.save(user);
 
             return user;
@@ -43,6 +47,27 @@ public class RegistrationService {
 
         throw new NetIdAlreadyInUseException(netId);
     }
+
+    public void changePassword(NetId netId, Password password)throws  Exception{
+        if (!checkNetIdIsUnique(netId)) {
+            HashedPassword hashedPassword = passwordHashingService.hash(password);
+            AppUser user = userRepository.findByNetId(netId).get();
+            System.out.println(user.getPassword());
+            user.changePassword(hashedPassword);
+            System.out.println(user.getPassword());
+            userRepository.save(user);
+
+            System.out.println(userRepository.count());
+            return;
+        }
+        throw new NetIdAlreadyInUseException(netId);
+    }
+//    public void applyFacultyUser(NetId netId, AppUser.Faculty faculty) throws Exception {
+//        if(!checkNetIdIsUnique(netId)){
+//            Optional<AppUser> user = userRepository.findByNetId(netId);
+//
+//        }
+//    }
 
     public boolean checkNetIdIsUnique(NetId netId) {
         return !userRepository.existsByNetId(netId);

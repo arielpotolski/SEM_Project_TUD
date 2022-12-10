@@ -1,11 +1,11 @@
 package nl.tudelft.sem.template.authentication.domain.user;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
 
@@ -16,12 +16,19 @@ import nl.tudelft.sem.template.authentication.domain.HasEvents;
 @Table(name = "users")
 @NoArgsConstructor
 public class AppUser extends HasEvents {
+    public enum Faculty {
+        CIVIL,
+        IO,
+        EWI
+    }
     /**
      * Identifier for the application user.
      */
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
 
     @Column(name = "net_id", nullable = false, unique = true)
     @Convert(converter = NetIdAttributeConverter.class)
@@ -30,6 +37,13 @@ public class AppUser extends HasEvents {
     @Column(name = "password_hash", nullable = false)
     @Convert(converter = HashedPasswordAttributeConverter.class)
     private HashedPassword password;
+
+    //@OneToMany(targetEntity = Faculty.class, mappedBy = "users")
+    @ElementCollection(targetClass = Faculty.class)
+    @JoinTable(name = "Faculty", joinColumns = @JoinColumn(name = "net_id"))
+    @Column(name = "abc", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Collection<Faculty> facultyList;
 
     /**
      * Create new application user.
@@ -41,6 +55,7 @@ public class AppUser extends HasEvents {
         this.netId = netId;
         this.password = password;
         this.recordThat(new UserWasCreatedEvent(netId));
+        this.facultyList = Collections.emptyList();
     }
 
     public void changePassword(HashedPassword password) {
@@ -74,5 +89,13 @@ public class AppUser extends HasEvents {
     @Override
     public int hashCode() {
         return Objects.hash(netId);
+    }
+
+    public void addFaculty(Faculty faculty){
+        if(!this.facultyList.contains(faculty)){
+        this.facultyList.add(faculty);}
+    }
+    public Collection<Faculty> getFaculties(){
+        return this.facultyList;
     }
 }
