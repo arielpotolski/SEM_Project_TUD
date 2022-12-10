@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.authentication.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.tudelft.sem.template.authentication.authentication.authentication.JwtRequestFilter;
 import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.authentication.authentication.JwtAuthenticationEntryPoint;
 import nl.tudelft.sem.template.authentication.authentication.authentication.JwtTokenVerifier;
@@ -26,12 +27,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Getter
     @Setter(onMethod = @__({@Autowired})) // add autowired annotation on setter
     private transient UserDetailsService userDetailsService;
+    private final transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final transient JwtRequestFilter jwtRequestFilter;
 
-    /**
-     * Password encoder password encoder.
-     *
-     * @return the password encoder
-     */
+    public WebSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                       JwtRequestFilter jwtRequestFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
+        /**
+         * Password encoder password encoder.
+         *
+         * @return the password encoder
+         */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
