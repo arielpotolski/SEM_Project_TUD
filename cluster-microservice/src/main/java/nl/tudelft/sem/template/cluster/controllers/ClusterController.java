@@ -84,6 +84,7 @@ public class ClusterController {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
 		if (node.hasEnoughCPU().equals("Your node has been successfully added.")) {
+			assigning.assignNodeToFaculty(node); // assigns faculty to node
 			this.nodeRep.save(node);
 		}
 		return ResponseEntity.ok(node.hasEnoughCPU());
@@ -121,12 +122,12 @@ public class ClusterController {
 		return ResponseEntity.ok("All nodes have been deleted from the cluster.");
 	}
 
-	@GetMapping("/resources")
+	@GetMapping("/resources/all")
 	public List<FacultyTotalResources> getResourcesByFaculty() {
 		return this.nodeRep.findTotalResourcesPerFaculty();
 	}
 
-	@GetMapping("/resources/{facultyId}")
+	@GetMapping("/resources/all/{facultyId}")
 	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
 		return this.nodeRep.findTotalResourcesForGivenFaculty(facultyId);
 	}
