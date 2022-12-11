@@ -75,6 +75,8 @@ public class ClusterController {
 		return ResponseEntity.of(this.nodeRep.findByUrl(url));
 	}
 
+
+
 	/**
 	 * Adds a new node to the cluster. Fails if amount of cpu resources are not enough
 	 * or if there is already a node with the same url in the database.
@@ -148,18 +150,28 @@ public class ClusterController {
 	 * categories (CPU, GPU, memory) that they control.
 	 *
 	 * @return a list of Spring Projection Interfaces containing the facultyId and the sum of available CPU, GPU, and
-	 * memory resources for that faculty
+	 * memory resources for that faculty.
 	 */
 	@GetMapping("/resources/all")
 	public List<FacultyTotalResources> getResourcesByFaculty() {
 		return this.nodeRep.findTotalResourcesPerFaculty();
 	}
 
-
+	/**
+	 * Returns the sum of the resources of each of the three categories (CPU, GPU, memory) that the given facultyId
+	 * has assigned.
+	 *
+	 * @param facultyId the facultyId for which to return the assigned resources.
+	 *
+	 * @return a Spring Projection Interface containing the facultyId and the sum of available CPU, GPU, and
+	 * memory resources for that faculty.
+	 */
 	@GetMapping("/resources/all/{facultyId}")
 	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
 		return this.nodeRep.findTotalResourcesForGivenFaculty(facultyId);
 	}
+
+
 
 	// free resources per day
 
