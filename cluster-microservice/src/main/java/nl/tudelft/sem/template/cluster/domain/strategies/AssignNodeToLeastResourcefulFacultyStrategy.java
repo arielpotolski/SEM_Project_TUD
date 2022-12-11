@@ -20,8 +20,8 @@ public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignme
 
     public String pickFacultyToAssignNodeTo(List<FacultyTotalResources> faculties) {
         return faculties.stream()
-                .map(x -> new Pair<String, Double>(x.getFacultyId(),
-                        x.getCpuResources() + x.getGpuResources() + x.getMemoryResources()))
+                .map(x -> new Pair<String, Double>(x.getFaculty_Id(),
+                        x.getCpu_Resources() + x.getGpu_Resources() + x.getMemory_Resources()))
                 .sorted(Comparator.comparingDouble(x -> x.value)).map(x -> x.key).collect(Collectors.toList()).get(0);
     }
 

@@ -42,8 +42,11 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
      * @return a list of objects which hold the facultyId and its sum of cpu, gpu, and memory resources.
      */
     @Query(nativeQuery = true,
-            value = "SELECT n.facultyId, SUM(n.cpuResources), SUM(n.gpuResources), SUM(n.memoryResources)" +
-            "FROM Node n GROUP BY n.facultyId")
+            value = "SELECT n.faculty_id," +
+                    " SUM(n.cpu_resources) AS Cpu_Resources," +
+                    " SUM(n.gpu_resources) AS Gpu_Resources," +
+                    " SUM(n.memory_resources) AS Memory_Resources" +
+                    " FROM Nodes n GROUP BY n.faculty_id")
     List<FacultyTotalResources> findTotalResourcesPerFaculty();
 
     /**
@@ -54,8 +57,11 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
      * @return object which holds the facultyId and the sum of its cpu, gpu, and memory resources.
      */
     @Query(nativeQuery = true,
-            value = "SELECT n.facultyId, SUM(n.cpuResources), SUM(n.gpuResources), SUM(n.memoryResources)" +
-                    "FROM Node n WHERE n.facultyID = :facultyId GROUP BY n.facultyId LIMIT 1")
+            value = "SELECT n.faculty_id," +
+                    " SUM(n.cpu_resources) AS Cpu_Resources," +
+                    " SUM(n.gpu_resources) AS Gpu_Resources," +
+                    " SUM(n.memory_resources) AS Memory_Resources" +
+                    " FROM Nodes n WHERE n.faculty_id = :facultyId GROUP BY n.faculty_id LIMIT 1")
     FacultyTotalResources findTotalResourcesForGivenFaculty(@Param("facultyId") String facultyId);
 
     // add dedicated method to resources per node in the cluster?

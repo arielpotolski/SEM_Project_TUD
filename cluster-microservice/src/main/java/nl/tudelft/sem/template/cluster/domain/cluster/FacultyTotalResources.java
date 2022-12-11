@@ -5,9 +5,9 @@ package nl.tudelft.sem.template.cluster.domain.cluster;
  */
 public interface FacultyTotalResources {
 
-    String getFacultyId();
-    double getCpuResources();
-    double getGpuResources();
-    double getMemoryResources();
+    String getFaculty_Id();
+    double getCpu_Resources();
+    double getGpu_Resources();
+    double getMemory_Resources();
 
 }

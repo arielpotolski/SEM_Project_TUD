@@ -143,10 +143,18 @@ public class ClusterController {
 		return ResponseEntity.ok("All nodes have been deleted from the cluster.");
 	}
 
+	/**
+	 * Returns all faculties which have any node assigned to them and the total sum of resources in each of the three
+	 * categories (CPU, GPU, memory) that they control.
+	 *
+	 * @return a list of Spring Projection Interfaces containing the facultyId and the sum of available CPU, GPU, and
+	 * memory resources for that faculty
+	 */
 	@GetMapping("/resources/all")
 	public List<FacultyTotalResources> getResourcesByFaculty() {
 		return this.nodeRep.findTotalResourcesPerFaculty();
 	}
+
 
 	@GetMapping("/resources/all/{facultyId}")
 	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {

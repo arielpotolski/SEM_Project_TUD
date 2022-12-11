@@ -9,7 +9,7 @@ public class AssignNodeToRandomFacultyStrategy implements NodeAssignmentStrategy
 
     public String pickFacultyToAssignNodeTo(List<FacultyTotalResources> faculties) {
         var rand = new Random();
-        return faculties.get(rand.nextInt(faculties.size())).getFacultyId();
+        return faculties.get(rand.nextInt(faculties.size())).getFaculty_Id();
     }
 
 }
