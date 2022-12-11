@@ -12,49 +12,49 @@ public class NodeBuilder implements NodeBuilderInterface{
     private String facultyId = null;
 
     @Override
-    public NodeBuilder setCpuResources(double cpuResources) {
+    public NodeBuilder setNodeCpuResourceCapacityTo(double cpuResources) {
         this.cpuResources = cpuResources;
         return this;
     }
 
     @Override
-    public NodeBuilder setGpuResources(double gpuResources) {
+    public NodeBuilder setNodeGpuResourceCapacityTo(double gpuResources) {
         this.gpuResources = gpuResources;
         return this;
     }
 
     @Override
-    public NodeBuilder setMemoryResources(double memoryResources) {
+    public NodeBuilder setNodeMemoryResourceCapacityTo(double memoryResources) {
         this.memoryResources = memoryResources;
         return this;
     }
 
     @Override
-    public NodeBuilder setName(String name) {
+    public NodeBuilder withNodeName(String name) {
         this.name = name;
         return this;
     }
 
     @Override
-    public NodeBuilder setUrl(String url) {
+    public NodeBuilder foundAtUrl(String url) {
         this.url = url;
         return this;
     }
 
     @Override
-    public NodeBuilder setUserNetId(String userNetId) {
+    public NodeBuilder byUserWithNetId(String userNetId) {
         this.userNetId = userNetId;
         return this;
     }
 
     @Override
-    public NodeBuilder setFacultyId(String facultyId) {
+    public NodeBuilder assignToFacultyWithId(String facultyId) {
         this.facultyId = facultyId;
         return this;
     }
 
     @Override
-    public Node build() {
+    public Node constructNodeInstance() {
         var node = new Node(cpuResources, gpuResources, memoryResources, name, url, userNetId);
         node.changeNodeAssignedFacultyId(facultyId);
         return node;

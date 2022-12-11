@@ -91,13 +91,13 @@ public class ClusterController {
 		for (String faculty : faculties) {
 			if (jobScheduleRep.existsByFacultyId(faculty)) continue;
 			Node core =  new NodeBuilder()
-								.setCpuResources(0.0)
-								.setGpuResources(0.0)
-								.setMemoryResources(0.0)
-								.setName("FacultyCentralCore")
-								.setUrl("/" + faculty + "/central-core")
-								.setUserNetId("SYSTEM")
-								.setFacultyId(faculty).build();
+								.setNodeCpuResourceCapacityTo(0.0)
+								.setNodeGpuResourceCapacityTo(0.0)
+								.setNodeMemoryResourceCapacityTo(0.0)
+								.withNodeName("FacultyCentralCore")
+								.foundAtUrl("/" + faculty + "/central-core")
+								.byUserWithNetId("SYSTEM")
+								.assignToFacultyWithId(faculty).constructNodeInstance();
 			contribution.addNodeAssignedToSpecificFacultyToCluster(core);
 		}
 		return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
@@ -123,13 +123,13 @@ public class ClusterController {
 			// Central cores not installed - faculties unknown. All nodes will be assigned to the
 			// Board of Examiners until faculties become known.
 			Node core =  new NodeBuilder()
-					.setCpuResources(0.0)
-					.setGpuResources(0.0)
-					.setMemoryResources(0.0)
-					.setName("BoardCentralCore")
-					.setUrl("/board-pf-examiners/central-core")
-					.setUserNetId("SYSTEM")
-					.setFacultyId("Board of Examiners").build();
+					.setNodeCpuResourceCapacityTo(0.0)
+					.setNodeGpuResourceCapacityTo(0.0)
+					.setNodeMemoryResourceCapacityTo(0.0)
+					.withNodeName("BoardCentralCore")
+					.foundAtUrl("/board-pf-examiners/central-core")
+					.byUserWithNetId("SYSTEM")
+					.assignToFacultyWithId("Board of Examiners").constructNodeInstance();
 			contribution.addNodeAssignedToSpecificFacultyToCluster(core);
 		}
 
@@ -139,13 +139,13 @@ public class ClusterController {
 		}
 		String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
 		Node n = new NodeBuilder()
-				.setCpuResources(node.getCpuResources())
-				.setGpuResources(node.getGpuResources())
-				.setMemoryResources(node.getMemoryResources())
-				.setName(node.getName())
-				.setUrl(node.getUrl())
-				.setUserNetId(netId)
-				.build();
+				.setNodeCpuResourceCapacityTo(node.getCpuResources())
+				.setNodeGpuResourceCapacityTo(node.getGpuResources())
+				.setNodeMemoryResourceCapacityTo(node.getMemoryResources())
+				.withNodeName(node.getName())
+				.foundAtUrl(node.getUrl())
+				.byUserWithNetId(netId)
+				.constructNodeInstance();
 
 		if (n.hasEnoughCPU().equals("Your node has been successfully added.")) {
 			contribution.addNodeToCluster(n);
