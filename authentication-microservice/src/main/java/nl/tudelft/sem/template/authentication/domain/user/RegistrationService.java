@@ -1,9 +1,9 @@
 package nl.tudelft.sem.template.authentication.domain.user;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * A DDD service for registering a new user.
@@ -48,26 +48,63 @@ public class RegistrationService {
         throw new NetIdAlreadyInUseException(netId);
     }
 
-    public void changePassword(NetId netId, Password password)throws  Exception{
+    /**
+     * Changes the password of user.
+     *
+     * @param netId of the user
+     * @param password new password
+     * @throws Exception if the user does not exist
+     */
+    public void changePassword(NetId netId, Password password)throws  Exception {
         if (!checkNetIdIsUnique(netId)) {
             HashedPassword hashedPassword = passwordHashingService.hash(password);
             AppUser user = userRepository.findByNetId(netId).get();
-            System.out.println(user.getPassword());
             user.changePassword(hashedPassword);
-            System.out.println(user.getPassword());
+            userRepository.delete(user);
             userRepository.save(user);
-
-            System.out.println(userRepository.count());
             return;
         }
-        throw new NetIdAlreadyInUseException(netId);
+        //Needs to change (make a new exception)
+        throw new NetIdNotFoundException(netId);
     }
-//    public void applyFacultyUser(NetId netId, AppUser.Faculty faculty) throws Exception {
-//        if(!checkNetIdIsUnique(netId)){
-//            Optional<AppUser> user = userRepository.findByNetId(netId);
-//
-//        }
-//    }
+
+    /**
+     * Add a faculty to a user.
+     *
+     * @param netId users you want to faculty to
+     * @param faculty the faculty you want to add
+     * @throws Exception if the user does not exist
+     */
+    public void applyFacultyUser(NetId netId, AppUser.Faculty faculty) throws Exception {
+        if (!checkNetIdIsUnique(netId)) {
+            AppUser user = userRepository.findByNetId(netId).get();
+            user.addFaculty(faculty);
+            userRepository.delete(user);
+            userRepository.save(user);
+            return;
+        }
+        //new make new exception
+        throw new NetIdNotFoundException(netId);
+    }
+
+
+    /**
+     * Get all the faculties of a user.
+     *
+     * @param netId user where the faculties are gotten from
+     * @return List of all faculties of the user
+     * @throws Exception if the netId does not exist
+     */
+
+    public List<AppUser.Faculty> getFaculties(NetId netId) throws Exception {
+        if (!checkNetIdIsUnique(netId)) {
+            AppUser user = userRepository.findByNetId(netId).get();
+            return (List<AppUser.Faculty>) user.getFaculties();
+        }
+        //Make new exception
+        throw new NetIdNotFoundException(netId);
+    }
+
 
     public boolean checkNetIdIsUnique(NetId netId) {
         return !userRepository.existsByNetId(netId);

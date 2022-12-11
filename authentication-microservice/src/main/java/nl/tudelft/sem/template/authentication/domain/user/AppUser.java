@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.*;
-
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
 
@@ -24,6 +23,7 @@ public class AppUser extends HasEvents {
     /**
      * Identifier for the application user.
      */
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,11 +91,19 @@ public class AppUser extends HasEvents {
         return Objects.hash(netId);
     }
 
-    public void addFaculty(Faculty faculty){
-        if(!this.facultyList.contains(faculty)){
-        this.facultyList.add(faculty);}
+    /**
+     * Adds faculy to this user.
+     *
+     * @param faculty to add
+     */
+
+    public void addFaculty(Faculty faculty) {
+        if (!this.facultyList.contains(faculty)) {
+            this.facultyList.add(faculty);
+        }
     }
-    public Collection<Faculty> getFaculties(){
+
+    public Collection<Faculty> getFaculties() {
         return this.facultyList;
     }
 }
