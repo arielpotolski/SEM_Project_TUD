@@ -1,6 +1,6 @@
-package nl.tudelft.sem.template.userservice.controllers;
+package nl.tudelft.sem.template.authentication.controllers;
 
-import nl.tudelft.sem.template.userservice.authentication.AuthManager;
+import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +29,7 @@ public class EmployeeController {
      *
      * @return the example found in the database with the given id
      */
-    @GetMapping("/hello")
+    @GetMapping("/hello2")
     public ResponseEntity<String> helloWorld() {
         return ResponseEntity.ok("Employee has been added");
 

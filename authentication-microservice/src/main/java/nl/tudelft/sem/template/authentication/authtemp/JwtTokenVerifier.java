@@ -1,11 +1,12 @@
-package nl.tudelft.sem.template.userservice.authentication;
+package nl.tudelft.sem.template.authentication.authtemp;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import java.util.Date;
-import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.function.Function;
 
 /**
  * Verifies the JWT token in the request for validity.

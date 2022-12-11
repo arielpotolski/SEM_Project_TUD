@@ -3,6 +3,8 @@ package nl.tudelft.sem.template.authentication.config;
 import lombok.Getter;
 import lombok.Setter;
 import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
+import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * The type Web security config.
@@ -23,12 +26,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Getter
     @Setter(onMethod = @__({@Autowired})) // add autowired annotation on setter
     private transient UserDetailsService userDetailsService;
+    private final transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final transient JwtRequestFilter jwtRequestFilter;
 
-    /**
-     * Password encoder password encoder.
-     *
-     * @return the password encoder
-     */
+    public WebSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                       JwtRequestFilter jwtRequestFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
+        /**
+         * Password encoder password encoder.
+         *
+         * @return the password encoder
+         */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -52,9 +62,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests().anyRequest().permitAll()
+        http
+                .authorizeRequests().antMatchers("/register", "/authenticate").permitAll().and()
+                .csrf().disable()
+                .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }
