@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ public class NodeAssignmentService {
         this.strategy = new AssignNodeToRandomFacultyStrategy();
     }
 
-    public void setStrategy(NodeAssignmentStrategy strategy) {
+    public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {
         this.strategy = strategy;
     }
 

@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.cluster.controllers;
 
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.cluster.*;
+import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,12 @@ import java.util.List;
 public class ClusterController {
 
 	private final transient AuthManager authManager;
+
 	private final transient NodeRepository nodeRep;
 	private final transient JobScheduleRepository jobScheduleRep;
+
 	private final transient JobSchedulingService scheduling;
-	private final transient NodeAssignmentService assigning;
+	private final transient NodeContributionService contribution;
 
 	/**
 	 * Instantiates a new controller.
@@ -32,12 +35,12 @@ public class ClusterController {
 	@Autowired
 	public ClusterController(AuthManager authManager, NodeRepository nodeRep,
 							 JobScheduleRepository jobScheduleRep, JobSchedulingService scheduling,
-							 NodeAssignmentService assigning) {
+							 NodeContributionService contribution) {
 		this.authManager = authManager;
 		this.nodeRep = nodeRep;
 		this.jobScheduleRep = jobScheduleRep;
 		this.scheduling = scheduling;
-		this.assigning = assigning;
+		this.contribution = contribution;
 	}
 
 	/**
@@ -82,16 +85,28 @@ public class ClusterController {
 	 */
 	@PostMapping(path = {"/add"})
 	public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
+		// Check if central cores have been installed by User Service
+		if ((int) this.nodeRep.count() == 0) {
+			// Central cores not installed - faculties unknown. All nodes will be assigned to the
+			// Board of Examiners until faculties become known.
+			Node centralCore = new Node(0.0, 0.0, 0.0,
+					"BoardCentralCore", "/board-of-examiners/central-core",
+					"SYSTEM");
+			contribution.addNodeAssignedToSpecificFacultyToCluster(centralCore, "Board of Examiners");
+		}
+
+
 		if (this.nodeRep.existsByUrl(node.getUrl())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
-		Node n = new Node(node.getGpuResources(), node.getGpuResources(), node.getMemoryResources(),
+		Node n = new Node(node.getGpuResources(),
+				node.getGpuResources(),
+				node.getMemoryResources(),
 				node.getName(), node.getUrl(),
 				SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
 
 		if (n.hasEnoughCPU().equals("Your node has been successfully added.")) {
-			assigning.assignNodeToFaculty(n); // assigns faculty to node
-			this.nodeRep.save(n);
+			contribution.addNodeToCluster(n);
 		}
 		return ResponseEntity.ok(n.hasEnoughCPU());
 	}
