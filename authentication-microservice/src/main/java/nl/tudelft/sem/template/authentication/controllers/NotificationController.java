@@ -3,8 +3,8 @@ package nl.tudelft.sem.template.authentication.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
-import nl.tudelft.sem.template.authentication.communicationData.JobNotificationData;
-import nl.tudelft.sem.template.authentication.communicationData.Data;
+import nl.tudelft.sem.template.authentication.communicationData.Notification;
+import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,20 +40,20 @@ public class NotificationController {
         return ResponseEntity.ok("Hello " + authManager.getNetId());
 
     }
-    @PostMapping("/jobNotification")
+    @PostMapping("/notification")
     public ResponseEntity<String> receiveJobNotification(
-            @RequestBody Data data
-    ){
-        String netId = authManager.getNetId();
-        JobNotificationData notificationData = JobNotificationData.createJobNotification(data);
-        notificationService.addJobNotification(netId, notificationData);
-        return ResponseEntity.ok("successfully received JobNotification");
+            @RequestBody NotificationRequestModel data)
+    {
+        String netId = data.getNetId();
+        Notification notificationData = Notification.createNotification(data);
+        notificationService.addNotification(netId, notificationData);
+        return ResponseEntity.ok("successfully received Notification");
     }
 
-    @GetMapping("/getJobNotification")
+    @GetMapping("/getNotification")
     public ResponseEntity<String> sendJobNotifications(){
         String netId = authManager.getNetId();
-        List<JobNotificationData> l = notificationService.getJobNotifications(netId);
+        List<Notification> l = notificationService.getNotifications(netId);
 
         try{
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

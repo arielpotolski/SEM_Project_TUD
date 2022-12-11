@@ -1,6 +1,6 @@
 package nl.tudelft.sem.template.authentication.services;
 
-import nl.tudelft.sem.template.authentication.communicationData.JobNotificationData;
+import nl.tudelft.sem.template.authentication.communicationData.Notification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -8,15 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toCollection;
-
 /**
  * Service class to store, handle, and sent out incoming notifications
  */
 @Service
 public class NotificationService {
 
-    private final Map<String, List<JobNotificationData>> jobNotifications;
+    private final Map<String, List<Notification>> jobNotifications;
 
     /**
      * Constructor which initializes the data storage
@@ -25,13 +23,13 @@ public class NotificationService {
         this.jobNotifications = new HashMap<>();
     }
 
-    public void addJobNotification(String netId, JobNotificationData jobNotificationData){
+    public void addNotification(String netId, Notification notificationData){
         if (!jobNotifications.containsKey(netId)) {
-            jobNotifications.put(netId, List.of(jobNotificationData));
+            jobNotifications.put(netId, List.of(notificationData));
         }else{
-            List<JobNotificationData> l = new ArrayList<>(jobNotifications.get(netId));
+            List<Notification> l = new ArrayList<>(jobNotifications.get(netId));
 
-            l.add(jobNotificationData);
+            l.add(notificationData);
 
             jobNotifications.put(netId, l);
         }
@@ -42,9 +40,9 @@ public class NotificationService {
      * @param netId netId of the user
      * @return list containing notifications, can be emtpy
      */
-    public List<JobNotificationData> getJobNotifications(String netId){
+    public List<Notification> getNotifications(String netId){
         if (jobNotifications.containsKey(netId)){
-            List<JobNotificationData> l =  jobNotifications.get(netId);
+            List<Notification> l =  jobNotifications.get(netId);
             jobNotifications.remove(netId);
             return l;
         } else{
