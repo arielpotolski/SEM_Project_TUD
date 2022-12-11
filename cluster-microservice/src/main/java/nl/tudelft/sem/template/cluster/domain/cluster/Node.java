@@ -53,7 +53,7 @@ public class Node {
 	 * @param name initializes the name given to the node.
 	 * @param userNetId assigns this node's user to the current netId.
 	 */
-	public Node(double gpuRes, double cpuRes, double memRes, String name,
+	public Node(double cpuRes, double gpuRes, double memRes, String name,
 				String url, String userNetId) {
 		this.cpuResources = cpuRes;
 		this.gpuResources = gpuRes;

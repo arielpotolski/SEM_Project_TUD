@@ -1,8 +1,10 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
+import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.*;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +77,36 @@ public class ClusterController {
 		return ResponseEntity.of(this.nodeRep.findByUrl(url));
 	}
 
+	/**
+	 * Sets up the "central cores" of the existing faculties. They are nodes with 0 of each type of resource which
+	 * serve as placeholders to ensure that the cluster knows which faculties exist and can, for example, be assigned
+	 * nodes. This endpoint should be used by the User service as soon as both it and Cluster are online.
+	 *
+	 * @param faculties the list of faculties that exist in the User service's database.
+	 *
+	 * @return message of confirmation that the faculties have been received.
+	 */
+	@PostMapping("/faculties")
+	public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
+		for (String faculty : faculties) {
+			if (jobScheduleRep.existsByFacultyId(faculty)) continue;
+			Node core =  new NodeBuilder()
+								.setCpuResources(0.0)
+								.setGpuResources(0.0)
+								.setMemoryResources(0.0)
+								.setName("FacultyCentralCore")
+								.setUrl("/" + faculty + "/central-core")
+								.setUserNetId("SYSTEM")
+								.setFacultyId(faculty).build();
+			contribution.addNodeAssignedToSpecificFacultyToCluster(core);
+		}
+		return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
+	}
 
+//	@PostMapping("/request")
+//	public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel) {
+//
+//	}
 
 	/**
 	 * Adds a new node to the cluster. Fails if amount of cpu resources are not enough
@@ -91,21 +122,30 @@ public class ClusterController {
 		if ((int) this.nodeRep.count() == 0) {
 			// Central cores not installed - faculties unknown. All nodes will be assigned to the
 			// Board of Examiners until faculties become known.
-			Node centralCore = new Node(0.0, 0.0, 0.0,
-					"BoardCentralCore", "/board-of-examiners/central-core",
-					"SYSTEM");
-			contribution.addNodeAssignedToSpecificFacultyToCluster(centralCore, "Board of Examiners");
+			Node core =  new NodeBuilder()
+					.setCpuResources(0.0)
+					.setGpuResources(0.0)
+					.setMemoryResources(0.0)
+					.setName("BoardCentralCore")
+					.setUrl("/board-pf-examiners/central-core")
+					.setUserNetId("SYSTEM")
+					.setFacultyId("Board of Examiners").build();
+			contribution.addNodeAssignedToSpecificFacultyToCluster(core);
 		}
 
 
 		if (this.nodeRep.existsByUrl(node.getUrl())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
-		Node n = new Node(node.getGpuResources(),
-				node.getGpuResources(),
-				node.getMemoryResources(),
-				node.getName(), node.getUrl(),
-				SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+		String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+		Node n = new NodeBuilder()
+				.setCpuResources(node.getCpuResources())
+				.setGpuResources(node.getGpuResources())
+				.setMemoryResources(node.getMemoryResources())
+				.setName(node.getName())
+				.setUrl(node.getUrl())
+				.setUserNetId(netId)
+				.build();
 
 		if (n.hasEnoughCPU().equals("Your node has been successfully added.")) {
 			contribution.addNodeToCluster(n);

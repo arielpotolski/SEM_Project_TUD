@@ -23,11 +23,8 @@ public class NodeContributionService {
         this.assigning = assigning;
     }
 
-    public void addNodeAssignedToSpecificFacultyToCluster(Node node, String facultyId) {
-        // assign to specified faculty
-        node.changeNodeAssignedFacultyId(facultyId);
-
-        // persist to repository
+    // node already has assigned facultyId
+    public void addNodeAssignedToSpecificFacultyToCluster(Node node) {
         this.repo.save(node);
     }
 
