@@ -2,8 +2,10 @@ package nl.tudelft.sem.template.cluster.controllers;
 
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.cluster.*;
+import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,15 +81,19 @@ public class ClusterController {
 	 * 			string saying why is it failing
 	 */
 	@PostMapping(path = {"/add"})
-	public ResponseEntity<String>  addNode(@RequestBody Node node) {
-		if (this.nodeRep.existsByUrl(node.getUrlOfNode())) {
+	public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
+		if (this.nodeRep.existsByUrl(node.getUrl())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
-		if (node.hasEnoughCPU().equals("Your node has been successfully added.")) {
-			assigning.assignNodeToFaculty(node); // assigns faculty to node
-			this.nodeRep.save(node);
+		Node n = new Node(node.getGpuResources(), node.getGpuResources(), node.getMemoryResources(),
+				node.getName(), node.getUrl(),
+				SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+
+		if (n.hasEnoughCPU().equals("Your node has been successfully added.")) {
+			assigning.assignNodeToFaculty(n); // assigns faculty to node
+			this.nodeRep.save(n);
 		}
-		return ResponseEntity.ok(node.hasEnoughCPU());
+		return ResponseEntity.ok(n.hasEnoughCPU());
 	}
 
 	/**
