@@ -16,6 +16,13 @@ import nl.tudelft.sem.template.authentication.domain.HasEvents;
 @Table(name = "users")
 @NoArgsConstructor
 public class AppUser extends HasEvents {
+
+    public enum Faculty {
+        CIVIL,
+        IO,
+        EWI
+    }
+
     /**
      * Identifier for the application user.
      */
