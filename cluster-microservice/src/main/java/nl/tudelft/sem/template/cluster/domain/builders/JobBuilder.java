@@ -67,4 +67,68 @@ public class JobBuilder implements JobBuilderInterface {
         return new Job(facultyId, userNetId, name, description,
                 requiredCpu, requiredGpu, requiredMemory, preferredCompletionDate);
     }
+
+    public String getFacultyId() {
+        return facultyId;
+    }
+
+    public void setFacultyId(String facultyId) {
+        this.facultyId = facultyId;
+    }
+
+    public String getUserNetId() {
+        return userNetId;
+    }
+
+    public void setUserNetId(String userNetId) {
+        this.userNetId = userNetId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getRequiredCpu() {
+        return requiredCpu;
+    }
+
+    public void setRequiredCpu(double requiredCpu) {
+        this.requiredCpu = requiredCpu;
+    }
+
+    public double getRequiredGpu() {
+        return requiredGpu;
+    }
+
+    public void setRequiredGpu(double requiredGpu) {
+        this.requiredGpu = requiredGpu;
+    }
+
+    public double getRequiredMemory() {
+        return requiredMemory;
+    }
+
+    public void setRequiredMemory(double requiredMemory) {
+        this.requiredMemory = requiredMemory;
+    }
+
+    public LocalDate getPreferredCompletionDate() {
+        return preferredCompletionDate;
+    }
+
+    public void setPreferredCompletionDate(LocalDate preferredCompletionDate) {
+        this.preferredCompletionDate = preferredCompletionDate;
+    }
 }

@@ -83,7 +83,7 @@ public class Node {
      *
      * @param gpuRes the amount of GPU resources.
      */
-    public void changeGpuResources(double gpuRes) {
+    public void setGpuResources(double gpuRes) {
         this.gpuResources = gpuRes;
     }
 
@@ -101,7 +101,7 @@ public class Node {
      *
      * @param cpuRes the amount of CPU resources.
      */
-    public void changeCpuResources(double cpuRes) {
+    public void setCpuResources(double cpuRes) {
         this.cpuResources = cpuRes;
     }
 
@@ -119,7 +119,7 @@ public class Node {
      *
      * @param memRes the amount of memory resources.
      */
-    public void changeMemoryResources(double memRes) {
+    public void setMemoryResources(double memRes) {
         this.memoryResources = memRes;
     }
 
@@ -128,7 +128,7 @@ public class Node {
      *
      * @return the name of this node.
      */
-    public String getNameOfNode() {
+    public String getName() {
         return name;
     }
 
@@ -137,7 +137,7 @@ public class Node {
      *
      * @param name the name that this node should receive.
      */
-    public void changeNameOfNode(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -146,7 +146,7 @@ public class Node {
      *
      * @return the url of this node.
      */
-    public String getUrlOfNode() {
+    public String getUrl() {
         return url;
     }
 
@@ -155,7 +155,7 @@ public class Node {
      *
      * @param url the url that will be set to this node.
      */
-    public void changeUrlOfNode(String url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 
@@ -164,7 +164,7 @@ public class Node {
      *
      * @return the user id of the contributing user of this node.
      */
-    public String getNodeOwnerUserNetId() {
+    public String getUserNetId() {
         return userNetId;
     }
 
@@ -173,7 +173,7 @@ public class Node {
      *
      * @return the String facultyId to which this node is assigned.
      */
-    public String getNodeAssignedFacultyId() {
+    public String getFacultyId() {
         return this.facultyId;
     }
 
@@ -182,7 +182,7 @@ public class Node {
      *
      * @param facultyId the new faculty assigned to this node.
      */
-    public void changeNodeAssignedFacultyId(String facultyId) {
+    public void setFacultyId(String facultyId) {
         this.facultyId = facultyId;
     }
 

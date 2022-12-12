@@ -33,9 +33,9 @@ public class LeastBusyDateStrategy implements JobSchedulingStrategy {
         beforePreferredDate.sort(Comparator.comparingDouble((AvailableResourcesForDate x) ->
                 x.getAvailableCpu() + x.getAvailableGpu() + x.getAvailableMemory()).reversed());
         for (AvailableResourcesForDate availableResources : beforePreferredDate) {
-            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
-                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
-                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
+            if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpu() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemory() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
             }
         }
@@ -43,9 +43,9 @@ public class LeastBusyDateStrategy implements JobSchedulingStrategy {
         // no match - default to the earliest possible
         for (int j = index; j < availableResourcesForDates.size(); ++j) {
             var availableResources = availableResourcesForDates.get(j);
-            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
-                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
-                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
+            if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpu() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemory() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
             }
         }

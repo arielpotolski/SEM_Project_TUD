@@ -40,12 +40,14 @@ public class ResourceInformationAccessingService {
 
     /**
      * TODO: use functional Java to generalize this
-     * Calculates and returns a list of available resources for each day for the given faculty.
+     * Calculates and returns a list of available resources for each day for the given faculty. The PMD warning
+     * is suppressed because that feature has been deprecated and yet it still runs that check for some reason.
      *
      * @param facultyId the faculty to perform the calculation for.
      *
      * @return a list of available resources for each date until the specified one.
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public List<AvailableResourcesForDate> getAvailableResourcesForGivenFacultyUntilDay(String facultyId,
                                                                                         LocalDate until) {
         var assignedResources = nodeRepo.findTotalResourcesForGivenFaculty(facultyId);

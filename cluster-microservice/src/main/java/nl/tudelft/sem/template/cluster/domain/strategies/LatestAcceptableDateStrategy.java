@@ -32,9 +32,9 @@ public class LatestAcceptableDateStrategy implements JobSchedulingStrategy {
         // go backwards
         for (int i = index; i >= 0; --i) {
             var availableResources = availableResourcesForDates.get(i);
-            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
-                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
-                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
+            if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpu() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemory() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
             }
         }
@@ -42,9 +42,9 @@ public class LatestAcceptableDateStrategy implements JobSchedulingStrategy {
         // no match - go forward from index
         for (int j = index; j < availableResourcesForDates.size(); ++j) {
             var availableResources = availableResourcesForDates.get(j);
-            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
-                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
-                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
+            if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpu() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemory() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
             }
         }

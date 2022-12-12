@@ -20,9 +20,9 @@ public class EarliestPossibleDateStrategy implements JobSchedulingStrategy {
      */
     public LocalDate scheduleJobFor(List<AvailableResourcesForDate> availableResourcesForDates, Job job) {
         for (AvailableResourcesForDate availableResources : availableResourcesForDates) {
-            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
-                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
-                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
+            if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpu() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemory() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
             }
         }

@@ -87,9 +87,9 @@ public class JobSchedulingService {
      */
     public boolean checkIfJobCanBeScheduled(Job job) {
         var assignedResources = nodeRepo.findTotalResourcesForGivenFaculty(job.getFacultyId());
-        return !(job.getRequiredCpuResources() > assignedResources.getCpu_Resources())
-                && !(job.getRequiredGpuResources() > assignedResources.getGpu_Resources())
-                && !(job.getRequiredMemoryResources() > assignedResources.getMemory_Resources());
+        return !(job.getRequiredCpu() > assignedResources.getCpu_Resources())
+                && !(job.getRequiredGpu() > assignedResources.getGpu_Resources())
+                && !(job.getRequiredMemory() > assignedResources.getMemory_Resources());
     }
 
     /**
@@ -113,7 +113,7 @@ public class JobSchedulingService {
         var dateToScheduleJob = strategy.scheduleJobFor(availableResourcesPerDay, job);
 
         // assign scheduled date to job
-        job.changeDateJobIsScheduledFor(dateToScheduleJob);
+        job.setScheduledFor(dateToScheduleJob);
 
         // save to schedule
         jobScheduleRepo.save(job);

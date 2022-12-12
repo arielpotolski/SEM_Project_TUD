@@ -74,11 +74,13 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
 
     /**
      * For each day in the scheduler (including the past) and for each faculty, returns the total number of resources
-     * that have already been reserved.
+     * that have already been reserved. The warnings have been suppressed because the String literals are in queries
+     * and thus should not be using a variable.
      *
      * @return list of FacultyDatedTotalResources, which contain the facultyId, the date and the resources reserved on
      * that day for that faculty.
      */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
                     + " s.scheduled_for AS Scheduled_Date,"
@@ -94,6 +96,7 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      * @return list of FacultyTotalResources, which contain the facultyId and the resources reserved on
      * the given day for that faculty.
      */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
                     + " SUM(s.requiredCpu) AS Cpu_Resources,"
@@ -109,6 +112,7 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      * @return list of FacultyTotalResources, which contain the facultyId and the resources reserved on
      * the given day for that faculty.
      */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @Query(nativeQuery = true,
             value = "SELECT s.scheduled_for AS Scheduled_Date,"
                     + " SUM(s.requiredCpu) AS Cpu_Resources,"
@@ -125,6 +129,7 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      * @return FacultyTotalResources, which contains the facultyId and the resources reserved on the given day for
      * the given faculty.
      */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
                     + " s.scheduled_for AS Scheduled_Date,"

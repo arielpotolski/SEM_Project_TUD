@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.cluster.domain.cluster;
 
 import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
-import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,7 @@ public class NodeAssignmentService {
         String chosenId = strategy.pickFacultyToAssignNodeTo(list);
 
         // set facultyId of node
-        node.changeNodeAssignedFacultyId(chosenId);
+        node.setFacultyId(chosenId);
     }
 
 }

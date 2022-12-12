@@ -93,7 +93,7 @@ public class Job {
      *
      * @param facultyId the facultyId to be assigned to this job.
      */
-    public void changeFacultyId(String facultyId) {
+    public void setFacultyId(String facultyId) {
         this.facultyId = facultyId;
     }
 
@@ -120,7 +120,7 @@ public class Job {
      *
      * @param jobName the name to be assigned to this job.
      */
-    public void changeJobName(String jobName) {
+    public void setJobName(String jobName) {
         this.jobName = jobName;
     }
 
@@ -138,7 +138,7 @@ public class Job {
      *
      * @param jobDescription the description to be assigned to this job.
      */
-    public void changeJobDescription(String jobDescription) {
+    public void setJobDescription(String jobDescription) {
         this.jobDescription = jobDescription;
     }
 
@@ -147,7 +147,7 @@ public class Job {
      *
      * @return the CPU resources this job requires.
      */
-    public double getRequiredCpuResources() {
+    public double getRequiredCpu() {
         return requiredCpu;
     }
 
@@ -156,7 +156,7 @@ public class Job {
      *
      * @param requiredCpu the required CPU resources amount to be assigned to this job.
      */
-    public void changeRequiredCpuResources(double requiredCpu) {
+    public void setRequiredCpu(double requiredCpu) {
         this.requiredCpu = requiredCpu;
     }
 
@@ -165,7 +165,7 @@ public class Job {
      *
      * @return the GPU resources this job requires.
      */
-    public double getRequiredGpuResources() {
+    public double getRequiredGpu() {
         return requiredGpu;
     }
 
@@ -174,7 +174,7 @@ public class Job {
      *
      * @param requiredGpu the required GPU resources amount to be assigned to this job.
      */
-    public void changeRequiredGpuResources(double requiredGpu) {
+    public void setRequiredGpu(double requiredGpu) {
         this.requiredGpu = requiredGpu;
     }
 
@@ -183,7 +183,7 @@ public class Job {
      *
      * @return the memory resources this job requires.
      */
-    public double getRequiredMemoryResources() {
+    public double getRequiredMemory() {
         return requiredMemory;
     }
 
@@ -192,7 +192,7 @@ public class Job {
      *
      * @param requiredMemory the required memory resources amount to be assigned to this job.
      */
-    public void changeRequiredMemoryResources(double requiredMemory) {
+    public void setRequiredMemory(double requiredMemory) {
         this.requiredMemory = requiredMemory;
     }
 
@@ -210,7 +210,7 @@ public class Job {
      *
      * @param preferredCompletionDate the new date before which this job should be finished.
      */
-    public void changePreferredCompletionDate(LocalDate preferredCompletionDate) {
+    public void setPreferredCompletionDate(LocalDate preferredCompletionDate) {
         this.preferredCompletionDate = preferredCompletionDate;
     }
 
@@ -219,7 +219,7 @@ public class Job {
      *
      * @return the date this job is currently scheduled for.
      */
-    public LocalDate getDateJobIsScheduledFor() {
+    public LocalDate getScheduledFor() {
         return scheduledFor;
     }
 
@@ -228,7 +228,7 @@ public class Job {
      *
      * @param scheduledFor the new scheduled date to be assigned to this job.
      */
-    public void changeDateJobIsScheduledFor(LocalDate scheduledFor) {
+    public void setScheduledFor(LocalDate scheduledFor) {
         this.scheduledFor = scheduledFor;
     }
 

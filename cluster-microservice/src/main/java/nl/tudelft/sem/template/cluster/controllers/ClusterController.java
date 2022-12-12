@@ -186,8 +186,8 @@ public class ClusterController {
         }
 
         // the resources requested are cpu >= gpu and cpu >= memory
-        if (job.getRequiredCpuResources() < job.getRequiredGpuResources()
-				|| job.getRequiredCpuResources() < job.getRequiredMemoryResources()) {
+        if (job.getRequiredCpu() < job.getRequiredGpu()
+				|| job.getRequiredCpu() < job.getRequiredMemory()) {
             return ResponseEntity.badRequest()
                     .body("The requested job cannot require more GPU or memory than CPU.");
         }

@@ -1,8 +1,5 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeAssignmentService;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
