@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.cluster.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,5 +17,7 @@ public class JobRequestModel {
     private double requiredCPU;
     private double requiredGPU;
     private double requiredMemory;
+
+    //@JsonDeserialize()
     private LocalDate preferredCompletionDate;
 }

@@ -1,5 +1,8 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -38,6 +41,8 @@ public class Job {
     private double requiredMemory;
 
     @Column(name = "preferredCompletionDate", nullable = false)
+//    @JsonSerialize()
+//    @JsonDeserialize()
     private LocalDate preferredCompletionDate;
 
     @Column(name = "scheduledFor", nullable = false)
@@ -61,11 +66,9 @@ public class Job {
      * @param requiredGPU the gpu resources that this job requires.
      * @param requiredMemory the memory resources that this job requires.
      * @param preferredCompletionDate the preferred date before which this job should be scheduled.
-     * @param scheduledFor the date for which this job is scheduled currently.
      */
     public Job(String facultyId, String userNetId, String jobName, String jobDescription,
-               double requiredCPU, double requiredGPU, double requiredMemory, LocalDate preferredCompletionDate,
-               LocalDate scheduledFor) {
+               double requiredCPU, double requiredGPU, double requiredMemory, LocalDate preferredCompletionDate) {
         this.facultyId = facultyId;
         this.userNetId = userNetId;
         this.jobName = jobName;
@@ -74,7 +77,6 @@ public class Job {
         this.requiredGPU = requiredGPU;
         this.requiredMemory = requiredMemory;
         this.preferredCompletionDate = preferredCompletionDate;
-        this.scheduledFor = scheduledFor;
     }
 
     /**

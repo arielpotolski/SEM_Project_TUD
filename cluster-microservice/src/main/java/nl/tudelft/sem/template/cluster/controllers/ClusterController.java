@@ -46,16 +46,6 @@ public class ClusterController {
 	}
 
 	/**
-	 * Gets example by id.
-	 *
-	 * @return the example found in the database with the given id
-	 */
-	@GetMapping("/hello")
-	public ResponseEntity<String> helloWorld() {
-		return ResponseEntity.ok("Hello " + authManager.getNetId());
-	}
-
-	/**
 	 * Gets all nodes stored in the cluster.
 	 *
 	 * @return a list of containing all the nodes
@@ -154,6 +144,8 @@ public class ClusterController {
 	}
 
 	/**
+	 * TODO: change this to post when we have a queue
+	 *
 	 * Delete a node from the cluster by url. It does nothing in case the url
 	 * does not exist.
 	 *
@@ -173,8 +165,6 @@ public class ClusterController {
 	}
 
 	/**
-	 * TODO: change this to post when we have a queue
-	 *
 	 * Deletes all the nodes from the cluster.
 	 *
 	 * @return a string saying if the deletion was successful
@@ -210,8 +200,6 @@ public class ClusterController {
 	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
 		return this.nodeRep.findTotalResourcesForGivenFaculty(facultyId);
 	}
-
-
 
 	// free resources per day
 
