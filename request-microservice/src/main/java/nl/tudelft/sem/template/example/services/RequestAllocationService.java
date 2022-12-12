@@ -1,9 +1,10 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.domain.Request;
-import nl.tudelft.sem.template.example.domain.Resource;
-import nl.tudelft.sem.template.example.domain.RequestRepository;
-import nl.tudelft.sem.template.example.domain.VerificationDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import nl.tudelft.sem.template.example.domain.*;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -13,9 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestAllocationService {
@@ -33,36 +33,42 @@ public class RequestAllocationService {
 
     public List<String> getFacultyUserFaculties(String token) {
 
+        try{
+            String url = "https://localhost:8081/getUserFaculties";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+
+            ResponseEntity<String> result = restTemplate.postForEntity(url, token, String.class);
+
+            String string = result.getBody();
+
+            assert string != null;
+            if(string.equals("")){
+                return new ArrayList<>();
+            }
+
+            return Arrays.stream(string.split(", ")).collect(Collectors.toList());
+        }
+        catch (Exception e){
+            System.out.println("error with post" + e);
+        }
         return new ArrayList<>();
-        // To be impl
-//        String url = "to be decided";
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        headers.add("token", token);
-//
-//
-//
-//        ResponseEntity<List<String>> response = restTemplate.postForEntity(url, entity, String.class);
-
-
-
 
     }
 
     public List<Resource> getReservedResource(String facultyName, Date preferredDate){
 
+        try{
+            String url = "https://localhost:8085/resources/"+ preferredDate.toString() + "/" + facultyName;
 
-        // Needs to be confirmed by Cluster team
-        String url = "https://localhost:8085/resources/" + facultyName + "/" + preferredDate.toString();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+            ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
+            return Objects.requireNonNull(result.getBody()).getResourceList();
 
-        HttpEntity<String> request =
-                new HttpEntity<String>(facultyName, headers);
-
-        Resource resourceRet =
-                restTemplate.postForObject(url, request, Resource.class);
+        }
+        catch (Exception e){
+            System.out.println("error with post" + e);
+        }
 
         return new ArrayList<>();
 
@@ -85,29 +91,60 @@ public class RequestAllocationService {
         }
         return false;
 
-
-
     }
 
 
-    public void sendRequestToCluster(Request request) {
+    public void sendRequestToCluster(Request request) throws JsonProcessingException {
 
-        String url = "https://localhost:8085/cluster/request";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        try{
+            String url = "https://localhost:8085/cluster/request";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
 
-        ResponseEntity<String> result = restTemplate.postForEntity(url, request, String.class);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(request);
+            System.out.println(json);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            if (result.getBody().equals("ok")) {
+                return;
+            }
+        }
+     catch (Exception e){
+        System.out.println("error with post" + e);
+     }
+
 
     }
 
     public void sendDeclinedRequestToUserService(Request request) {
 
-        // URL to be determined
-        String url = "to be decided";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<Request> result = restTemplate.postForEntity(url, request, Request.class);
+        try{
+            String url = "https://localhost:8081/notification";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
+
+
+
+            JSONObject json = new JSONObject();
+            json.put("date",request.getPreferredDate());
+            json.put("type","REQUEST");
+            json.put("state","REJECTED");
+            json.put("message",request.getDescription());
+            json.put("netId",request.getNetId());
+
+
+            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            if (result.getBody().equals("ok")) {
+                return;
+            }
+        }
+        catch (Exception e){
+            System.out.println("error with post" + e);
+        }
+
 
     }
 

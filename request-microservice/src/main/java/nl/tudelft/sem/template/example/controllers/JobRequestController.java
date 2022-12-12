@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -56,9 +57,9 @@ public class JobRequestController {
 
         List<String> token = headers.get("token");
 
-        boolean verified = requestAllocationService.verifyUser(authManager.getNetId(), token.get(0),request.getFaculty());
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
 
-        if(verified){
+        if(facultyUserFaculties.contains(request.getFaculty())){
             request.setApproved(false);
             requestRepository.save(request);
             publishRequest();
@@ -79,7 +80,7 @@ public class JobRequestController {
     }
 
     @PostMapping("sendApprovals")
-    public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers, @RequestBody ApprovalInformation approvalInformation){
+    public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers, @RequestBody ApprovalInformation approvalInformation) throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
         List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
