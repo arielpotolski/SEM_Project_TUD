@@ -5,8 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/cluster-microservice.iml" filepath="$PROJECT_DIR$/cluster-microservice.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/nl.tudelft.cse.sem.template.example-microservice.main.iml" filepath="$PROJECT_DIR$/.idea/modules/nl.tudelft.cse.sem.template.example-microservice.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/nl.tudelft.cse.sem.template.example-microservice.main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/nl.tudelft.cse.sem.template.example-microservice.main~1.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/authentication-microservice/template.authentication-microservice.main.iml" filepath="$PROJECT_DIR$/.idea/modules/authentication-microservice/template.authentication-microservice.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/example-microservice/template.example-microservice.main.iml" filepath="$PROJECT_DIR$/.idea/modules/example-microservice/template.example-microservice.main.iml" />
     </modules>
   </component>
 </project>

@@ -24,15 +24,5 @@ public class EmployeeController {
         this.authManager = authManager;
     }
 
-    /**
-     * Gets example by id.
-     *
-     * @return the example found in the database with the given id
-     */
-    @GetMapping("/hello2")
-    public ResponseEntity<String> helloWorld() {
-        return ResponseEntity.ok("Employee has been added");
-
-    }
 }
 
