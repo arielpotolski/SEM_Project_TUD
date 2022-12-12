@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.cluster.domain.services;
+package nl.tudelft.sem.template.cluster.domain.cluster;
 
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeAssignmentService;
