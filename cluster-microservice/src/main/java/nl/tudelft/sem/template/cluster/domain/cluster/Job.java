@@ -40,12 +40,10 @@ public class Job {
     @Column(name = "requiredMemory", nullable = false)
     private double requiredMemory;
 
-    @Column(name = "preferredCompletionDate", nullable = false)
-//    @JsonSerialize()
-//    @JsonDeserialize()
+    @Column(name = "preferredCompletionDate", nullable = false, columnDefinition = "DATE")
     private LocalDate preferredCompletionDate;
 
-    @Column(name = "scheduledFor", nullable = false)
+    @Column(name = "scheduledFor", nullable = false, columnDefinition = "DATE")
     private LocalDate scheduledFor;
 
     /**

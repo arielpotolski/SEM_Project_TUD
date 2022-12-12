@@ -21,7 +21,7 @@ public class JobBuilder implements JobBuilderInterface {
     }
 
     @Override
-    public JobBuilder requestedByUserWithNetId(String NetId) {
+    public JobBuilder requestedByUserWithNetId(String userNetId) {
         this.userNetId = userNetId;
         return this;
     }
