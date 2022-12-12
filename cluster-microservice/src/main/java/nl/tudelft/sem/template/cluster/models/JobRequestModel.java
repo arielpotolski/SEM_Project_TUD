@@ -1,8 +1,7 @@
 package nl.tudelft.sem.template.cluster.models;
 
-import lombok.Data;
-
 import java.time.LocalDate;
+import lombok.Data;
 
 /**
  * Model representing a user request for a job.
@@ -13,8 +12,8 @@ public class JobRequestModel {
     private String userNetId;
     private String jobName;
     private String jobDescription;
-    private double requiredCPU;
-    private double requiredGPU;
+    private double requiredCpu;
+    private double requiredGpu;
     private double requiredMemory;
     private LocalDate preferredCompletionDate;
 }

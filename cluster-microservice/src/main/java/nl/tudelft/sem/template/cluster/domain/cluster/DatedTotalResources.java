@@ -8,8 +8,11 @@ import java.time.LocalDate;
 public interface DatedTotalResources {
 
     LocalDate getScheduled_Date();
+
     double getCpu_Resources();
+
     double getGpu_Resources();
+
     double getMemory_Resources();
 
 }

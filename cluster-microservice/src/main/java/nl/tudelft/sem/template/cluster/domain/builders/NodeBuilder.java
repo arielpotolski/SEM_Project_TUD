@@ -2,7 +2,7 @@ package nl.tudelft.sem.template.cluster.domain.builders;
 
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 
-public class NodeBuilder implements NodeBuilderInterface{
+public class NodeBuilder implements NodeBuilderInterface {
     private double cpuResources;
     private double gpuResources;
     private double memoryResources;

@@ -1,22 +1,30 @@
 package nl.tudelft.sem.template.cluster.domain.strategies;
 
-import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
-import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-
 import java.time.LocalDate;
 import java.util.List;
+import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
+import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 
 /**
  * Defines a strategy in which a job is scheduled for the earliest available date.
  */
-public class EarliestPossibleDateStrategy implements JobSchedulingStrategy{
+public class EarliestPossibleDateStrategy implements JobSchedulingStrategy {
 
+    /**
+     * Looks for the earliest date in the list, on which the provided job can be scheduled.
+     *
+     * @param availableResourcesForDates the list of available resources for each considered day.
+     * @param job the job to schedule.
+     *
+     * @return the date on which the job is to be scheduled.
+     */
     public LocalDate scheduleJobFor(List<AvailableResourcesForDate> availableResourcesForDates, Job job) {
         for (AvailableResourcesForDate availableResources : availableResourcesForDates) {
-            if (job.getRequiredCPUResources() <= availableResources.getAvailableCpu() &&
-                job.getRequiredGPUResources() <= availableResources.getAvailableGpu() &&
-                job.getRequiredMemoryResources() <= availableResources.getAvailableMemory())
+            if (job.getRequiredCpuResources() <= availableResources.getAvailableCpu()
+                    && job.getRequiredGpuResources() <= availableResources.getAvailableGpu()
+                    && job.getRequiredMemoryResources() <= availableResources.getAvailableMemory()) {
                 return availableResources.getDate();
+            }
         }
 
         // this should never be reached because a check is run first if there is the job can ever be scheduled

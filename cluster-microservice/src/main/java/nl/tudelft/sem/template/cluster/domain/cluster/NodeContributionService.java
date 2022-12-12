@@ -28,6 +28,12 @@ public class NodeContributionService {
         this.repo.save(node);
     }
 
+    /**
+     * Calls the NodeAssignmentService to assign this node to a faculty and adds it to the cluster (persists in
+     * repository.)
+     *
+     * @param node the node to add to the cluster.
+     */
     public void addNodeToCluster(Node node) {
         // node is unassigned - assign faculty
         assigning.assignNodeToFaculty(node);

@@ -1,12 +1,12 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
+import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 /**
  * This class provides a service which assigns a given node to a faculty based on the chosen strategy.
@@ -27,6 +27,11 @@ public class NodeAssignmentService {
         this.strategy = strategy;
     }
 
+    /**
+     * Uses the current startegy to pick a faculty to which to assign the given node.
+     *
+     * @param node the node to assign to a faculty.
+     */
     public void assignNodeToFaculty(Node node) {
         // pick faculty using strategy
         List<FacultyTotalResources> list = this.repo.findTotalResourcesPerFaculty();

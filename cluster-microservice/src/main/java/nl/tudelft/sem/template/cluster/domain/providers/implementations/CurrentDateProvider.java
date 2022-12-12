@@ -1,9 +1,8 @@
 package nl.tudelft.sem.template.cluster.domain.providers.implementations;
 
+import java.time.LocalDate;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
 
 @Component
 public class CurrentDateProvider implements DateProvider {

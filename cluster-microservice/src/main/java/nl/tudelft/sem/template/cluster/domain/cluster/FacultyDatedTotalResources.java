@@ -8,9 +8,13 @@ import java.time.LocalDate;
 public interface FacultyDatedTotalResources {
 
     String getFaculty_Id();
+
     double getCpu_Resources();
+
     double getGpu_Resources();
+
     double getMemory_Resources();
+
     LocalDate getScheduled_Date();
 
 }

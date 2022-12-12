@@ -1,11 +1,13 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "schedule")
@@ -32,10 +34,10 @@ public class Job {
     private String jobDescription;
 
     @Column(name = "requiredCPU", nullable = false)
-    private double requiredCPU;
+    private double requiredCpu;
 
     @Column(name = "requiredGPU", nullable = false)
-    private double requiredGPU;
+    private double requiredGpu;
 
     @Column(name = "requiredMemory", nullable = false)
     private double requiredMemory;
@@ -60,19 +62,19 @@ public class Job {
      * @param userNetId the netId of the user who requested the job.
      * @param jobName the name of the job.
      * @param jobDescription the description of the job.
-     * @param requiredCPU the cpu resources that this job requires.
-     * @param requiredGPU the gpu resources that this job requires.
+     * @param requiredCpu the cpu resources that this job requires.
+     * @param requiredGpu the gpu resources that this job requires.
      * @param requiredMemory the memory resources that this job requires.
      * @param preferredCompletionDate the preferred date before which this job should be scheduled.
      */
     public Job(String facultyId, String userNetId, String jobName, String jobDescription,
-               double requiredCPU, double requiredGPU, double requiredMemory, LocalDate preferredCompletionDate) {
+               double requiredCpu, double requiredGpu, double requiredMemory, LocalDate preferredCompletionDate) {
         this.facultyId = facultyId;
         this.userNetId = userNetId;
         this.jobName = jobName;
         this.jobDescription = jobDescription;
-        this.requiredCPU = requiredCPU;
-        this.requiredGPU = requiredGPU;
+        this.requiredCpu = requiredCpu;
+        this.requiredGpu = requiredGpu;
         this.requiredMemory = requiredMemory;
         this.preferredCompletionDate = preferredCompletionDate;
     }
@@ -145,17 +147,17 @@ public class Job {
      *
      * @return the CPU resources this job requires.
      */
-    public double getRequiredCPUResources() {
-        return requiredCPU;
+    public double getRequiredCpuResources() {
+        return requiredCpu;
     }
 
     /**
      * Changes the amount of CPU resources that this job requires to the provided one.
      *
-     * @param requiredCPU the required CPU resources amount to be assigned to this job.
+     * @param requiredCpu the required CPU resources amount to be assigned to this job.
      */
-    public void changeRequiredCPUResources(double requiredCPU) {
-        this.requiredCPU = requiredCPU;
+    public void changeRequiredCpuResources(double requiredCpu) {
+        this.requiredCpu = requiredCpu;
     }
 
     /**
@@ -163,17 +165,17 @@ public class Job {
      *
      * @return the GPU resources this job requires.
      */
-    public double getRequiredGPUResources() {
-        return requiredGPU;
+    public double getRequiredGpuResources() {
+        return requiredGpu;
     }
 
     /**
      * Changes the amount of GPU resources that this job requires to the provided one.
      *
-     * @param requiredGPU the required GPU resources amount to be assigned to this job.
+     * @param requiredGpu the required GPU resources amount to be assigned to this job.
      */
-    public void changeRequiredGPUResources(double requiredGPU) {
-        this.requiredGPU = requiredGPU;
+    public void changeRequiredGpuResources(double requiredGpu) {
+        this.requiredGpu = requiredGpu;
     }
 
     /**
@@ -240,11 +242,15 @@ public class Job {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Job job = (Job) o;
-        return Double.compare(job.requiredCPU, requiredCPU) == 0
-                && Double.compare(job.requiredGPU, requiredGPU) == 0
+        return Double.compare(job.requiredCpu, requiredCpu) == 0
+                && Double.compare(job.requiredGpu, requiredGpu) == 0
                 && Double.compare(job.requiredMemory, requiredMemory) == 0
                 && Objects.equals(facultyId, job.facultyId)
                 && Objects.equals(userNetId, job.userNetId)
@@ -261,7 +267,7 @@ public class Job {
     @Override
     public int hashCode() {
         return Objects.hash(facultyId, userNetId, jobName, jobDescription,
-                requiredCPU, requiredGPU, requiredMemory, preferredCompletionDate,
+                requiredCpu, requiredGpu, requiredMemory, preferredCompletionDate,
                 scheduledFor);
     }
 }

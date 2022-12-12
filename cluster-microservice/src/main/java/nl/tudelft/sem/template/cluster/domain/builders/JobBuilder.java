@@ -1,16 +1,16 @@
 package nl.tudelft.sem.template.cluster.domain.builders;
 
+import java.time.LocalDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 
-import java.time.LocalDate;
 
 public class JobBuilder implements JobBuilderInterface {
     private String facultyId;
     private String userNetId;
     private String name;
     private String description;
-    private double requiredCPU;
-    private double requiredGPU;
+    private double requiredCpu;
+    private double requiredGpu;
     private double requiredMemory;
     private LocalDate preferredCompletionDate;
 
@@ -40,13 +40,13 @@ public class JobBuilder implements JobBuilderInterface {
 
     @Override
     public JobBuilder needingCpuResources(double cpuResources) {
-        this.requiredCPU = cpuResources;
+        this.requiredCpu = cpuResources;
         return this;
     }
 
     @Override
     public JobBuilder needingGpuResources(double gpuResources) {
-        this.requiredGPU = gpuResources;
+        this.requiredGpu = gpuResources;
         return this;
     }
 
@@ -65,6 +65,6 @@ public class JobBuilder implements JobBuilderInterface {
     @Override
     public Job constructJobInstance() {
         return new Job(facultyId, userNetId, name, description,
-                requiredCPU, requiredGPU, requiredMemory, preferredCompletionDate);
+                requiredCpu, requiredGpu, requiredMemory, preferredCompletionDate);
     }
 }

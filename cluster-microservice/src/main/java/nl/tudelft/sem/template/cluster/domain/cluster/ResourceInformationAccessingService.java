@@ -1,12 +1,13 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class ResourceInformationAccessingService {
@@ -23,6 +24,13 @@ public class ResourceInformationAccessingService {
 
     private final transient DateProvider date;
 
+    /**
+     * Constructs a new instance of this service.
+     *
+     * @param jobScheduleRepo the schedule repository.
+     * @param nodeRepo the node repository.
+     * @param date the date provider.
+     */
     public ResourceInformationAccessingService(JobScheduleRepository jobScheduleRepo, NodeRepository nodeRepo,
                                                DateProvider date) {
         this.jobScheduleRepo = jobScheduleRepo;
@@ -32,7 +40,6 @@ public class ResourceInformationAccessingService {
 
     /**
      * TODO: use functional Java to generalize this
-     *
      * Calculates and returns a list of available resources for each day for the given faculty.
      *
      * @param facultyId the faculty to perform the calculation for.
@@ -47,7 +54,8 @@ public class ResourceInformationAccessingService {
         // for each day from tomorrow until specified date
         for (LocalDate day : date.getTomorrow().datesUntil(until.plusDays(1)).collect(Collectors.toList())) {
             var reservedResources = jobScheduleRepo
-                    .findResourcesRequiredForGivenFacultyForGivenDay(day, facultyId); // what does this return when there's none reserved?
+                    .findResourcesRequiredForGivenFacultyForGivenDay(day, facultyId);
+            // TODO: what does this return when there's none reserved? ^
             AvailableResourcesForDate availableResourcesForTheDay;
             if (reservedResources == null) {
                 availableResourcesForTheDay = new AvailableResourcesForDate(day,

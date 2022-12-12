@@ -1,16 +1,11 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
+import java.time.LocalDate;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.strategies.EarliestPossibleDateStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
-import nl.tudelft.sem.template.cluster.domain.strategies.LatestAcceptableDateStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 /**
  * This service handles scheduling a job according to the current strategy.
@@ -92,9 +87,9 @@ public class JobSchedulingService {
      */
     public boolean checkIfJobCanBeScheduled(Job job) {
         var assignedResources = nodeRepo.findTotalResourcesForGivenFaculty(job.getFacultyId());
-        return !(job.getRequiredCPUResources() > assignedResources.getCpu_Resources()) &&
-                !(job.getRequiredGPUResources() > assignedResources.getGpu_Resources()) &&
-                !(job.getRequiredMemoryResources() > assignedResources.getMemory_Resources());
+        return !(job.getRequiredCpuResources() > assignedResources.getCpu_Resources())
+                && !(job.getRequiredGpuResources() > assignedResources.getGpu_Resources())
+                && !(job.getRequiredMemoryResources() > assignedResources.getMemory_Resources());
     }
 
     /**
@@ -107,8 +102,9 @@ public class JobSchedulingService {
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
         var maxDateInSchedule = this.findLatestDateWithReservedResources();
-        if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule))
+        if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule)) {
             maxDateInSchedule = job.getPreferredCompletionDate();
+        }
         var availableResourcesPerDay = resourceInfo
                 .getAvailableResourcesForGivenFacultyUntilDay(job.getFacultyId(),
                         maxDateInSchedule.plusDays(1));

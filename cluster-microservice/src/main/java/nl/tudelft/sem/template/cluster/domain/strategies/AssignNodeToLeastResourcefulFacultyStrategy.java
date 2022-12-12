@@ -1,13 +1,18 @@
 package nl.tudelft.sem.template.cluster.domain.strategies;
 
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 
-public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignmentStrategy{
+public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignmentStrategy {
 
+    /**
+     * A helper class to facilitate the usage of functional Java.
+     *
+     * @param <K> the key of the Pair.
+     * @param <V> the value of the Pair.
+     */
     private static class Pair<K, V> {
         K key;
         V value;
@@ -18,6 +23,13 @@ public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignme
         }
     }
 
+    /**
+     * Finds the faculty with the least total currently assigned resources and returns its facultyId.
+     *
+     * @param faculties the faculties from which to look for the least resourceful one.
+     *
+     * @return String representation of the facultyId.
+     */
     public String pickFacultyToAssignNodeTo(List<FacultyTotalResources> faculties) {
         return faculties.stream()
                 .map(x -> new Pair<String, Double>(x.getFaculty_Id(),
