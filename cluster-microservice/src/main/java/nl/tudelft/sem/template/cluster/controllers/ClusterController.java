@@ -1,9 +1,12 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
+import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.*;
-import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
+import nl.tudelft.sem.template.cluster.domain.cluster.JobSchedulingService;
+import nl.tudelft.sem.template.cluster.domain.cluster.NodeContributionService;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,6 +33,8 @@ public class ClusterController {
 	private final transient JobSchedulingService scheduling;
 	private final transient NodeContributionService contribution;
 
+	private final transient DateProvider dateProvider;
+
 	/**
 	 * Instantiates a new controller.
 	 *
@@ -37,12 +43,13 @@ public class ClusterController {
 	@Autowired
 	public ClusterController(AuthManager authManager, NodeRepository nodeRep,
 							 JobScheduleRepository jobScheduleRep, JobSchedulingService scheduling,
-							 NodeContributionService contribution) {
+							 NodeContributionService contribution, DateProvider dateProvider) {
 		this.authManager = authManager;
 		this.nodeRep = nodeRep;
 		this.jobScheduleRep = jobScheduleRep;
 		this.scheduling = scheduling;
 		this.contribution = contribution;
+		this.dateProvider = dateProvider;
 	}
 
 	/**
@@ -93,10 +100,99 @@ public class ClusterController {
 		return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
 	}
 
-//	@PostMapping("/request")
-//	public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel) {
-//
-//	}
+	/**
+	 * Gets and returns all jobs in the schedule.
+	 *
+	 * @return list of all jobs in the schedule.
+	 */
+	@GetMapping("/schedule")
+	public List<Job> getSchedule() {
+		return this.jobScheduleRep.findAll();
+	}
+
+	/**
+	 * Gets and returns the total amount of resources each faculty has reserved on each day.
+	 *
+	 * @return list of FacultyDatedTotalResources, which contain the date, the facultyId, and the amount of resources
+	 * that are reserved for that faculty on that day.
+	 */
+	@GetMapping("/resources/reserved")
+	public List<FacultyDatedTotalResources> getReservedPerFacultyPerDay() {
+		return this.jobScheduleRep.findResourcesRequiredForEachDay();
+	}
+
+	/**
+	 * Gets and returns the total amount of resources reserved in each faculty for the given day.
+	 *
+	 * @param rawDate the String representation of the date in the yyyy-MM-dd format
+	 *
+	 * @return a list of FacultyTotalResources, which contain the facultyId and the amount of resources reserved
+	 * in that faculty on the given day.
+	 */
+	@GetMapping("/resources/reserved/{date}")
+	public List<FacultyTotalResources> getReservedPerFacultyForGivenDay(@PathVariable("date") String rawDate) {
+		LocalDate dateToFindReservedResourcesFor = LocalDate.parse(rawDate);
+		return this.jobScheduleRep.findResourcesRequiredForGivenDay(dateToFindReservedResourcesFor);
+	}
+
+	/**
+	 * Gets and returns the total amount of resources reserved in the given faculty on the given day.
+	 *
+	 * @param rawDate the String representation of the date in the yyyy-MM-dd format
+	 * @param facultyId the facultyId of the faculty to check the reserved resources for.
+	 *
+	 * @return ResponseEntity containing a FacultyDatedTotalResources object, which contains the date, the facultyId,
+	 * and the total reserved resources in each of the three categories.
+	 */
+	@GetMapping("/resources/reserved/{date}/{facultyId}")
+	public ResponseEntity<FacultyDatedTotalResources> getReservedForGivenFacultyForGivenDay(
+			@PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
+		LocalDate dateToFindReservedResourcesFor = LocalDate.parse(rawDate);
+		return ResponseEntity.ok(this.jobScheduleRep
+				.findResourcesRequiredForGivenFacultyForGivenDay(dateToFindReservedResourcesFor, facultyId));
+	}
+
+	/**
+	 * Accepts a request from the request service, converts it into a job and schedules it.
+	 *
+	 * @param jobModel the JobRequestModel which is the deserialized JSON of the request sent by the Request service.
+	 *
+	 * @return a ResponseEntity with an informative message.
+	 */
+	@PostMapping("/request")
+	public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel) {
+		// extract job from request model
+		Job job = new JobBuilder().requestedThroughFaculty(jobModel.getFacultyId())
+								  .requestedByUserWithNetId(jobModel.getUserNetId())
+								  .havingName(jobModel.getJobName())
+							  	  .withDescription(jobModel.getJobDescription())
+								  .needingCpuResources(jobModel.getRequiredCPU())
+								  .needingGpuResources(jobModel.getRequiredGPU())
+								  .needingMemoryResources(jobModel.getRequiredMemory())
+								  .preferredCompletedBeforeDate(jobModel.getPreferredCompletionDate())
+								  .constructJobInstance();
+
+		// preferred completion date is in the future
+		if (job.getPreferredCompletionDate().isBefore(dateProvider.getTomorrow())) return ResponseEntity.badRequest()
+				.body("The requested job cannot require the cluster to compute it before "
+						+ dateProvider.getTomorrow() + ".");
+
+		// the resources requested are cpu >= gpu and cpu >= memory
+		if (job.getRequiredCPUResources() < job.getRequiredGPUResources() ||
+				job.getRequiredCPUResources() < job.getRequiredMemoryResources()) return ResponseEntity.badRequest()
+				.body("The requested job cannot require more GPU or memory than CPU.");
+
+		// can job ever be scheduled
+		if (!this.scheduling.checkIfJobCanBeScheduled(job)) return ResponseEntity.badRequest()
+				.body("The requested job requires more resources than are assigned to the "
+						+ job.getFacultyId() + " faculty.");
+
+		// schedule job
+		scheduling.scheduleJob(job);
+
+		// return
+		return ResponseEntity.ok("Successfully scheduled job.");
+	}
 
 	/**
 	 * Adds a new node to the cluster. Fails if amount of cpu resources are not enough
@@ -123,7 +219,6 @@ public class ClusterController {
 			contribution.addNodeAssignedToSpecificFacultyToCluster(core);
 		}
 
-
 		if (this.nodeRep.existsByUrl(node.getUrl())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
@@ -144,8 +239,6 @@ public class ClusterController {
 	}
 
 	/**
-	 * TODO: change this to post when we have a queue
-	 *
 	 * Delete a node from the cluster by url. It does nothing in case the url
 	 * does not exist.
 	 *
@@ -197,8 +290,8 @@ public class ClusterController {
 	 * memory resources for that faculty.
 	 */
 	@GetMapping("/resources/all/{facultyId}")
-	public FacultyTotalResources getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
-		return this.nodeRep.findTotalResourcesForGivenFaculty(facultyId);
+	public ResponseEntity<FacultyTotalResources> getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
+		return ResponseEntity.ok(this.nodeRep.findTotalResourcesForGivenFaculty(facultyId));
 	}
 
 	// free resources per day
