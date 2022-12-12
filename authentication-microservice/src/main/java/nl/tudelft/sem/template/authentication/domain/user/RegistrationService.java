@@ -105,6 +105,25 @@ public class RegistrationService {
         throw new NetIdNotFoundException(netId);
     }
 
+    /**
+     * Remove faculty from a user
+     * @param netId user where the faculty needs to be removed
+     * @param faculty that needs to be removed
+     * @throws NetIdNotFoundException if the netId does not exist
+     */
+
+    public void removeFacultyUser(NetId netId, AppUser.Faculty faculty) throws NetIdNotFoundException {
+        if (!checkNetIdIsUnique(netId)) {
+            AppUser user = userRepository.findByNetId(netId).get();
+            user.removeFaculty(faculty);
+            userRepository.delete(user);
+            userRepository.save(user);
+            return;
+        }
+        //new make new exception
+        throw new NetIdNotFoundException(netId);
+    }
+
 
     public boolean checkNetIdIsUnique(NetId netId) {
         return !userRepository.existsByNetId(netId);

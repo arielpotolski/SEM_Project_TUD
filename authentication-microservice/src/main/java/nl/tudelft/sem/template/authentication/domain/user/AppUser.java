@@ -106,4 +106,15 @@ public class AppUser extends HasEvents {
     public Collection<Faculty> getFaculties() {
         return this.facultyList;
     }
+
+    /**
+     * removing faculty from the user
+     * 
+     * @param faculty that needs to be removed
+     */
+    public void removeFaculty(Faculty faculty) {
+        if (this.facultyList.contains(faculty)) {
+            this.facultyList.remove(faculty);
+        }
+    }
 }
