@@ -82,8 +82,8 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
                     + " s.scheduled_for AS Scheduled_Date,"
-                    + " SUM(s.requiredCPU) AS Cpu_Resources,"
-                    + " SUM(s.requiredGPU) AS Gpu_Resources,"
+                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
+                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
                     + " SUM(s.required_memory) AS Memory_Resources"
                     + " FROM Schedule s GROUP BY s.faculty_id, s.scheduled_for")
     List<FacultyDatedTotalResources> findResourcesRequiredForEachDay();
@@ -96,8 +96,8 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      */
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
-                    + " SUM(s.requiredCPU) AS Cpu_Resources,"
-                    + " SUM(s.requiredGPU) AS Gpu_Resources,"
+                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
+                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
                     + " SUM(s.required_memory) AS Memory_Resources"
                     + " FROM Schedule s WHERE :date = s.scheduled_for"
                     + " GROUP BY s.faculty_id")
@@ -111,8 +111,8 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      */
     @Query(nativeQuery = true,
             value = "SELECT s.scheduled_for AS Scheduled_Date,"
-                    + " SUM(s.requiredCPU) AS Cpu_Resources,"
-                    + " SUM(s.requiredGPU) AS Gpu_Resources,"
+                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
+                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
                     + " SUM(s.required_memory) AS Memory_Resources"
                     + " FROM Schedule s WHERE :facultyId = s.faculty_id"
                     + " GROUP BY s.scheduled_for")
@@ -128,8 +128,8 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
     @Query(nativeQuery = true,
             value = "SELECT s.faculty_id,"
                     + " s.scheduled_for AS Scheduled_Date,"
-                    + " SUM(s.requiredCPU) AS Cpu_Resources,"
-                    + " SUM(s.requiredGPU) AS Gpu_Resources,"
+                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
+                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
                     + " SUM(s.required_memory) AS Memory_Resources"
                     + " FROM Schedule s WHERE :date = s.scheduled_for"
                     + " AND :facultyId = s.faculty_id"
