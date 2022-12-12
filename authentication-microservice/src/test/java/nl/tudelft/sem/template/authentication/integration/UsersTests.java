@@ -1,8 +1,8 @@
 package nl.tudelft.sem.template.authentication.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,13 +10,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
-import nl.tudelft.sem.template.authentication.domain.user.AppUser;
-import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
-import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.Password;
-import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
-import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
+import nl.tudelft.sem.template.authentication.domain.user.*;
 import nl.tudelft.sem.template.authentication.framework.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
@@ -58,6 +54,9 @@ public class UsersTests {
     @Autowired
     private transient UserRepository userRepository;
 
+    @Autowired
+    private transient RegistrationService registrationService;
+
     @Test
     public void register_withValidData_worksCorrectly() throws Exception {
         // Arrange
@@ -82,6 +81,30 @@ public class UsersTests {
 
         assertThat(savedUser.getNetId()).isEqualTo(testUser);
         assertThat(savedUser.getPassword()).isEqualTo(testHashedPassword);
+    }
+
+    @Test
+    public void applyFaculty_WithValidData() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        registrationService.registerUser(testUser,testPassword);
+
+        ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
+        model.setNetId(testUser.toString());
+        model.setFaculty(AppUser.Faculty.EWI.toString());
+        //act
+        ResultActions resultActions = mockMvc.perform(post("/applyFaculty")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.serialize(model)));
+        //Assert
+        resultActions.andExpect(status().isOk());
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+
+        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)).isTrue();
+        assertThat(savedUser.getFaculties().size()).isEqualTo(1);
+
     }
 
     @Test
@@ -179,7 +202,7 @@ public class UsersTests {
                 .content(JsonUtil.serialize(model)));
 
         // Assert
-        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(status().isUnauthorized());
 
         verify(mockAuthenticationManager).authenticate(argThat(authentication ->
                 testUser.equals(authentication.getPrincipal())
@@ -195,6 +218,8 @@ public class UsersTests {
         final String wrongPassword = "password1234";
         final String testPassword = "password123";
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        
+
         when(mockPasswordEncoder.hash(new Password(testPassword))).thenReturn(testHashedPassword);
 
         when(mockAuthenticationManager.authenticate(argThat(authentication ->

@@ -38,11 +38,10 @@ public class AppUser extends HasEvents {
     @Convert(converter = HashedPasswordAttributeConverter.class)
     private HashedPassword password;
 
-    //@OneToMany(targetEntity = Faculty.class, mappedBy = "users")
-    @ElementCollection(targetClass = Faculty.class)
-    @JoinTable(name = "Faculty", joinColumns = @JoinColumn(name = "net_id"))
-    @Column(name = "abc", nullable = false)
+    @ElementCollection(targetClass = Faculty.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
+    @CollectionTable(name="faculties")
+    @Column(name = "faculty")
     private Collection<Faculty> facultyList;
 
     /**
