@@ -2,8 +2,11 @@ package nl.tudelft.sem.template.cluster.domain.cluster;
 
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.EarliestPossibleDateStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
+import nl.tudelft.sem.template.cluster.domain.strategies.LatestAcceptableDateStrategy;
+import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,8 @@ public class JobSchedulingService {
      */
     private transient JobSchedulingStrategy strategy;
 
+    private final transient DateProvider dateProvider;
+
     /**
      * Creates a new JobSchedulingService object and injects the repository.
      *
@@ -44,13 +49,16 @@ public class JobSchedulingService {
      */
     @Autowired
     public JobSchedulingService(JobScheduleRepository jobScheduleRepo, NodeRepository nodeRepo,
-                                ResourceInformationAccessingService resourceInfo) {
+                                ResourceInformationAccessingService resourceInfo,
+                                DateProvider dateProvider) {
         this.jobScheduleRepo = jobScheduleRepo;
         this.nodeRepo = nodeRepo;
         this.resourceInfo = resourceInfo;
 
         // default strategy: first come, first served; the earliest possible date
-        this.strategy = new EarliestPossibleDateStrategy();
+        this.strategy = new LeastBusyDateStrategy();
+
+        this.dateProvider = dateProvider;
     }
 
     /**
@@ -68,7 +76,10 @@ public class JobSchedulingService {
      * @return the latest date in the schedule.
      */
     public LocalDate findLatestDateWithReservedResources() {
-        return this.jobScheduleRepo.findMaximumDate();
+        var latestDateInSchedule = this.jobScheduleRepo.findMaximumDate();
+
+        // if null, there are no jobs scheduled - thus we can go only until tomorrow
+        return latestDateInSchedule != null ? latestDateInSchedule : dateProvider.getTomorrow();
     }
 
     /**
@@ -95,9 +106,12 @@ public class JobSchedulingService {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
+        var maxDateInSchedule = this.findLatestDateWithReservedResources();
+        if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule))
+            maxDateInSchedule = job.getPreferredCompletionDate();
         var availableResourcesPerDay = resourceInfo
                 .getAvailableResourcesForGivenFacultyUntilDay(job.getFacultyId(),
-                        this.findLatestDateWithReservedResources().plusDays(2));
+                        maxDateInSchedule.plusDays(1));
 
         // use strategy to determine a date to schedule the job for
         var dateToScheduleJob = strategy.scheduleJobFor(availableResourcesPerDay, job);

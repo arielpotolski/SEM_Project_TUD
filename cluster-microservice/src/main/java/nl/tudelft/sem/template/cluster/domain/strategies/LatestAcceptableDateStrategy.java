@@ -13,19 +13,13 @@ import java.util.stream.Collectors;
  * means that no possible date in the preferred range is available - defaults to "earliest possible date"
  * strategy.
  */
-public class LatestAcceptableDateStrategy {
+public class LatestAcceptableDateStrategy implements JobSchedulingStrategy{
 
     public LocalDate scheduleJobFor(List<AvailableResourcesForDate> availableResourcesForDates, Job job) {
         // index of date
-        int index;
-        if (job.getPreferredCompletionDate().isAfter(availableResourcesForDates
-                        .get(availableResourcesForDates.size() - 1).getDate()))
-            index = availableResourcesForDates.size() - 1;
-        else {
-            index = availableResourcesForDates.stream()
+        int index = availableResourcesForDates.stream()
                     .map(AvailableResourcesForDate::getDate).collect(Collectors.toList())
                     .indexOf(job.getPreferredCompletionDate());
-        }
 
         // go backwards
         for (int i = index; i >= 0; --i) {

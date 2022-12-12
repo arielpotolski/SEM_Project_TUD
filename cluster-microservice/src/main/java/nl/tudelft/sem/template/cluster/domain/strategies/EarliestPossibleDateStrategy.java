@@ -18,6 +18,7 @@ public class EarliestPossibleDateStrategy implements JobSchedulingStrategy{
                 job.getRequiredMemoryResources() <= availableResources.getAvailableMemory())
                 return availableResources.getDate();
         }
+
         // this should never be reached because a check is run first if there is the job can ever be scheduled
         // only such jobs are passed to this method, and as the last scheduled job is in the penultimate position,
         // the last date will have all resources free
