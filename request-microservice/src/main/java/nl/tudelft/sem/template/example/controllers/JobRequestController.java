@@ -64,7 +64,7 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        List<String> token = headers.get("token");
+        List<String> token = headers.get("Authorization");
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
 
@@ -93,6 +93,10 @@ public class JobRequestController {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
+
+
+
+    // TODO: Remove getters in the controller they are useless.
 
     /**
      * Gets auth manager.

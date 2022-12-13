@@ -17,6 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -73,27 +76,50 @@ public class JobRequestControllerTest {
 
     }
 
+    @Test
+    public void sendRequestTestNotInFaculty () throws Exception {
+
+        String dateString = "2023-12-12";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Request request = new Request(123l, "Test", "Test", "Test", "AE",
+                2.0, 1.0, 1.0, true, simpleDateFormat.parse(dateString));
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+
+    }
+
+    //TODO: Cannot mock token properly, so we need a different test
+
 //    @Test
-//    public void sendRequestTestNotInFaculty () throws Exception {
+//    public void sendRequestTestInFaculty () throws Exception {
 //
+//        String dateString = "2023-12-12";
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 //
-//        Request request = new Request(123l, "Test", "Test", "Test", "AE", 2.0, 1.0, 1.0, true, "2023/12/12");
+//        Request request = new Request(123l, "Test", "Test", "Test", "AE",
+//                2.0, 1.0, 1.0, false, simpleDateFormat.parse(dateString));
 //
-//        ResultActions result = mockMvc.perform(get("/job/sendRequest")
-//                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(list))
+//        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+//                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
 //                .contentType(MediaType.APPLICATION_JSON)
 //                .header("Authorization", "Bearer MockedToken"));
 //
 //        result.andExpect(status().isOk());
 //        String response = result.andReturn().getResponse().getContentAsString();
-//        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+//        assertThat(response).isEqualTo("The request was sent. Now it is to be approved by faculty.");
 //
 //    }
 
-    @Test
-    public void sendRequestTestInFaculty () throws Exception {}
 
-
+    // Can also add an assert if we change the request in the controller
 
     @Test
     public void pendingRequestsTest () throws Exception {
