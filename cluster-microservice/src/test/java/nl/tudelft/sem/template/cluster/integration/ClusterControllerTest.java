@@ -90,11 +90,10 @@ public class ClusterControllerTest {
 
         // Act
         // Still include Bearer token as AuthFilter itself is not mocked
-        ResultActions result = mockMvc.perform(get("/nodes")
+        ResultActions result = mockMvc.perform(get("/nodes/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        // Assert
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("[]"); // empty list
@@ -138,7 +137,25 @@ public class ClusterControllerTest {
 
     @Test
     public void getNodeByUrlTest() throws Exception {
+        ResultActions result = mockMvc.perform(get("/nodes/hackers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("");
+
+        nodeRepository.save(node1);
+        nodeRepository.save(node2);
+        nodeRepository.save(node3);
+
+        ResultActions result2 = mockMvc.perform(get("/nodes/TPM/central-core")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result2.andExpect(status().isOk());
+        String response2 = result2.andReturn().getResponse().getContentAsString();
+        assertThat(response2).isEqualTo(JsonUtil.serialize(List.of(node2)));
     }
 
     @Test

@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @RestController
 public class ClusterController {
@@ -60,14 +62,15 @@ public class ClusterController {
     /**
      * Provides an endpoint for accessing nodes directly. This can be either all nodes or a node at specified url.
      *
-     * @param url the url to look for the node at (if given).
+     * @param request the url to look for the node at (if given).
      *
      * @return response entity containing the list of all relevant nodes (or the looked for node when url provided and
      * exists in the database).
      */
-    @GetMapping(value = {"/nodes", "/nodes/{url}"})
-    public ResponseEntity<List<Node>> getNodeInformation(@PathVariable(value = "url", required = false) String url) {
-        if (url == null) {
+    @GetMapping(value = {"/nodes", "/nodes/**"})
+    public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes", "");
+        if ("".equals(url) || "/".equals(url)) {
             return ResponseEntity.ok(this.nodeInformationAccessingService.getAllNodes());
         } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
             return ResponseEntity.ok(List.of(this.nodeInformationAccessingService.getByUrl(url)));
@@ -123,13 +126,14 @@ public class ClusterController {
     /**
      * Delete all nodes or specified node, if url provided.
      *
-     * @param url the url by which the node will be found and deleted, if provided.
+     * @param request the url by which the node will be found and deleted, if provided.
      *
      * @return a string saying whether the node(s) was deleted or not
      */
-    @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/{url}"})
-    public ResponseEntity<String> deleteNode(@PathVariable(value = "url", required = false) String url) {
-        if (url == null) {
+    @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
+    public ResponseEntity<String> deleteNode(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
+        if ("".equals(url) || "/".equals(url)) {
             this.nodeInformationAccessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
