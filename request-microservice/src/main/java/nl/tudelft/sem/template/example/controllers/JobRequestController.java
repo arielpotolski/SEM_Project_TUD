@@ -1,6 +1,8 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.List;
+import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -11,15 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- *
- * This is the controller which manages all incoming communication from other services
- *
+ * This is the controller which manages all incoming communication from other services.
  */
 @RestController
 @RequestMapping("/job")
@@ -53,11 +55,11 @@ public class JobRequestController {
      * @return the response entity
      */
     @PostMapping("/sendRequest")
-    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request){
+    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
 
         //check if the user is from the corresponding faculty
 
-        if(request.getFaculty() == null){
+        if (request.getFaculty() == null) {
             return ResponseEntity.ok()
                     .body("You are not verified to send requests to this faculty");
         }
@@ -66,7 +68,7 @@ public class JobRequestController {
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
 
-        if(facultyUserFaculties.contains(request.getFaculty())){
+        if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
             requestRepository.save(request);
             publishRequest();
@@ -81,12 +83,13 @@ public class JobRequestController {
     }
 
     /**
-     * This endpoint is responsible for broadcasting all pending requests, so a faculty-privileged account can approve/decline them.
+     * This endpoint is responsible for broadcasting all pending requests,
+     * so a faculty-privileged account can approve/decline them.
      *
      * @return the response entity
      */
     @GetMapping("pendingRequests")
-    public ResponseEntity<List<Request>> publishRequest(){
+    public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
@@ -102,14 +105,16 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
-    public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers, @RequestBody ApprovalInformation approvalInformation) throws JsonProcessingException {
+    public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
+                                                       @RequestBody ApprovalInformation approvalInformation)
+            throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
         List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
-                .filter(x->facultiesOfFacultyUser.contains(x.getFaculty()))
+                .filter(x -> facultiesOfFacultyUser.contains(x.getFaculty()))
                 .collect(Collectors.toList());
 
         for (Request request : requests) {
@@ -119,7 +124,7 @@ public class JobRequestController {
         //Implementation of changing the status of respective requests to approved
 
         for (Request request : requests) {
-            if(requestAllocationService.enoughResourcesForJob(request)){
+            if (requestAllocationService.enoughResourcesForJob(request)) {
                 requestAllocationService.sendRequestToCluster(request);
 
             }

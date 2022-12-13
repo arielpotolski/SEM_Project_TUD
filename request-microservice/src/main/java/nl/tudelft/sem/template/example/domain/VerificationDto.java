@@ -3,7 +3,7 @@ package nl.tudelft.sem.template.example.domain;
 /**
  * The type Verification dto.
  */
-public class VerificationDTO {
+public class VerificationDto {
 
     private String netId;
     private String token;
@@ -16,7 +16,7 @@ public class VerificationDTO {
      * @param token   the token
      * @param faculty the faculty
      */
-    public VerificationDTO(String netId, String token, String faculty) {
+    public VerificationDto(String netId, String token, String faculty) {
         this.netId = netId;
         this.token = token;
         this.faculty = faculty;

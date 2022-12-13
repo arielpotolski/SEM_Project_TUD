@@ -1,17 +1,18 @@
 package nl.tudelft.sem.template.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.NonNull;
-
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import lombok.NonNull;
 
 
 /**
  * The type Request.
  */
 @Entity
-@Table(name = "request")
 public class Request {
 
     @Id
@@ -38,8 +39,9 @@ public class Request {
     @NonNull
     private boolean approved;
 
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @NonNull
-    @JsonFormat(pattern="yyyy-MM-dd")
     private Date preferredDate;
 
     /**

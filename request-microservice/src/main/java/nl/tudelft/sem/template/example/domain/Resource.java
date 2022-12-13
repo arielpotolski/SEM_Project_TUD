@@ -6,22 +6,22 @@ package nl.tudelft.sem.template.example.domain;
 public class Resource {
 
     private String facultyName;
-    private Double resourceCPU;
-    private Double resourceGPU;
+    private Double resourceCpu;
+    private Double resourceGpu;
     private Double resourceMemory;
 
     /**
      * Instantiates a new Resource.
      *
      * @param facultyName    the faculty name
-     * @param resourceCPU    the resource cpu
-     * @param resourceGPU    the resource gpu
+     * @param resourceCpu    the resource cpu
+     * @param resourceGpu    the resource gpu
      * @param resourceMemory the resource memory
      */
-    public Resource(String facultyName, Double resourceCPU, Double resourceGPU, Double resourceMemory) {
+    public Resource(String facultyName, Double resourceCpu, Double resourceGpu, Double resourceMemory) {
         this.facultyName = facultyName;
-        this.resourceCPU = resourceCPU;
-        this.resourceGPU = resourceGPU;
+        this.resourceCpu = resourceCpu;
+        this.resourceGpu = resourceGpu;
         this.resourceMemory = resourceMemory;
     }
 
@@ -48,17 +48,17 @@ public class Resource {
      *
      * @return the resource cpu
      */
-    public Double getResourceCPU() {
-        return resourceCPU;
+    public Double getResourceCpu() {
+        return resourceCpu;
     }
 
     /**
      * Sets resource cpu.
      *
-     * @param resourceCPU the resource cpu
+     * @param resourceCpu the resource cpu
      */
-    public void setResourceCPU(Double resourceCPU) {
-        this.resourceCPU = resourceCPU;
+    public void setResourceCpu(Double resourceCpu) {
+        this.resourceCpu = resourceCpu;
     }
 
     /**
@@ -66,17 +66,17 @@ public class Resource {
      *
      * @return the resource gpu
      */
-    public Double getResourceGPU() {
-        return resourceGPU;
+    public Double getResourceGpu() {
+        return resourceGpu;
     }
 
     /**
      * Sets resource gpu.
      *
-     * @param resourceGPU the resource gpu
+     * @param resourceGpu the resource gpu
      */
-    public void setResourceGPU(Double resourceGPU) {
-        this.resourceGPU = resourceGPU;
+    public void setResourceGpu(Double resourceGpu) {
+        this.resourceGpu = resourceGpu;
     }
 
     /**
