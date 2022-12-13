@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.cluster.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +15,7 @@ import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,6 +168,116 @@ public class ClusterControllerTest {
 
     @Test
     public void addNodesTest() throws Exception {
+        assertThat(nodeRepository.count()).isEqualTo(0); // no nodes
+
+        // change node1
+        node1.setCpuResources(3.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        // add first node, check that Board of Examiners also added
+        ResultActions result = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        assertThat(nodeRepository.count()).isEqualTo(2);
+        assertThat(nodeRepository.existsByFacultyId("Board of Examiners")).isTrue();
+
+        Node found = nodeRepository.findByUrl("hippity");
+        assertThat(found).isNotNull();
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node has been successfully added.");
+
+        // add node with existing url
+        ResultActions result2 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result2.andExpect(status().isOk());
+        String response2 = result2.andReturn().getResponse().getContentAsString();
+        assertThat(response2).isEqualTo("Failed to add node. A node with this url already exists.");
+
+        // add valid node to cluster
+        ResultActions result3 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result3.andExpect(status().isOk());
+        String response3 = result3.andReturn().getResponse().getContentAsString();
+        assertThat(response3).isEqualTo("Your node has been successfully added.");
+        assertThat(nodeRepository.count()).isEqualTo(3);
+
+        // try to add invalid node
+        node3.setGpuResources(1.0);
+        node3.setUrl("a");
+
+        ResultActions result4 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result4.andExpect(status().isOk());
+        String response4 = result4.andReturn().getResponse().getContentAsString();
+        assertThat(response4).isEqualTo("The amount of CPU resources should be at least as much as the amount "
+                + "of GPU resources.");
+
+        node3.setMemoryResources(2.0);
+        node3.setUrl("aa");
+
+        ResultActions result5 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result5.andExpect(status().isOk());
+        String response5 = result5.andReturn().getResponse().getContentAsString();
+        assertThat(response5).isEqualTo("The amount of CPU resources should be at least as much as the amount of GPU"
+                + " resources and at least as much as the amount of memory resources.");
+
+        node3.setCpuResources(-1.0);
+        node3.setUrl("aaa");
+
+        ResultActions result6 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result6.andExpect(status().isOk());
+        String response6 = result6.andReturn().getResponse().getContentAsString();
+        assertThat(response6).isEqualTo("None of the resources can be negative.");
+
+        node3.setCpuResources(1.5);
+        node3.setUrl("aaaa");
+
+        ResultActions result7 = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result7.andExpect(status().isOk());
+        String response7 = result7.andReturn().getResponse().getContentAsString();
+        assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
+                + " of memory resources.");
+    }
+
+    @Test
+    public void addNodesToExistingFacultiesTest() {
+
+    }
+
+    @Test
+    public void deleteAllNodesTest() throws Exception {
+
+    }
+
+    @Test
+    public void deleteNodeByUrlTest() throws Exception {
 
     }
 
@@ -221,6 +333,43 @@ public class ClusterControllerTest {
         assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
         assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
         assertThat(nodeRepository.findByUrl("/AE/central-core")).isEqualTo(node3);
+    }
+
+    @Test
+    public void getScheduleTest() throws Exception {
+
+    }
+
+    @Test
+    public void sendRequestTest() throws Exception {
+
+    }
+
+    @Test
+    public void getResourcesAssignedToAllTest() throws Exception {
+
+    }
+
+    @Test
+    public void getResourcesAssignedToSpecificFacultyTest() throws Exception {
+
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDay() throws Exception {
+        // check both url paths
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyForGivenDay() throws Exception {
+    }
+
+    @Test
+    public void getResourcesReservedForGivenFacultyPerDay() throws Exception {
+    }
+
+    @Test
+    public void getResourcesReservedForGivenFacultyForGivenDay() throws Exception {
     }
 
 }
