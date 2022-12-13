@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Hello World example controller.
- * <p>
- * This controller shows how you can extract information from the JWT token.
- * </p>
+ *
+ * This is the controller which manages all incoming communication from other services
+ *
  */
 @RestController
 @RequestMapping("/job")
@@ -32,9 +31,10 @@ public class JobRequestController {
 
     /**
      * Instantiates a new controller.
-     *  @param authManager Spring Security component used to authenticate and authorize the user
-     * @param requestAllocationService
-     * @param requestRepository
+     *
+     * @param authManager              Spring Security component used to authenticate and authorize the user
+     * @param requestAllocationService the request allocation service
+     * @param requestRepository        the request repository
      */
     @Autowired
     public JobRequestController(AuthManager authManager, RequestAllocationService requestAllocationService,
@@ -45,6 +45,13 @@ public class JobRequestController {
     }
 
 
+    /**
+     * This mapping is responsible for receiving requests from users and processing them afterwards.
+     *
+     * @param headers the headers
+     * @param request the request
+     * @return the response entity
+     */
     @PostMapping("/sendRequest")
     public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request){
 
@@ -73,12 +80,27 @@ public class JobRequestController {
 
     }
 
+    /**
+     * This endpoint is responsible for broadcasting all pending requests, so a faculty-privileged account can approve/decline them.
+     *
+     * @return the response entity
+     */
     @GetMapping("pendingRequests")
     public ResponseEntity<List<Request>> publishRequest(){
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
+    /**
+     * This endpoint is responsible for accepting the ids of approved requests,
+     * and see if the sender is legitimate and from the respective faculty.
+     * Afterwards, the requests are sent to the cluster.
+     *
+     * @param headers             the headers
+     * @param approvalInformation the approval information
+     * @return the response entity
+     * @throws JsonProcessingException the json processing exception
+     */
     @PostMapping("sendApprovals")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers, @RequestBody ApprovalInformation approvalInformation) throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
