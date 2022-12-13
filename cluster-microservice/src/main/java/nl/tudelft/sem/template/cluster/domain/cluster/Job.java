@@ -8,9 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "schedule")
+@Getter
+@Setter
 public class Job {
 
     /**
@@ -77,159 +81,6 @@ public class Job {
         this.requiredGpu = requiredGpu;
         this.requiredMemory = requiredMemory;
         this.preferredCompletionDate = preferredCompletionDate;
-    }
-
-    /**
-     * Gets and returns the facultyId of this job.
-     *
-     * @return the facultyId of this job.
-     */
-    public String getFacultyId() {
-        return facultyId;
-    }
-
-    /**
-     * Changes the facultyId of this job to the provided one.
-     *
-     * @param facultyId the facultyId to be assigned to this job.
-     */
-    public void setFacultyId(String facultyId) {
-        this.facultyId = facultyId;
-    }
-
-    /**
-     * Gets and returns the netId of the user who requested this job.
-     *
-     * @return the netId of the user who requested this job.
-     */
-    public String getUserNetId() {
-        return userNetId;
-    }
-
-    /**
-     * Gets and returns the name of this job.
-     *
-     * @return the name of this job.
-     */
-    public String getJobName() {
-        return jobName;
-    }
-
-    /**
-     * Changes the name of this job to the provided one.
-     *
-     * @param jobName the name to be assigned to this job.
-     */
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
-    }
-
-    /**
-     * Gets and returns the description of this job.
-     *
-     * @return the description of this job.
-     */
-    public String getJobDescription() {
-        return jobDescription;
-    }
-
-    /**
-     * Changes the description of this job to the provided one.
-     *
-     * @param jobDescription the description to be assigned to this job.
-     */
-    public void setJobDescription(String jobDescription) {
-        this.jobDescription = jobDescription;
-    }
-
-    /**
-     * Gets and returns the amount of CPU resources this job requires.
-     *
-     * @return the CPU resources this job requires.
-     */
-    public double getRequiredCpu() {
-        return requiredCpu;
-    }
-
-    /**
-     * Changes the amount of CPU resources that this job requires to the provided one.
-     *
-     * @param requiredCpu the required CPU resources amount to be assigned to this job.
-     */
-    public void setRequiredCpu(double requiredCpu) {
-        this.requiredCpu = requiredCpu;
-    }
-
-    /**
-     * Gets and returns the amount of GPU resources this job requires.
-     *
-     * @return the GPU resources this job requires.
-     */
-    public double getRequiredGpu() {
-        return requiredGpu;
-    }
-
-    /**
-     * Changes the amount of GPU resources that this job requires to the provided one.
-     *
-     * @param requiredGpu the required GPU resources amount to be assigned to this job.
-     */
-    public void setRequiredGpu(double requiredGpu) {
-        this.requiredGpu = requiredGpu;
-    }
-
-    /**
-     * Gets and returns the amount of memory resources this job requires.
-     *
-     * @return the memory resources this job requires.
-     */
-    public double getRequiredMemory() {
-        return requiredMemory;
-    }
-
-    /**
-     * Changes the amount of memory resources that this job requires to the provided one.
-     *
-     * @param requiredMemory the required memory resources amount to be assigned to this job.
-     */
-    public void setRequiredMemory(double requiredMemory) {
-        this.requiredMemory = requiredMemory;
-    }
-
-    /**
-     * Gets and returns the preferred date before which this job should be completed.
-     *
-     * @return the preferred date before which this job should be completed.
-     */
-    public LocalDate getPreferredCompletionDate() {
-        return preferredCompletionDate;
-    }
-
-    /**
-     * Changes the preferred date before this job should be completed to the provided one.
-     *
-     * @param preferredCompletionDate the new date before which this job should be finished.
-     */
-    public void setPreferredCompletionDate(LocalDate preferredCompletionDate) {
-        this.preferredCompletionDate = preferredCompletionDate;
-    }
-
-    /**
-     * Gets and return the date that this job is currently scheduled for.
-     *
-     * @return the date this job is currently scheduled for.
-     */
-    public LocalDate getScheduledFor() {
-        return scheduledFor;
-    }
-
-    /**
-     * Changes the date this job is scheduled for to the provided one.
-     *
-     * @param scheduledFor the new scheduled date to be assigned to this job.
-     */
-    public void setScheduledFor(LocalDate scheduledFor) {
-        this.scheduledFor = scheduledFor;
     }
 
     /**

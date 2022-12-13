@@ -1,6 +1,9 @@
-package nl.tudelft.sem.template.cluster.domain.cluster;
+package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.time.LocalDate;
+import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
+import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
@@ -26,7 +29,7 @@ public class JobSchedulingService {
     /**
      * Provides access to information related to the resources.
      */
-    private final transient ResourceInformationAccessingService resourceInfo;
+    private final transient SchedulerInformationAccessingService resourceInfo;
 
 
     /**
@@ -44,7 +47,7 @@ public class JobSchedulingService {
      */
     @Autowired
     public JobSchedulingService(JobScheduleRepository jobScheduleRepo, NodeRepository nodeRepo,
-                                ResourceInformationAccessingService resourceInfo,
+                                SchedulerInformationAccessingService resourceInfo,
                                 DateProvider dateProvider) {
         this.jobScheduleRepo = jobScheduleRepo;
         this.nodeRepo = nodeRepo;

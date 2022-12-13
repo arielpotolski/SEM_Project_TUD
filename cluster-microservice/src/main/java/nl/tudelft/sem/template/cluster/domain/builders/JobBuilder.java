@@ -1,9 +1,12 @@
 package nl.tudelft.sem.template.cluster.domain.builders;
 
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 
-@SuppressWarnings("PMD.BeanMembersShouldSerialize")
+@Getter
+@Setter
 public class JobBuilder implements JobBuilderInterface {
     private String facultyId;
     private String userNetId;

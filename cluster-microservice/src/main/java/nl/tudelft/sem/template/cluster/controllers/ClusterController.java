@@ -5,17 +5,17 @@ import java.util.List;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
-import nl.tudelft.sem.template.cluster.domain.cluster.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeContributionService;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
+import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
+import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
+import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,11 +32,10 @@ public class ClusterController {
 
     private final transient AuthManager authManager;
 
-    private final transient NodeRepository nodeRep;
-    private final transient JobScheduleRepository jobScheduleRep;
-
     private final transient JobSchedulingService scheduling;
-    private final transient NodeContributionService contribution;
+    private final transient NodeContributionService nodeContributionService;
+    private final transient NodeInformationAccessingService nodeInformationAccessingService;
+    private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
 
     private final transient DateProvider dateProvider;
 
@@ -46,36 +45,103 @@ public class ClusterController {
      * @param authManager Spring Security component used to authenticate and authorize the user
      */
     @Autowired
-    public ClusterController(AuthManager authManager, NodeRepository nodeRep,
-                             JobScheduleRepository jobScheduleRep, JobSchedulingService scheduling,
-                             NodeContributionService contribution, DateProvider dateProvider) {
+    public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
+                             NodeContributionService nodeContributionService, DateProvider dateProvider,
+                             NodeInformationAccessingService nodeInformationAccessingService,
+                             SchedulerInformationAccessingService schedulerInformationAccessingService) {
         this.authManager = authManager;
-        this.nodeRep = nodeRep;
-        this.jobScheduleRep = jobScheduleRep;
         this.scheduling = scheduling;
-        this.contribution = contribution;
+        this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
+        this.nodeInformationAccessingService = nodeInformationAccessingService;
+        this.schedulerInformationAccessingService = schedulerInformationAccessingService;
     }
 
     /**
-     * Gets all nodes stored in the cluster.
+     * Provides an endpoint for accessing nodes directly. This can be either all nodes or a node at specified url.
      *
-     * @return a list of containing all the nodes
+     * @param url the url to look for the node at (if given).
+     *
+     * @return response entity containing the list of all relevant nodes (or the looked for node when url provided and
+     * exists in the database).
      */
-    @GetMapping("/all")
-    public List<Node> getAll() {
-        return this.nodeRep.findAll();
+    @GetMapping(value = {"/nodes", "/nodes/{url}"})
+    public ResponseEntity<List<Node>> getNodeInformation(@PathVariable(value = "url", required = false) String url) {
+        if (url == null) {
+            return ResponseEntity.ok(this.nodeInformationAccessingService.getAllNodes());
+        } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
+            return ResponseEntity.ok(List.of(this.nodeInformationAccessingService.getByUrl(url)));
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
-     * Gets a node by the url.
+     * Adds a new node to the cluster. Fails if amount of cpu resources are not enough
+     * or if there is already a node with the same url in the database.
      *
-     * @param url the url of the specific node to be found
-     * @return the node that has this url. It does not return anything if the url is not found in the cluster
+     * @param node the node to be added to the cluster
+     * @return A string saying if the node was added. In case of failure, it returns a
+     * 			string saying why is it failing
      */
-    @GetMapping("/{url}")
-    public ResponseEntity<Node> getNode(@PathVariable("url") String url) {
-        return ResponseEntity.of(this.nodeRep.findByUrl(url));
+    @PostMapping(path = {"/nodes/add"})
+    public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
+        // Check if central cores have been installed by User Service
+        if (this.nodeInformationAccessingService.getNumberOfNodesInRepository() == 0) {
+            // Central cores not installed - faculties unknown. All nodes will be assigned to the
+            // Board of Examiners until faculties become known.
+            Node core =  new NodeBuilder()
+                    .setNodeCpuResourceCapacityTo(0.0)
+                    .setNodeGpuResourceCapacityTo(0.0)
+                    .setNodeMemoryResourceCapacityTo(0.0)
+                    .withNodeName("BoardCentralCore")
+                    .foundAtUrl("/board-pf-examiners/central-core")
+                    .byUserWithNetId("SYSTEM")
+                    .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
+            this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
+        }
+
+        if (this.nodeInformationAccessingService.existsByUrl(node.getUrl())) {
+            return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
+        }
+        String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Node n = new NodeBuilder()
+                .setNodeCpuResourceCapacityTo(node.getCpuResources())
+                .setNodeGpuResourceCapacityTo(node.getGpuResources())
+                .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
+                .withNodeName(node.getName())
+                .foundAtUrl(node.getUrl())
+                .byUserWithNetId(netId)
+                .constructNodeInstance();
+
+        if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
+            this.nodeContributionService.addNodeToCluster(n);
+        }
+        return ResponseEntity.ok(n.hasEnoughCpu());
+    }
+
+    /**
+     * Delete all nodes or specified node, if url provided.
+     *
+     * @param url the url by which the node will be found and deleted, if provided.
+     *
+     * @return a string saying whether the node(s) was deleted or not
+     */
+    @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/{url}"})
+    public ResponseEntity<String> deleteNode(@PathVariable(value = "url", required = false) String url) {
+        if (url == null) {
+            this.nodeInformationAccessingService.deleteAllNodes();
+            return ResponseEntity.ok("All nodes have been deleted from the cluster.");
+        }
+
+        if (this.nodeInformationAccessingService.existsByUrl(url)) {
+            Node node = this.nodeInformationAccessingService.getByUrl(url);
+            this.nodeInformationAccessingService.deleteNode(node);
+            return ResponseEntity.ok("The node has been successfully deleted");
+        } else {
+            return ResponseEntity.ok("Could not find the node to be deleted."
+                    + " Check if the url provided is correct.");
+        }
     }
 
     /**
@@ -90,18 +156,18 @@ public class ClusterController {
     @PostMapping("/faculties")
     public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
         for (String faculty : faculties) {
-            if (jobScheduleRep.existsByFacultyId(faculty)) {
+            if (this.schedulerInformationAccessingService.existsByFacultyId(faculty)) {
                 continue;
             }
             Node core =  new NodeBuilder()
-                                .setNodeCpuResourceCapacityTo(0.0)
-                                .setNodeGpuResourceCapacityTo(0.0)
-                                .setNodeMemoryResourceCapacityTo(0.0)
-                                .withNodeName("FacultyCentralCore")
-                                .foundAtUrl("/" + faculty + "/central-core")
-                                .byUserWithNetId("SYSTEM")
-                                .assignToFacultyWithId(faculty).constructNodeInstance();
-            contribution.addNodeAssignedToSpecificFacultyToCluster(core);
+                    .setNodeCpuResourceCapacityTo(0.0)
+                    .setNodeGpuResourceCapacityTo(0.0)
+                    .setNodeMemoryResourceCapacityTo(0.0)
+                    .withNodeName("FacultyCentralCore")
+                    .foundAtUrl("/" + faculty + "/central-core")
+                    .byUserWithNetId("SYSTEM")
+                    .assignToFacultyWithId(faculty).constructNodeInstance();
+            this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
         }
         return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
     }
@@ -113,49 +179,7 @@ public class ClusterController {
      */
     @GetMapping("/schedule")
     public List<Job> getSchedule() {
-        return this.jobScheduleRep.findAll();
-    }
-
-    /**
-     * Gets and returns the total amount of resources each faculty has reserved on each day.
-     *
-     * @return list of FacultyDatedTotalResources, which contain the date, the facultyId, and the amount of resources
-     that are reserved for that faculty on that day.
-     */
-    @GetMapping("/resources/reserved")
-    public List<FacultyDatedTotalResources> getReservedPerFacultyPerDay() {
-        return this.jobScheduleRep.findResourcesRequiredForEachDay();
-    }
-
-    /**
-     * Gets and returns the total amount of resources reserved in each faculty for the given day.
-     *
-     * @param rawDate the String representation of the date in the yyyy-MM-dd format
-     *
-     * @return a list of FacultyTotalResources, which contain the facultyId and the amount of resources reserved
-     * in that faculty on the given day.
-     */
-    @GetMapping("/resources/reserved/{date}")
-    public List<FacultyTotalResources> getReservedPerFacultyForGivenDay(@PathVariable("date") String rawDate) {
-        LocalDate dateToFindReservedResourcesFor = LocalDate.parse(rawDate);
-        return this.jobScheduleRep.findResourcesRequiredForGivenDay(dateToFindReservedResourcesFor);
-    }
-
-    /**
-     * Gets and returns the total amount of resources reserved in the given faculty on the given day.
-     *
-     * @param rawDate the String representation of the date in the yyyy-MM-dd format
-     * @param facultyId the facultyId of the faculty to check the reserved resources for.
-     *
-     * @return ResponseEntity containing a FacultyDatedTotalResources object, which contains the date, the facultyId,
-     * and the total reserved resources in each of the three categories.
-     */
-    @GetMapping("/resources/reserved/{date}/{facultyId}")
-    public ResponseEntity<FacultyDatedTotalResources> getReservedForGivenFacultyForGivenDay(
-            @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
-        LocalDate dateToFindReservedResourcesFor = LocalDate.parse(rawDate);
-        return ResponseEntity.ok(this.jobScheduleRep
-                .findResourcesRequiredForGivenFacultyForGivenDay(dateToFindReservedResourcesFor, facultyId));
+        return this.schedulerInformationAccessingService.getAllJobsFromSchedule();
     }
 
     /**
@@ -169,25 +193,25 @@ public class ClusterController {
     public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel) {
         // extract job from request model
         Job job = new JobBuilder().requestedThroughFaculty(jobModel.getFacultyId())
-                                  .requestedByUserWithNetId(jobModel.getUserNetId())
-                                  .havingName(jobModel.getJobName())
-                                  .withDescription(jobModel.getJobDescription())
-                                  .needingCpuResources(jobModel.getRequiredCpu())
-                                  .needingGpuResources(jobModel.getRequiredGpu())
-                                  .needingMemoryResources(jobModel.getRequiredMemory())
-                                  .preferredCompletedBeforeDate(jobModel.getPreferredCompletionDate())
-                                  .constructJobInstance();
+                .requestedByUserWithNetId(jobModel.getUserNetId())
+                .havingName(jobModel.getJobName())
+                .withDescription(jobModel.getJobDescription())
+                .needingCpuResources(jobModel.getRequiredCpu())
+                .needingGpuResources(jobModel.getRequiredGpu())
+                .needingMemoryResources(jobModel.getRequiredMemory())
+                .preferredCompletedBeforeDate(jobModel.getPreferredCompletionDate())
+                .constructJobInstance();
 
         // preferred completion date is in the future
-        if (job.getPreferredCompletionDate().isBefore(dateProvider.getTomorrow())) {
+        if (job.getPreferredCompletionDate().isBefore(this.dateProvider.getTomorrow())) {
             return ResponseEntity.badRequest()
                     .body("The requested job cannot require the cluster to compute it before "
-                            + dateProvider.getTomorrow() + ".");
+                            + this.dateProvider.getTomorrow() + ".");
         }
 
         // the resources requested are cpu >= gpu and cpu >= memory
         if (job.getRequiredCpu() < job.getRequiredGpu()
-				|| job.getRequiredCpu() < job.getRequiredMemory()) {
+                || job.getRequiredCpu() < job.getRequiredMemory()) {
             return ResponseEntity.badRequest()
                     .body("The requested job cannot require more GPU or memory than CPU.");
         }
@@ -200,110 +224,87 @@ public class ClusterController {
         }
 
         // schedule job
-        scheduling.scheduleJob(job);
+        this.scheduling.scheduleJob(job);
 
         // return
         return ResponseEntity.ok("Successfully scheduled job.");
     }
 
     /**
-     * Adds a new node to the cluster. Fails if amount of cpu resources are not enough
-     * or if there is already a node with the same url in the database.
+     * Gets and returns the total amount of resources in each of the three categories (CPU, GPU, memory) per faculty.
+     * If facultyId provided as path parameter, returns only the resources assigned to specific faculty, if it exists
+     * in the database.
      *
-     * @param node the node to be added to the cluster
-     * @return A string saying if the node was added. In case of failure, it returns a
-     * 			string saying why is it failing
-     */
-    @PostMapping(path = {"/add"})
-    public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
-        // Check if central cores have been installed by User Service
-        if ((int) this.nodeRep.count() == 0) {
-            // Central cores not installed - faculties unknown. All nodes will be assigned to the
-            // Board of Examiners until faculties become known.
-            Node core =  new NodeBuilder()
-                    .setNodeCpuResourceCapacityTo(0.0)
-                    .setNodeGpuResourceCapacityTo(0.0)
-                    .setNodeMemoryResourceCapacityTo(0.0)
-                    .withNodeName("BoardCentralCore")
-                    .foundAtUrl("/board-pf-examiners/central-core")
-                    .byUserWithNetId("SYSTEM")
-                    .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
-            contribution.addNodeAssignedToSpecificFacultyToCluster(core);
-        }
-
-        if (this.nodeRep.existsByUrl(node.getUrl())) {
-            return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
-        }
-        String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Node n = new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(node.getCpuResources())
-                .setNodeGpuResourceCapacityTo(node.getGpuResources())
-                .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
-                .withNodeName(node.getName())
-                .foundAtUrl(node.getUrl())
-                .byUserWithNetId(netId)
-                .constructNodeInstance();
-
-        if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
-            contribution.addNodeToCluster(n);
-        }
-        return ResponseEntity.ok(n.hasEnoughCpu());
-    }
-
-    /**
-     * Delete a node from the cluster by url. It does nothing in case the url
-     * does not exist.
+     * @param facultyId the facultyId to get the assigned resources to.
      *
-     * @param url the url by which the node will be found and deleted
-     * @return a string saying whether the node was deleted or not
+     * @return response entity containing a list of all relevant resources with facultyIds (or one FacultyTotalResource
+     * object if facultyId specified).
      */
-    @DeleteMapping("/{url}")
-    public ResponseEntity<String> deleteNode(@PathVariable("url") String url) {
-        if (nodeRep.existsByUrl(url)) {
-            Node node = nodeRep.findByUrl(url).get();
-            this.nodeRep.delete(node);
-            return ResponseEntity.ok("The node has been successfully deleted");
+    @GetMapping(value = {"/resources/assigned", "/resources/assigned/{facultyId}"})
+    public ResponseEntity<List<FacultyTotalResources>> getResourcesAssignedToFaculty(
+            @PathVariable(value = "facultyId", required = false) String facultyId) {
+        if (facultyId == null) {
+            return ResponseEntity.ok(this.nodeInformationAccessingService.getAssignedResourcesPerFaculty());
+        } else if (this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
+            return ResponseEntity.ok(List.of(this.nodeInformationAccessingService
+                    .getAssignedResourcesForGivenFaculty(facultyId)));
         } else {
-            return ResponseEntity.ok("Could not find the node to be deleted."
-					+ " Check if the url provided is correct.");
+            return ResponseEntity.badRequest().build();
         }
     }
 
     /**
-     * Deletes all the nodes from the cluster.
+     * Gets and returns the total reserved resources per day per faculty. Uses TotalResourcesInterface to encapsulate
+     * different return types: DatedTotalResources, returned when grouping by date; FacultyTotalResources, returned when
+     * grouping by facultyId; and FacultyDatedTotalResources, returned when not grouping and when only looking for
+     * resources reserved for a specific faculty and date.
      *
-     * @return a string saying if the deletion was successful
+     * @param rawDate the date on which to look for reserved resources, in String format.
+     * @param facultyId the facultyId to find reserved resources of.
+     *
+     * @return response entity containing a list of Spring Projection Interfaces containing the reserved resources
+     * in the three categories, as well as the date, the facultyId, or both.
      */
-    @DeleteMapping("/all")
-    public ResponseEntity<String> removeAll() {
-        this.nodeRep.deleteAll();
-        return ResponseEntity.ok("All nodes have been deleted from the cluster.");
-    }
+    @GetMapping(value = {"/resources/reserved", "/resources/reserved/{date}&{facultyId}",
+        "/resources/reserved/{date}&", "/resources/reserved/&{facultyId}", "resources/reserved/&"})
+    public ResponseEntity<List<TotalResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
+            @PathVariable(value = "date", required = false) String rawDate,
+            @PathVariable(value = "facultyId", required = false) String facultyId) {
+        LocalDate date = LocalDate.parse(rawDate);
+        if (date == null && facultyId == null) {
+            // for all dates, for all faculties
+            return ResponseEntity.ok(this.schedulerInformationAccessingService
+                            .convertToResponseModels(this.schedulerInformationAccessingService
+                            .getReservedResourcesPerFacultyPerDay()));
+        } else if (date != null && facultyId == null) {
+            if (!this.schedulerInformationAccessingService.existsByScheduledFor(date)) {
+                return ResponseEntity.badRequest().build();
+            }
 
-    /**
-     * Returns all faculties which have any node assigned to them and the total sum of resources in each of the three
-     * categories (CPU, GPU, memory) that they control.
-     *
-     * @return a list of Spring Projection Interfaces containing the facultyId and the sum of available CPU, GPU, and
-     * memory resources for that faculty.
-     */
-    @GetMapping("/resources/all")
-    public List<FacultyTotalResources> getResourcesByFaculty() {
-        return this.nodeRep.findTotalResourcesPerFaculty();
-    }
+            // for given date, for all faculties
+            return ResponseEntity.ok(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.schedulerInformationAccessingService
+                            .getReservedResourcesPerFacultyForGivenDay(date)));
+        } else if (date == null && facultyId != null) {
+            if (!this.schedulerInformationAccessingService.existsByFacultyId(facultyId)) {
+                return ResponseEntity.badRequest().build();
+            }
 
-    /**
-     * Returns the sum of the resources of each of the three categories (CPU, GPU, memory) that the given facultyId
-     * has assigned.
-     *
-     * @param facultyId the facultyId for which to return the assigned resources.
-     *
-     * @return a Spring Projection Interface containing the facultyId and the sum of available CPU, GPU, and
-     * memory resources for that faculty.
-     */
-    @GetMapping("/resources/all/{facultyId}")
-    public ResponseEntity<FacultyTotalResources> getResourcesForGivenFaculty(@PathVariable("facultyId") String facultyId) {
-        return ResponseEntity.ok(this.nodeRep.findTotalResourcesForGivenFaculty(facultyId));
+            // for given faculty, for all dates
+            return ResponseEntity.ok(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.schedulerInformationAccessingService
+                            .getReservedResourcesPerDayForGivenFaculty(facultyId)));
+        } else {
+            if (!this.schedulerInformationAccessingService.existsByScheduledFor(date)
+                || !this.schedulerInformationAccessingService.existsByFacultyId(facultyId)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // for given faculty, for given date
+            return ResponseEntity.ok(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.schedulerInformationAccessingService
+                            .getReservedResourcesForGivenDayForGivenFaculty(date, facultyId)));
+        }
     }
 
     // free resources per day

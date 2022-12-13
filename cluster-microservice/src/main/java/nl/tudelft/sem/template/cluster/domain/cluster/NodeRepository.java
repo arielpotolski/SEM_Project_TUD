@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +19,7 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
      *
      * @return an optional containing the node if found.
      */
-    Optional<Node> findByUrl(String url);
+    Node findByUrl(String url);
 
     /**
      * Checks if a node exists with the given url.
@@ -30,6 +29,15 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
      * @return a boolean indicating whether a node with the given url exists in the repository.
      */
     boolean existsByUrl(String url);
+
+    /**
+     * Checks if the given faculty has any node assigned.
+     *
+     * @param facultyId the facultyId to check node assignment to.
+     *
+     * @return a boolean indicating whether any node is assigned to the given faculty.
+     */
+    boolean existsByFacultyId(String facultyId);
 
 
     /**
@@ -62,7 +70,5 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
     FacultyTotalResources findTotalResourcesForGivenFaculty(@Param("facultyId") String facultyId);
 
     // add dedicated method to resources per node in the cluster?
-
-
 
 }

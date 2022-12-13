@@ -1,8 +1,11 @@
 package nl.tudelft.sem.template.cluster.domain.builders;
 
+import lombok.Getter;
+import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 
-@SuppressWarnings("PMD.BeanMembersShouldSerialize")
+@Getter
+@Setter
 public class NodeBuilder implements NodeBuilderInterface {
     private double cpuResources;
     private double gpuResources;

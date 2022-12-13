@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -89,57 +88,5 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
                     + " SUM(s.required_memory) AS Memory_Resources"
                     + " FROM Schedule s GROUP BY s.faculty_id, s.scheduled_for")
     List<FacultyDatedTotalResources> findResourcesRequiredForEachDay();
-
-    /**
-     * For the given day and for each faculty, returns the total number of resources that have already been reserved.
-     *
-     * @return list of FacultyTotalResources, which contain the facultyId and the resources reserved on
-     * the given day for that faculty.
-     */
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    @Query(nativeQuery = true,
-            value = "SELECT s.faculty_id,"
-                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
-                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
-                    + " SUM(s.required_memory) AS Memory_Resources"
-                    + " FROM Schedule s WHERE :date = s.scheduled_for"
-                    + " GROUP BY s.faculty_id")
-    List<FacultyTotalResources> findResourcesRequiredForGivenDay(@Param("date") LocalDate date);
-
-    /**
-     * For the given day and for each faculty, returns the total number of resources that have already been reserved.
-     *
-     * @return list of FacultyTotalResources, which contain the facultyId and the resources reserved on
-     * the given day for that faculty.
-     */
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    @Query(nativeQuery = true,
-            value = "SELECT s.scheduled_for AS Scheduled_Date,"
-                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
-                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
-                    + " SUM(s.required_memory) AS Memory_Resources"
-                    + " FROM Schedule s WHERE :facultyId = s.faculty_id"
-                    + " GROUP BY s.scheduled_for")
-    List<DatedTotalResources> findResourcesRequiredForGivenFaculty(@Param("facultyId") String facultyId);
-
-
-    /**
-     * For the given day and for given faculty, returns the total number of resources that have already been reserved.
-     *
-     * @return FacultyTotalResources, which contains the facultyId and the resources reserved on the given day for
-     * the given faculty.
-     */
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    @Query(nativeQuery = true,
-            value = "SELECT s.faculty_id,"
-                    + " s.scheduled_for AS Scheduled_Date,"
-                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
-                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
-                    + " SUM(s.required_memory) AS Memory_Resources"
-                    + " FROM Schedule s WHERE :date = s.scheduled_for"
-                    + " AND :facultyId = s.faculty_id"
-                    + " GROUP BY s.faculty_id, s.scheduled_for")
-    FacultyDatedTotalResources findResourcesRequiredForGivenFacultyForGivenDay(@Param("date") LocalDate date,
-                                                                          @Param("facultyId") String facultyId);
 
 }

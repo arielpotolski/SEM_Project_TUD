@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
 /**
- * Spring Projection Interface to handle result of querying for total resources per faculty.
+ * Spring Projection Interface to handle result of querying for total resources per faculty in the node repository.
  */
 public interface FacultyTotalResources {
 
