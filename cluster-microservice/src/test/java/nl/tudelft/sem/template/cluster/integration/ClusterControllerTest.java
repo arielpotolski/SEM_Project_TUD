@@ -525,6 +525,12 @@ public class ClusterControllerTest {
 
     @Test
     public void sendValidRequestTest() throws Exception {
+        // faculties
+
+
+        // nodes
+
+        // request
 
     }
 
