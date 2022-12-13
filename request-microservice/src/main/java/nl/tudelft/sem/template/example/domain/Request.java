@@ -36,7 +36,6 @@ public class Request {
     @NonNull
     private Double memory;
 
-    @NonNull
     private boolean approved;
 
 
