@@ -189,15 +189,18 @@ public class Node {
 	 * 		   or the reason why the node was considered invalid.
 	 */
 	public String hasEnoughCPU() {
+		if (this.cpuResources < 0 || this.gpuResources < 0 || this.memoryResources < 0) {
+			return "None of the resources can be negative.";
+		}
 		if (this.cpuResources < this.gpuResources && this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount of GPU" +
 					" resources and at least as much as the amount of memory resources.";
 		} else if (this.cpuResources < this.gpuResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
-					"of GPU resources.";
+					" of GPU resources.";
 		} else if (this.cpuResources < this.memoryResources) {
 			return "The amount of CPU resources should be at least as much as the amount" +
-					"of memory resources.";
+					" of memory resources.";
 		} else {
 			return "Your node has been successfully added.";
 		}

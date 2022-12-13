@@ -73,7 +73,7 @@ public class ClusterController {
 	 */
 	@PostMapping(path = {"/add"})
 	public ResponseEntity<String>  addNode(@RequestBody Node node) {
-		if (this.nodeRep.existsByUrl(node.getUrl())) {
+		if (this.nodeRep.existsByUrl(node.getUrlOfNode())) {
 			return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
 		}
 		if (node.hasEnoughCPU().equals("Your node has been successfully added.")) {
