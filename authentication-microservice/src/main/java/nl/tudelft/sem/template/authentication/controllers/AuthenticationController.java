@@ -7,7 +7,12 @@ import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
-import nl.tudelft.sem.template.authentication.models.*;
+import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
+import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
+import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
+import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
+import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
+import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -181,7 +186,7 @@ public class AuthenticationController {
         try {
             AppUser.Faculty faculty = AppUser.Faculty.valueOf(request.getFaculty());
             NetId netId = new NetId(request.getNetId());
-            registrationService.removeFacultyUser(netId,faculty);
+            registrationService.removeFacultyUser(netId, faculty);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

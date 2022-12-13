@@ -3,8 +3,7 @@ package nl.tudelft.sem.template.authentication.models;
 import lombok.Data;
 
 @Data
-public class NotificationRequestModel
-{
+public class NotificationRequestModel {
     private String date;
     private String type;
     private String state;

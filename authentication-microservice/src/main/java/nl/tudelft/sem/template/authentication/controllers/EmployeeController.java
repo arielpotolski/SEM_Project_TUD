@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Class which will handle assigning Employees to Faculties
+ * Class which will handle assigning Employees to Faculties.
  */
 @RestController
 public class EmployeeController {

@@ -4,9 +4,21 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
+
 
 /**
  * A DDD entity representing an application user in our domain.
@@ -40,7 +52,7 @@ public class AppUser extends HasEvents {
 
     @ElementCollection(targetClass = Faculty.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name="faculties")
+    @CollectionTable(name = "faculties")
     @Column(name = "faculty")
     private Collection<Faculty> facultyList;
 
@@ -107,8 +119,8 @@ public class AppUser extends HasEvents {
     }
 
     /**
-     * removing faculty from the user
-     * 
+     * removing faculty from the user.
+     *
      * @param faculty that needs to be removed
      */
     public void removeFaculty(Faculty faculty) {

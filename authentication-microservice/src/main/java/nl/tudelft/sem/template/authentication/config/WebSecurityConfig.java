@@ -2,9 +2,9 @@ package nl.tudelft.sem.template.authentication.config;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
 import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
+import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,11 +34,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtRequestFilter = jwtRequestFilter;
     }
-        /**
-         * Password encoder password encoder.
-         *
-         * @return the password encoder
-         */
+
+    /**
+     * Password encoder password encoder.
+     *
+     * @return the password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

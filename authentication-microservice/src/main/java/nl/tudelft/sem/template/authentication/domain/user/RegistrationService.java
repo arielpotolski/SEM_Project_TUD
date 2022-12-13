@@ -106,7 +106,8 @@ public class RegistrationService {
     }
 
     /**
-     * Remove faculty from a user
+     * Remove faculty from a user.
+     *
      * @param netId user where the faculty needs to be removed
      * @param faculty that needs to be removed
      * @throws NetIdNotFoundException if the netId does not exist
