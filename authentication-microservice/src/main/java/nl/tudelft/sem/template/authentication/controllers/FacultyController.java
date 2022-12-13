@@ -10,7 +10,6 @@ import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,10 +33,11 @@ public class FacultyController {
      *
      * @param request request from user with the data
      * @return 200 OK if the faculty is added to the user
-     * @throws Exception if a user or the faculty  doesn't exist
+     * @throws ResponseStatusException if a user or the faculty  doesn't exist
      */
     @PostMapping("/applyFaculty")
-    public ResponseEntity applyFaculty(@RequestBody ApplyFacultyRequestModel request) throws Exception {
+    public ResponseEntity<String> applyFaculty(@RequestBody ApplyFacultyRequestModel request)
+            throws ResponseStatusException {
 
         try {
             AppUser.Faculty faculty = AppUser.Faculty.valueOf(request.getFaculty());
@@ -54,10 +54,11 @@ public class FacultyController {
      *
      * @param request request from user with the data
      * @return JSON of al the request in one field
-     * @throws Exception if a user does not exist
+     * @throws ResponseStatusException if a user does not exist
      */
     @PostMapping("/getUserFaculties")
-    public ResponseEntity getFaculties(@RequestBody GetFacultyRequestModel request) throws Exception {
+    public ResponseEntity<GetFacultyResponseModel> getFaculties(@RequestBody GetFacultyRequestModel request)
+            throws ResponseStatusException {
         String response;
         try {
             NetId netId = new NetId(request.getNetId());
@@ -74,10 +75,11 @@ public class FacultyController {
      *
      * @param request request from user with the data
      * @return 200 OK if faculty is removed
-     * @throws Exception if a user or faculty does not exist
+     * @throws ResponseStatusException if a user or faculty does not exist
      */
     @PostMapping("/removeFaculty")
-    public ResponseEntity removeFaculties(@RequestBody ApplyFacultyRequestModel request) throws Exception {
+    public ResponseEntity<String> removeFaculties(@RequestBody ApplyFacultyRequestModel request)
+            throws ResponseStatusException {
         try {
             AppUser.Faculty faculty = AppUser.Faculty.valueOf(request.getFaculty());
             NetId netId = new NetId(request.getNetId());
