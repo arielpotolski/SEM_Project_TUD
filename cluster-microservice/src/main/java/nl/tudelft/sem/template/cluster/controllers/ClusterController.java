@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.cluster.controllers;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 public class ClusterController {
@@ -62,14 +62,16 @@ public class ClusterController {
     /**
      * Provides an endpoint for accessing nodes directly. This can be either all nodes or a node at specified url.
      *
-     * @param url the url to look for the node at (if given).
+     * @param request the url to look for the node at (if given).
      *
      * @return response entity containing the list of all relevant nodes (or the looked for node when url provided and
      * exists in the database).
      */
-    @GetMapping(value = {"/nodes", "/nodes/{url}"})
-    public ResponseEntity<List<Node>> getNodeInformation(@PathVariable(value = "url", required = false) String url) {
-        if (url == null) {
+    @GetMapping(value = {"/nodes", "/nodes/**"})
+    public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes", "");
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
             return ResponseEntity.ok(this.nodeInformationAccessingService.getAllNodes());
         } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
             return ResponseEntity.ok(List.of(this.nodeInformationAccessingService.getByUrl(url)));
@@ -97,7 +99,7 @@ public class ClusterController {
                     .setNodeGpuResourceCapacityTo(0.0)
                     .setNodeMemoryResourceCapacityTo(0.0)
                     .withNodeName("BoardCentralCore")
-                    .foundAtUrl("/board-pf-examiners/central-core")
+                    .foundAtUrl("/board-of-examiners/central-core")
                     .byUserWithNetId("SYSTEM")
                     .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
             this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
@@ -125,13 +127,15 @@ public class ClusterController {
     /**
      * Delete all nodes or specified node, if url provided.
      *
-     * @param url the url by which the node will be found and deleted, if provided.
+     * @param request the url by which the node will be found and deleted, if provided.
      *
      * @return a string saying whether the node(s) was deleted or not
      */
-    @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/{url}"})
-    public ResponseEntity<String> deleteNode(@PathVariable(value = "url", required = false) String url) {
-        if (url == null) {
+    @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
+    public ResponseEntity<String> deleteNode(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
             this.nodeInformationAccessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
@@ -158,7 +162,7 @@ public class ClusterController {
     @PostMapping("/faculties")
     public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
         for (String faculty : faculties) {
-            if (this.schedulerInformationAccessingService.existsByFacultyId(faculty)) {
+            if (this.nodeInformationAccessingService.existsByFacultyId(faculty)) {
                 continue;
             }
             Node core =  new NodeBuilder()
@@ -272,7 +276,7 @@ public class ClusterController {
     public ResponseEntity<List<TotalResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
-        LocalDate date = LocalDate.parse(rawDate);
+        LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
             return ResponseEntity.ok(this.schedulerInformationAccessingService

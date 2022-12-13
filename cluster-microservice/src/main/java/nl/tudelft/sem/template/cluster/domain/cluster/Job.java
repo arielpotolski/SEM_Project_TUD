@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -46,9 +47,11 @@ public class Job {
     @Column(name = "requiredMemory", nullable = false)
     private double requiredMemory;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "preferredCompletionDate", nullable = false, columnDefinition = "DATE")
     private LocalDate preferredCompletionDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "scheduledFor", nullable = false, columnDefinition = "DATE")
     private LocalDate scheduledFor;
 
