@@ -28,6 +28,9 @@ public class SchedulerInformationAccessingService {
      */
     private final transient NodeRepository nodeRepo;
 
+    /**
+     * The provider for dates.
+     */
     private final transient DateProvider date;
 
     /**
@@ -44,15 +47,34 @@ public class SchedulerInformationAccessingService {
         this.date = date;
     }
 
+    /**
+     * Checks whether a job requested through the faculty with the given id exists in the schedule.
+     *
+     * @param facultyId the facultyId to look for in the repository.
+     *
+     * @return boolean indicating whether the faculty with the given id has already had jobs requested and scheduled
+     * through it.
+     */
     public boolean existsByFacultyId(String facultyId) {
         return this.jobScheduleRepo.existsByFacultyId(facultyId);
     }
 
-    // why inverted?
+    /**
+     * Checks whether there is any job currently in the schedule on the given day.
+     *
+     * @param date the date on which to look for jobs.
+     *
+     * @return boolean indicating whether there is any job scheduled for the given day.
+     */
     public boolean existsByScheduledFor(LocalDate date) {
         return this.jobScheduleRepo.existsByScheduledFor(date);
     }
 
+    /**
+     * Gets and returns a list of all scheduled jobs, present and past, that exist in the database.
+     *
+     * @return a list of all jobs from the repository.
+     */
     public List<Job> getAllJobsFromSchedule() {
         return this.jobScheduleRepo.findAll();
     }
@@ -72,15 +94,37 @@ public class SchedulerInformationAccessingService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets and returns the already reserved resources per faculty per day.
+     *
+     * @return list of object containing dates, facultyIds, and the three doubles, representing the reserved
+     * resources for that faculty on that day.
+     */
     public List<FacultyDatedTotalResources> getReservedResourcesPerFacultyPerDay() {
         return this.jobScheduleRepo.findResourcesRequiredForEachDay();
     }
 
+    /**
+     * Gets and returns the already reserved resources per faculty for a given day.
+     *
+     * @param date the date on which to check already reserved resources.
+     *
+     * @return list of object containing dates, facultyIds, and the three doubles, representing the reserved
+     * resources for that faculty on the given day.
+     */
     public List<FacultyDatedTotalResources> getReservedResourcesPerFacultyForGivenDay(LocalDate date) {
         return this.getReservedResourcesPerFacultyPerDay().stream()
                 .filter(x -> x.getScheduled_Date().equals(date)).collect(Collectors.toList());
     }
 
+    /**
+     * Gets and returns the already reserved resources per day for the given faculty.
+     *
+     * @param facultyId the facultyId by which to look for reserved resources per day.
+     *
+     * @return list of object containing dates, facultyIds, and the three doubles, representing the reserved
+     * resources for the given faculty per day.
+     */
     public List<FacultyDatedTotalResources> getReservedResourcesPerDayForGivenFaculty(String facultyId) {
         return this.getReservedResourcesPerFacultyPerDay().stream()
                 .filter(x -> x.getFaculty_Id().equals(facultyId)).collect(Collectors.toList());
