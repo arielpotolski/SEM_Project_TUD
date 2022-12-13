@@ -15,10 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -82,7 +80,7 @@ public class JobRequestControllerTest {
         String dateString = "2023-12-12";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Request request = new Request(123l, "Test", "Test", "Test", "AE",
+        Request request = new Request(123L, "Test", "Test", "Test", "AE",
                 2.0, 1.0, 1.0, true, simpleDateFormat.parse(dateString));
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
