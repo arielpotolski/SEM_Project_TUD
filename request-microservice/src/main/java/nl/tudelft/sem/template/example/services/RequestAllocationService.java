@@ -114,9 +114,9 @@ public class RequestAllocationService {
         for (int i = 0; i < resources.size(); i++) {
             Resource currentResource = resources.get(i);
 
-            if (currentResource.getResourceCPU() >= request.getCpu()
+            if (currentResource.getResourceCpu() >= request.getCpu()
                     &&
-                    currentResource.getResourceGPU() >= request.getGpu()
+                    currentResource.getResourceGpu() >= request.getGpu()
                     &&
                     currentResource.getResourceMemory() >= request.getMemory()) {
                 return true;
