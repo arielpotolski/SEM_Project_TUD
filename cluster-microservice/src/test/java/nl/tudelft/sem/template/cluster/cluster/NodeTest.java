@@ -97,31 +97,31 @@ public class NodeTest {
         this.node.setGpuResources(3.1);
         this.node.setMemoryResources(3.1);
 
-        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources " +
-            "should be at least as much as the amount of GPU resources and at least" +
-            " as much as the amount of memory resources.");
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources "
+                + "should be at least as much as the amount of GPU resources and at least"
+                + " as much as the amount of memory resources.");
     }
 
     @Test
     public void hasEnoughCpuLessThanGpu() {
         this.node.setGpuResources(3.1);
 
-        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources " +
-            "should be at least as much as the amount of GPU resources.");
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources "
+                + "should be at least as much as the amount of GPU resources.");
     }
 
     @Test
     public void hasEnoughCpuLessThanMemory() {
         this.node.setMemoryResources(3.1);
 
-        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources" +
-            " should be at least as much as the amount of memory resources.");
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources"
+                + " should be at least as much as the amount of memory resources.");
     }
 
     @Test
     public void hasEnoughCpuTrue() {
-        assertThat(this.node.hasEnoughCpu()).isEqualTo("Your node has been " +
-            "successfully added.");
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("Your node has been "
+                + "successfully added.");
     }
 
     @Test
@@ -161,19 +161,19 @@ public class NodeTest {
     }
 
     @Test
-    public void EqualsTestTrue() {
+    public void equalsTestTrue() {
         Node that = new Node(3, 2, 3, "node1", "url1", "netid1");
         assertThat(this.node.equals(that)).isTrue();
     }
 
     @Test
-    public void HashCodeTest() {
+    public void hashCodeTest() {
         Node that = new Node(3, 2, 3, "node1", "url1", "netid1");
         assertThat(this.node.hashCode()).isEqualTo(that.hashCode());
     }
 
     @Test
-    public void HashCodeFails() {
+    public void hashCodeFails() {
         Node that = new Node(2, 3, 3, "node2", "url1", "netid1");
         assertThat(this.node.hashCode()).isNotEqualTo(that.hashCode());
     }
