@@ -9,14 +9,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
+import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
+import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,9 +61,22 @@ public class ClusterControllerTest {
     @Autowired
     private transient NodeRepository nodeRepository;
 
+    @Autowired
+    private transient JobScheduleRepository jobScheduleRepository;
+
+    @Autowired
+    private transient DateProvider dateProvider;
+
     private Node node1;
     private Node node2;
     private Node node3;
+
+    private Job job;
+    private Job job2;
+    private Job job3;
+    private Job job4;
+
+    private JobRequestModel model;
 
     /**
      * The setup of the tests.
@@ -92,6 +111,39 @@ public class ClusterControllerTest {
                 .foundAtUrl("/" + "AE" + "/central-core")
                 .byUserWithNetId("SYSTEM")
                 .assignToFacultyWithId("AE").constructNodeInstance();
+        job = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2022, 12, 15))
+                .needingMemoryResources(1.0).needingGpuResources(1.0).needingCpuResources(5.0).withDescription("desc")
+                .havingName("job").requestedByUserWithNetId("ALAN").requestedThroughFaculty("EWI")
+                .constructJobInstance();
+        job.setScheduledFor(LocalDate.of(2022, 12, 14));
+        job2 = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2022, 12, 15))
+                .needingMemoryResources(0.0).needingGpuResources(1.0).needingCpuResources(2.0).withDescription("desc")
+                .havingName("ob").requestedByUserWithNetId("ALAN").requestedThroughFaculty("AE")
+                .constructJobInstance();
+        job2.setScheduledFor(LocalDate.of(2022, 12, 14));
+        job3 = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2022, 12, 15))
+                .needingMemoryResources(1.0).needingGpuResources(1.0).needingCpuResources(2.0).withDescription("desc")
+                .havingName("job").requestedByUserWithNetId("ALAN").requestedThroughFaculty("EWI")
+                .constructJobInstance();
+        job3.setScheduledFor(LocalDate.of(2022, 12, 14));
+        job4 = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2022, 12, 17))
+                .needingMemoryResources(1.0).needingGpuResources(1.0).needingCpuResources(2.0).withDescription("desc")
+                .havingName("jb").requestedByUserWithNetId("ALAN").requestedThroughFaculty("EWI")
+                .constructJobInstance();
+        job4.setScheduledFor(LocalDate.of(2022, 12, 14));
+        model = new JobRequestModel();
+        model.setFacultyId("EWI");
+        model.setJobName("name");
+        model.setJobDescription("desc");
+        model.setUserNetId("ALAN");
+        model.setRequiredCpu(2.0);
+        model.setRequiredGpu(1.0);
+        model.setRequiredMemory(0.5);
+        model.setPreferredCompletionDate(LocalDate.of(2022, 12, 15));
+    }
+
+    public boolean compareTwoDateFormats(String a, String b) {
+        return false;
     }
 
     @Test
@@ -325,6 +377,7 @@ public class ClusterControllerTest {
         assertThat(nodeRepository.count()).isEqualTo(1);
     }
 
+    // TODO: split
     @Test
     public void postFacultiesTest() throws Exception {
         // Act
@@ -380,12 +433,98 @@ public class ClusterControllerTest {
     }
 
     @Test
-    public void getScheduleTest() throws Exception {
+    public void getEmptyScheduleTest() throws Exception {
+        ResultActions result = mockMvc.perform(get("/schedule")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("[]");
     }
 
     @Test
-    public void sendRequestTest() throws Exception {
+    public void getOneItemScheduleTest() throws Exception {
+        jobScheduleRepository.save(job);
+
+        ResultActions result = mockMvc.perform(get("/schedule")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        String check = JsonUtil.serialize(List.of(job));
+
+        assertThat(response).isEqualTo(check);
+    }
+
+    @Test
+    public void getMultipleItemScheduleTest() throws Exception {
+        jobScheduleRepository.save(job);
+        jobScheduleRepository.save(job2);
+        jobScheduleRepository.save(job3);
+        jobScheduleRepository.save(job4);
+
+        ResultActions result = mockMvc.perform(get("/schedule")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        String check = JsonUtil.serialize(List.of(job, job2, job3, job4));
+
+        assertThat(response).isEqualTo(check);
+    }
+
+    @Test
+    public void sendTooEarlyRequestTest() throws Exception {
+        model.setPreferredCompletionDate(LocalDate.of(2022, 12, 12));
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+                .accept(MediaType.APPLICATION_JSON).content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The requested job cannot require the cluster to compute it before "
+                + this.dateProvider.getTomorrow() + ".");
+    }
+
+    @Test
+    public void sendInvalidRequestTest() throws Exception {
+        model.setRequiredCpu(0.0);
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+                .accept(MediaType.APPLICATION_JSON).content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The requested job cannot require more GPU or memory than CPU.");
+    }
+
+    @Test
+    public void sendTooGreedyRequestTest() throws Exception {
+        model.setRequiredCpu(10.0);
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+                .accept(MediaType.APPLICATION_JSON).content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The requested job requires more resources than are assigned "
+                + "to the EWI faculty.");
+    }
+
+    @Test
+    public void sendValidRequestTest() throws Exception {
 
     }
 

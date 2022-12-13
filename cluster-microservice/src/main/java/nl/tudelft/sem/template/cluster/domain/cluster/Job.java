@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,9 +48,11 @@ public class Job {
     @Column(name = "requiredMemory", nullable = false)
     private double requiredMemory;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "preferredCompletionDate", nullable = false, columnDefinition = "DATE")
     private LocalDate preferredCompletionDate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "scheduledFor", nullable = false, columnDefinition = "DATE")
     private LocalDate scheduledFor;
 
