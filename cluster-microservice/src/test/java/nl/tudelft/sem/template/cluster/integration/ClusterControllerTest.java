@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,8 +15,10 @@ import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,15 +49,100 @@ public class ClusterControllerTest {
     @Autowired
     private transient NodeRepository nodeRepository;
 
+    private Node node1;
+    private Node node2;
+    private Node node3;
 
+    @BeforeEach
+    public void setup() {
+        when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
+
+        node1 = new NodeBuilder()
+                .setNodeCpuResourceCapacityTo(0.0)
+                .setNodeGpuResourceCapacityTo(0.0)
+                .setNodeMemoryResourceCapacityTo(0.0)
+                .withNodeName("FacultyCentralCore")
+                .foundAtUrl("/" + "EWI" + "/central-core")
+                .byUserWithNetId("SYSTEM")
+                .assignToFacultyWithId("EWI").constructNodeInstance();
+        node2 = new NodeBuilder()
+                .setNodeCpuResourceCapacityTo(0.0)
+                .setNodeGpuResourceCapacityTo(0.0)
+                .setNodeMemoryResourceCapacityTo(0.0)
+                .withNodeName("FacultyCentralCore")
+                .foundAtUrl("/" + "TPM" + "/central-core")
+                .byUserWithNetId("SYSTEM")
+                .assignToFacultyWithId("TPM").constructNodeInstance();
+        node3 = new NodeBuilder()
+                .setNodeCpuResourceCapacityTo(0.0)
+                .setNodeGpuResourceCapacityTo(0.0)
+                .setNodeMemoryResourceCapacityTo(0.0)
+                .withNodeName("FacultyCentralCore")
+                .foundAtUrl("/" + "AE" + "/central-core")
+                .byUserWithNetId("SYSTEM")
+                .assignToFacultyWithId("AE").constructNodeInstance();
+    }
+
+    @Test
+    public void getAllNodesTest() throws Exception {
+
+        // Act
+        // Still include Bearer token as AuthFilter itself is not mocked
+        ResultActions result = mockMvc.perform(get("/nodes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("[]"); // empty list
+
+        node1 = new NodeBuilder()
+                .setNodeCpuResourceCapacityTo(2.0)
+                .setNodeGpuResourceCapacityTo(1.0)
+                .setNodeMemoryResourceCapacityTo(1.0)
+                .withNodeName("MyFirstNode")
+                .foundAtUrl("myUrl")
+                .byUserWithNetId("Me")
+                .assignToFacultyWithId("AE").constructNodeInstance();
+        node2.setCpuResources(5.0);
+        node2.setName("FUCK");
+
+        // add some nodes
+        nodeRepository.save(node1);
+        nodeRepository.save(node2);
+
+        // check all returned nodes
+        ResultActions result2 = mockMvc.perform(get("/nodes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result2.andExpect(status().isOk());
+        String response2 = result2.andReturn().getResponse().getContentAsString();
+        assertThat(response2).isEqualTo(JsonUtil.serialize(List.of(node1, node2))); // two elements list
+        nodeRepository.delete(node2);
+
+        // check all returned nodes
+        ResultActions result3 = mockMvc.perform(get("/nodes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result3.andExpect(status().isOk());
+        String response3 = result3.andReturn().getResponse().getContentAsString();
+        assertThat(response3).isEqualTo(JsonUtil.serialize(List.of(node1))); // one element list
+
+        // TODO: generate random number of random nodes and check
+    }
+
+    @Test
+    public void getNodeByUrlTest() throws Exception {
+
+    }
 
     @Test
     public void postFacultiesTest() throws Exception {
-
-        when(mockAuthenticationManager.getNetId()).thenReturn("Admin");
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Admin");
-
         // Act
         // Still include Bearer token as AuthFilter itself is not mocked
         List<String> list = List.of("EWI", "TPM");
@@ -77,23 +165,6 @@ public class ClusterControllerTest {
         assertThat(nodeRepository.count()).isEqualTo(2);
 
         // check that expected nodes have been persisted
-        var node1 = new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(0.0)
-                .setNodeGpuResourceCapacityTo(0.0)
-                .setNodeMemoryResourceCapacityTo(0.0)
-                .withNodeName("FacultyCentralCore")
-                .foundAtUrl("/" + "EWI" + "/central-core")
-                .byUserWithNetId("SYSTEM")
-                .assignToFacultyWithId("EWI").constructNodeInstance();
-        var node2 = new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(0.0)
-                .setNodeGpuResourceCapacityTo(0.0)
-                .setNodeMemoryResourceCapacityTo(0.0)
-                .withNodeName("FacultyCentralCore")
-                .foundAtUrl("/" + "TPM" + "/central-core")
-                .byUserWithNetId("SYSTEM")
-                .assignToFacultyWithId("TPM").constructNodeInstance();
-
         assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
         assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
 
@@ -118,15 +189,6 @@ public class ClusterControllerTest {
         assertThat(nodeRepository.existsByFacultyId("AE")).isTrue();
         assertThat(nodeRepository.existsByFacultyId("IO")).isFalse();
         assertThat(nodeRepository.count()).isEqualTo(3);
-
-        var node3 = new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(0.0)
-                .setNodeGpuResourceCapacityTo(0.0)
-                .setNodeMemoryResourceCapacityTo(0.0)
-                .withNodeName("FacultyCentralCore")
-                .foundAtUrl("/" + "AE" + "/central-core")
-                .byUserWithNetId("SYSTEM")
-                .assignToFacultyWithId("AE").constructNodeInstance();
 
         assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
         assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);

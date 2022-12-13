@@ -89,6 +89,7 @@ public class JobSchedulingService {
      * @return boolean indicating whether it is possible, within the foreseeable future, to schedule the job
      */
     public boolean checkIfJobCanBeScheduled(Job job) {
+        if (!this.nodeRepo.existsByFacultyId(job.getFacultyId())) return false;
         var assignedResources = nodeRepo.findTotalResourcesForGivenFaculty(job.getFacultyId());
         return !(job.getRequiredCpu() > assignedResources.getCpu_Resources())
                 && !(job.getRequiredGpu() > assignedResources.getGpu_Resources())

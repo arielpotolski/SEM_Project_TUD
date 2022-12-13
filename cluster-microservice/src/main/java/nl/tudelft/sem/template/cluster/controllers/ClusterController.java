@@ -95,7 +95,7 @@ public class ClusterController {
                     .setNodeGpuResourceCapacityTo(0.0)
                     .setNodeMemoryResourceCapacityTo(0.0)
                     .withNodeName("BoardCentralCore")
-                    .foundAtUrl("/board-pf-examiners/central-core")
+                    .foundAtUrl("/board-of-examiners/central-core")
                     .byUserWithNetId("SYSTEM")
                     .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
             this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
