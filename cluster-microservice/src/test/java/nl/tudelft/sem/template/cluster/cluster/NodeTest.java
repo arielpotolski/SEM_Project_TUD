@@ -22,24 +22,24 @@ public class NodeTest {
 
 	@Test
 	public void getGpuTest() {
-		assertThat(this.node.getGPUResources()).isEqualTo(2);
+		assertThat(this.node.getGpuResources()).isEqualTo(2);
 	}
 
 	@Test
 	public void setGpuTest() {
-		this.node.changeGPUResources(3);
-		assertThat(this.node.getGPUResources()).isEqualTo(3);
+		this.node.setGpuResources(3);
+		assertThat(this.node.getGpuResources()).isEqualTo(3);
 	}
 
 	@Test
 	public void getCpuTest() {
-		assertThat(this.node.getCPUResources()).isEqualTo(3);
+		assertThat(this.node.getCpuResources()).isEqualTo(3);
 	}
 
 	@Test
 	public void setCpuTest() {
-		this.node.changeCPUResources(5);
-		assertThat(this.node.getCPUResources()).isEqualTo(5);
+		this.node.setCpuResources(5);
+		assertThat(this.node.getCpuResources()).isEqualTo(5);
 	}
 
 	@Test
@@ -49,78 +49,78 @@ public class NodeTest {
 
 	@Test
 	public void setMemoryTest() {
-		this.node.changeMemoryResources(4);
+		this.node.setMemoryResources(4);
 		assertThat(this.node.getMemoryResources()).isEqualTo(4);
 	}
 
 	@Test
 	public void getNameTest() {
-		assertThat(this.node.getNameOfNode()).isEqualTo("node1");
+		assertThat(this.node.getName()).isEqualTo("node1");
 	}
 
 	@Test
 	public void setNameTest() {
-		this.node.changeNameOfNode("Node");
-		assertThat(this.node.getNameOfNode()).isEqualTo("Node");
+		this.node.setName("Node");
+		assertThat(this.node.getName()).isEqualTo("Node");
 	}
 
 	@Test
 	public void getUrlTest() {
-		assertThat(this.node.getUrlOfNode()).isEqualTo("url1");
+		assertThat(this.node.getUrl()).isEqualTo("url1");
 	}
 
 	@Test
 	public void setUrlTest() {
-		this.node.changeUrlOfNode("Url");
-		assertThat(this.node.getUrlOfNode()).isEqualTo("Url");
+		this.node.setName("Url");
+		assertThat(this.node.getUrl()).isEqualTo("Url");
 	}
 
 	@Test
 	public void getUserNetIdTest() {
-		assertThat(this.node.getNodeOwnerUserNetId()).isEqualTo("netid1");
+		assertThat(this.node.getUserNetId()).isEqualTo("netid1");
 	}
 
 	@Test
 	public void setFacultyIdTest() {
-		this.node.changeNodeAssignedFacultyId("facId");
-		assertThat(this.node.getNodeAssignedFacultyId()).isEqualTo("facId");
+		this.node.setFacultyId("facId");
+		assertThat(this.node.getFacultyId()).isEqualTo("facId");
 	}
 
 	@Test
 	public void hasEnoughCpuNegativeGpuTest() {
-		this.node.changeGPUResources(-1);
-		assertThat(this.node.hasEnoughCPU()).isEqualTo("None of the resources can be negative.");
+		this.node.setGpuResources(-1);
+		assertThat(this.node.hasEnoughCpu()).isEqualTo("None of the resources can be negative.");
 	}
 
 	@Test
 	public void hasEnoughCpuLessThanGpuAndMemory() {
-		this.node.changeGPUResources(3.1);
-		this.node.changeMemoryResources(3.1);
+		this.node.setGpuResources(3.1);
+		this.node.setMemoryResources(3.1);
 
-		assertThat(this.node.hasEnoughCPU()).isEqualTo("The amount of CPU resources " +
+		assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources " +
 			"should be at least as much as the amount of GPU resources and at least" +
 			" as much as the amount of memory resources.");
 	}
 
 	@Test
 	public void hasEnoughCpuLessThanGpu() {
-		this.node.changeGPUResources(3.1);
+		this.node.setGpuResources(3.1);
 
-		assertThat(this.node.hasEnoughCPU()).isEqualTo("The amount of CPU resources " +
+		assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources " +
 			"should be at least as much as the amount of GPU resources.");
 	}
 
 	@Test
 	public void hasEnoughCpuLessThanMemory() {
-		this.node.changeMemoryResources(3.1);
+		this.node.setMemoryResources(3.1);
 
-		assertThat(this.node.hasEnoughCPU()).isEqualTo("The amount of CPU resources" +
+		assertThat(this.node.hasEnoughCpu()).isEqualTo("The amount of CPU resources" +
 			" should be at least as much as the amount of memory resources.");
 	}
 
 	@Test
 	public void hasEnoughCpuTrue() {
-		assertThat(this.node.hasEnoughCPU()).isEqualTo("Your node has been " +
+		assertThat(this.node.hasEnoughCpu()).isEqualTo("Your node has been " +
 			"successfully added.");
 	}
 
