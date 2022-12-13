@@ -1,26 +1,21 @@
 package nl.tudelft.sem.template.authentication.integration;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
-import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.*;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.authentication.models.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,7 +53,7 @@ public class UsersTests {
     private transient JwtTokenVerifier mockJwtTokenVerifier;
 
 
-    private AuthManager mockAuthManager;
+//    private AuthManager mockAuthManager;
 
     @Autowired
     private transient UserRepository userRepository;
@@ -233,7 +228,7 @@ public class UsersTests {
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
         model.setNetId(testUser.toString());
-        ResultActions resultActions = mockMvc.perform(get("/getFaculties")
+        ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
@@ -256,7 +251,7 @@ public class UsersTests {
         GetFacultyRequestModel model = new GetFacultyRequestModel();
         model.setNetId(testUser.toString());
 
-        ResultActions resultActions = mockMvc.perform(get("/getFaculties")
+        ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
