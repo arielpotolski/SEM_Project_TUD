@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.cluster.controllers;
 
 import java.time.LocalDate;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
@@ -25,9 +26,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-
 
 @RestController
 public class ClusterController {

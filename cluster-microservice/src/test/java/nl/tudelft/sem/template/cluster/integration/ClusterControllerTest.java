@@ -29,6 +29,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+/**
+ * Tests for the cluster controller.
+ */
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 // activate profiles to have spring use mocks during auto-injection of certain beans.
@@ -53,6 +56,9 @@ public class ClusterControllerTest {
     private Node node2;
     private Node node3;
 
+    /**
+     * The setup of the tests.
+     */
     @BeforeEach
     public void setup() {
         when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
