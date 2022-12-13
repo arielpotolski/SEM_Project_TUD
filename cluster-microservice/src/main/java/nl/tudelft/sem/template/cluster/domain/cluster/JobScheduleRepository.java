@@ -1,35 +1,16 @@
 package nl.tudelft.sem.template.cluster.domain.cluster;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 /**
  * A DDD repository for querying and persisting information related to the schedule of the cluster.
  */
 @Repository
 public interface JobScheduleRepository extends JpaRepository<Job, Long> {
-
-    /**
-     * Tries to find and return a job by job ID.
-     *
-     * @param id the id to find the job by.
-     *
-     * @return an optional containing the job if found.
-     */
-    Optional<Job> findById(long id);
-
-    /**
-     * Checks if a job exists with the given ID.
-     *
-     * @param id the id to check the existence of.
-     *
-     * @return a boolean indicating whether a job with the given ID exists in the repository.
-     */
-    boolean existsById(long id);
 
     /**
      * Looks for all jobs which have been requested by the user with the provided netID.
@@ -86,5 +67,31 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      * @return a boolean indicating whether there exists any job which has been scheduled on the given date.
      */
     boolean existsByScheduledFor(LocalDate scheduledFor);
+
+    /**
+     * Gets and returns the last date on which any job is currently scheduled.
+     *
+     * @return the last job existing in the repository.
+     */
+    @Query(nativeQuery = true, value = "SELECT max(s.scheduled_for) FROM Schedule s")
+    LocalDate findMaximumDate();
+
+    /**
+     * For each day in the scheduler (including the past) and for each faculty, returns the total number of resources
+     * that have already been reserved. The warnings have been suppressed because the String literals are in queries
+     * and thus should not be using a variable.
+     *
+     * @return list of FacultyDatedTotalResources, which contain the facultyId, the date and the resources reserved on
+     * that day for that faculty.
+     */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+    @Query(nativeQuery = true,
+            value = "SELECT s.faculty_id,"
+                    + " s.scheduled_for AS Scheduled_Date,"
+                    + " SUM(s.requiredCpu) AS Cpu_Resources,"
+                    + " SUM(s.requiredGpu) AS Gpu_Resources,"
+                    + " SUM(s.required_memory) AS Memory_Resources"
+                    + " FROM Schedule s GROUP BY s.faculty_id, s.scheduled_for")
+    List<FacultyDatedTotalResources> findResourcesRequiredForEachDay();
 
 }

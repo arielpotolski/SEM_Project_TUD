@@ -9,27 +9,27 @@ variables:
   # Disable the Gradle daemon to ensure isolated runs of the CI pipeline.
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-build-example-microservice:
+build-cluster-microservice:
   stage: build
   script:
-    gradle example-microservice:assemble example-microservice:testClasses
+    gradle cluster-microservice:assemble cluster-microservice:testClasses
 
-checkStyle-example-microservice:
+checkStyle-cluster-microservice:
   stage: staticAnalysis
   script:
-    gradle example-microservice:checkstyleMain example-microservice:checkStyleTest
+    gradle cluster-microservice:checkstyleMain cluster-microservice:checkStyleTest
   allow_failure: true
 
 
-PMD-example-microservice:
+PMD-cluster-microservice:
   stage: staticAnalysis
   script:
-    gradle example-microservice:pmdMain
+    gradle cluster-microservice:pmdMain
   allow_failure: true
 
-test-example-microservice:
+test-cluster-microservice:
   stage: test
   script:
-    - gradle example-microservice:test example-microservice:jacocoTestReport
-    - cat example-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
+    - gradle cluster-microservice:test cluster-microservice:jacocoTestReport
+    - cat cluster-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
   coverage: /([0-9]{1,3})%/
