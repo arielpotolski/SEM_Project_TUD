@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Tests for the cluster controller.
@@ -268,12 +269,60 @@ public class ClusterControllerTest {
 
     @Test
     public void deleteAllNodesTest() throws Exception {
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("All nodes have been deleted from the cluster.");
+        assertThat(nodeRepository.count()).isEqualTo(0);
     }
 
     @Test
-    public void deleteNodeByUrlTest() throws Exception {
+    public void deleteNodeByUrlTestNoNodes() throws Exception {
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/url")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Could not find the node to be deleted."
+                + " Check if the url provided is correct.");
+        assertThat(nodeRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void deleteNodeByUrlTestWrongUrl() throws Exception {
+        nodeRepository.save(node1);
+        nodeRepository.save(node2);
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/url")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Could not find the node to be deleted."
+                + " Check if the url provided is correct.");
+        assertThat(nodeRepository.count()).isEqualTo(2);
+    }
+
+    @Test
+    public void deleteNodeByUrlTestCorrectUrl() throws Exception {
+        nodeRepository.save(node1);
+        nodeRepository.save(node2);
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The node has been successfully deleted");
+        assertThat(nodeRepository.count()).isEqualTo(1);
     }
 
     @Test
