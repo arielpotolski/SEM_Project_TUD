@@ -156,7 +156,7 @@ public class ClusterController {
     @PostMapping("/faculties")
     public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
         for (String faculty : faculties) {
-            if (this.schedulerInformationAccessingService.existsByFacultyId(faculty)) {
+            if (this.nodeInformationAccessingService.existsByFacultyId(faculty)) {
                 continue;
             }
             Node core =  new NodeBuilder()
