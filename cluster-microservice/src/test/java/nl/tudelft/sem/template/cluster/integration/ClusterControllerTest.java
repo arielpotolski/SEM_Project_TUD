@@ -15,6 +15,7 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
+import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
@@ -554,22 +555,71 @@ public class ClusterControllerTest {
 
     @Test
     public void getResourcesAssignedToAllEmptyTest() throws Exception {
+        ResultActions result = mockMvc.perform(get("/resources/assigned")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("[]");
     }
 
+    // commented out because it needs us to refactor the code to be able to insert a class here
     @Test
     public void getResourcesAssignedToAllNonEmptyTest() throws Exception {
-
+//        // nodes
+//        node1.setCpuResources(5.0);
+//        node1.setGpuResources(3.0);
+//        node1.setMemoryResources(2.0);
+//        node1.setFacultyId("EWI");
+//        nodeRepository.save(node1);
+//        node2.setCpuResources(3.0);
+//        node2.setMemoryResources(1.0);
+//        node2.setFacultyId("EWI");
+//        nodeRepository.save(node2);
+//
+//        ResultActions result = mockMvc.perform(get("/resources/assigned")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .header("Authorization", "Bearer MockedToken"));
+//
+//        result.andExpect(status().isOk());
+//        String response = result.andReturn().getResponse().getContentAsString();
+//        assertThat(response).isEqualTo("[{\"memory_Resources\":3.0,\"cpu_Resources\":8.0,\"gpu_Resources\":3.0," +
+//                "\"faculty_Id\":\"EWI\"}]");
     }
 
     @Test
-    public void getResourcesAssignedToSpecificFacultyTest() throws Exception {
+    public void getResourcesAssignedToSpecificFacultyDoesNotExistTest() throws Exception {
+        ResultActions result = mockMvc.perform(get("/resources/assigned/url")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("");
+    }
+
+    @Test
+    public void getResourcesAssignedToSpecificFacultyExistsTest() throws Exception {
+        node1.setCpuResources(5.0);
+        node1.setGpuResources(3.0);
+        node1.setMemoryResources(2.0);
+        node1.setFacultyId("EWI");
+        nodeRepository.save(node1);
+
+        ResultActions result = mockMvc.perform(get("/resources/assigned/EWI")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        //assertThat(response).isEqualTo(JsonUtil.serialize()); // same as above
     }
 
     @Test
     public void getResourcesReservedPerFacultyPerDay() throws Exception {
         // check both url paths
+
     }
 
     @Test
