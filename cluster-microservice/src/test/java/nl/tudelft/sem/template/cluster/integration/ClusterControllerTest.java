@@ -165,6 +165,11 @@ public class ClusterControllerTest {
     }
 
     @Test
+    public void addNodesTest() throws Exception {
+
+    }
+
+    @Test
     public void postFacultiesTest() throws Exception {
         // Act
         // Still include Bearer token as AuthFilter itself is not mocked
