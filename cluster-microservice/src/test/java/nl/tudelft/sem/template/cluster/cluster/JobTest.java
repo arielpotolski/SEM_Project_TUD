@@ -1,10 +1,11 @@
 package nl.tudelft.sem.template.cluster.cluster;
 
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
