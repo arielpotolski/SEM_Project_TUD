@@ -1,10 +1,12 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
+import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
@@ -307,7 +309,34 @@ public class ClusterController {
         }
     }
 
-    // free resources per day
+    /**
+     * Gets and returns the available resources for the given faculty between tomorrow and the given date, inclusive.
+     *
+     * @param rawDate the String form of the date until which to calculate available resources.
+     * @param facultyId the facultyId of the faculty to calculate available resources for.
+     *
+     * @return response entity containing a list of available resources per day from tomorrow until given.
+     */
+    @GetMapping(value = "/resources/available/{date}/{facultyId}")
+    public ResponseEntity<List<AvailableResourcesForDate>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
+            @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
+        // anti-corruption
+        try {
+            LocalDate.parse(rawDate);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        LocalDate date = LocalDate.parse(rawDate);
+        if (date.isBefore(this.dateProvider.getTomorrow())
+                || !this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // return - change this later when refactoring
+        return ResponseEntity.ok(this.schedulerInformationAccessingService
+                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date));
+    }
+
 
     // free resources per day for given faculty
 

@@ -71,4 +71,6 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
 
     // add dedicated method to resources per node in the cluster?
 
+    //
+
 }
