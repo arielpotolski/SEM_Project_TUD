@@ -51,7 +51,7 @@ public class RequestAllocationServiceTest {
     private transient AuthManager mockAuthenticationManager;
 
     /**
-     * Don't need a specific token and we can test with this setup
+     * Don't need a specific token,so we can test with this setup.
      */
     @BeforeEach
     public void setup() {
@@ -71,26 +71,7 @@ public class RequestAllocationServiceTest {
     public void getReservedResourceTest(){
 
 
-
     }
-
-//    @Test
-//    public void enoughResourcesForJobTest() throws Exception{
-//
-//        String dateString = "2023-12-12";
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//
-//        Request request = new Request(123l, "Test", "Test", "Test", "AE",
-//                2.0, 1.0, 1.0, true, simpleDateFormat.parse(dateString));
-//
-//
-//        Resource res1 = new Resource("AE", 23.0, 23.0, 23.0);
-//        Resource res2 = new Resource("AE", 23.0, 23.0, 23.0);
-//
-//        List<Resource> resources = List.of(res1, res2);
-//
-//
-//    }
 
     @Test
     public void sendRequestToClusterTest(){}
