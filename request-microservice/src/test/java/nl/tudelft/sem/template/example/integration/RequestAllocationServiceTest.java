@@ -50,6 +50,9 @@ public class RequestAllocationServiceTest {
     @Autowired
     private transient AuthManager mockAuthenticationManager;
 
+    /**
+     * Don't need a specific token and we can test with this setup
+     */
     @BeforeEach
     public void setup() {
 
@@ -90,16 +93,10 @@ public class RequestAllocationServiceTest {
 //    }
 
     @Test
-    public void sendRequestToClusterTest(){
-
-    }
+    public void sendRequestToClusterTest(){}
 
     @Test
-    public void sendDeclinedRequestToUserService() throws Exception{
-
-
-
-    }
+    public void sendDeclinedRequestToUserService(){}
 
 
 }
