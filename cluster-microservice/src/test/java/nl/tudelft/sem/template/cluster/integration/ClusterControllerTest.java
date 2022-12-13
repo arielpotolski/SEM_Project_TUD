@@ -24,6 +24,7 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
+import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -564,28 +565,10 @@ public class ClusterControllerTest {
         assertThat(response).isEqualTo("[]");
     }
 
-    // commented out because it needs us to refactor the code to be able to insert a class here
+    // empty because it needs us to refactor the code to be able to insert a class here
     @Test
     public void getResourcesAssignedToAllNonEmptyTest() throws Exception {
-//        // nodes
-//        node1.setCpuResources(5.0);
-//        node1.setGpuResources(3.0);
-//        node1.setMemoryResources(2.0);
-//        node1.setFacultyId("EWI");
-//        nodeRepository.save(node1);
-//        node2.setCpuResources(3.0);
-//        node2.setMemoryResources(1.0);
-//        node2.setFacultyId("EWI");
-//        nodeRepository.save(node2);
-//
-//        ResultActions result = mockMvc.perform(get("/resources/assigned")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .header("Authorization", "Bearer MockedToken"));
-//
-//        result.andExpect(status().isOk());
-//        String response = result.andReturn().getResponse().getContentAsString();
-//        assertThat(response).isEqualTo("[{\"memory_Resources\":3.0,\"cpu_Resources\":8.0,\"gpu_Resources\":3.0," +
-//                "\"faculty_Id\":\"EWI\"}]");
+
     }
 
     @Test
@@ -619,7 +602,18 @@ public class ClusterControllerTest {
     @Test
     public void getResourcesReservedPerFacultyPerDay() throws Exception {
         // check both url paths
+        TotalResourcesResponseModel testingModel = new TotalResourcesResponseModel(
+                LocalDate.of(2022, 12, 14), "EWI",
+                5.0, 1.0, 1.0);
 
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
     }
 
     @Test

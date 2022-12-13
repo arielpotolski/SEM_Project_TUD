@@ -274,7 +274,7 @@ public class ClusterController {
     public ResponseEntity<List<TotalResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
-        LocalDate date = LocalDate.parse(rawDate);
+        LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
             return ResponseEntity.ok(this.schedulerInformationAccessingService
