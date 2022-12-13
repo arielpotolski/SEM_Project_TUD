@@ -1,13 +1,13 @@
 package nl.tudelft.sem.template.authentication.controllers;
 
-import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsService;
-import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
-import nl.tudelft.sem.template.authentication.models.*;
+import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
+import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
+import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,11 +59,11 @@ public class AuthenticationController {
      *
      * @param request The login model
      * @return JWT token if the login is successful
-     * @throws Exception if the user does not exist or the password is incorrect
+     * @throws ResponseStatusException if the user does not exist or the password is incorrect
      */
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponseModel> authenticate(@RequestBody AuthenticationRequestModel request)
-            throws Exception {
+        throws ResponseStatusException {
 
         try {
             authenticationManager.authenticate(
@@ -87,10 +86,10 @@ public class AuthenticationController {
      *
      * @param request The registration model
      * @return 200 OK if the registration is successful
-     * @throws Exception if a user with this netid already exists
+     * @throws ResponseStatusException if a user with this netid already exists
      */
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegistrationRequestModel request) throws Exception {
+    public ResponseEntity<String> register(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
 
         try {
             NetId netId = new NetId(request.getNetId());
@@ -108,10 +107,10 @@ public class AuthenticationController {
      *
      * @param request request from user with the data
      * @return 200 OK if the change is successful
-     * @throws Exception if a user does not exist
+     * @throws ResponseStatusException if a user does not exist
      */
     @PostMapping("/change")
-    public  ResponseEntity change(@RequestBody RegistrationRequestModel request) throws Exception {
+    public  ResponseEntity<String> change(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
         try {
             NetId netId = new NetId(request.getNetId());
             Password password = new Password(request.getPassword());

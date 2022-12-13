@@ -8,7 +8,7 @@ import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class to store, handle, and sent out incoming notifications
+ * Service class to store, handle, and sent out incoming notifications.
  */
 @Service
 public class NotificationService {
@@ -16,7 +16,7 @@ public class NotificationService {
     private final Map<String, List<Notification>> jobNotifications;
 
     /**
-     * Constructor which initializes the data storage
+     * Constructor which initializes the data storage.
      */
     public NotificationService() {
         this.jobNotifications = new HashMap<>();
