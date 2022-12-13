@@ -525,17 +525,40 @@ public class ClusterControllerTest {
 
     @Test
     public void sendValidRequestTest() throws Exception {
-        // faculties
-
-
         // nodes
+        node1.setCpuResources(5.0);
+        node1.setGpuResources(3.0);
+        node1.setMemoryResources(2.0);
+        node1.setFacultyId("EWI");
+        nodeRepository.save(node1);
+        node2.setCpuResources(3.0);
+        node2.setMemoryResources(1.0);
+        node2.setFacultyId("EWI");
+        nodeRepository.save(node2);
 
         // request
+        model.setRequiredCpu(5.0);
+        model.setRequiredGpu(2.0);
+        model.setRequiredMemory(1.0);
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+                .accept(MediaType.APPLICATION_JSON).content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Successfully scheduled job.");
+    }
+
+    @Test
+    public void getResourcesAssignedToAllEmptyTest() throws Exception {
 
     }
 
     @Test
-    public void getResourcesAssignedToAllTest() throws Exception {
+    public void getResourcesAssignedToAllNonEmptyTest() throws Exception {
 
     }
 
