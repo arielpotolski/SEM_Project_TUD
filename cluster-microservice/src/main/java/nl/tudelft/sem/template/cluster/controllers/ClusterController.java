@@ -68,7 +68,8 @@ public class ClusterController {
     @GetMapping(value = {"/nodes", "/nodes/**"})
     public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
-        if (url.isEmpty() || url.startsWith("/")) {
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
             return ResponseEntity.ok(this.nodeInformationAccessingService.getAllNodes());
         } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
             return ResponseEntity.ok(List.of(this.nodeInformationAccessingService.getByUrl(url)));
@@ -131,7 +132,8 @@ public class ClusterController {
     @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
     public ResponseEntity<String> deleteNode(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
-        if (url.isEmpty() || url.startsWith("/")) {
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
             this.nodeInformationAccessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
