@@ -1,7 +1,9 @@
-package nl.tudelft.sem.template.authentication.integration.utils;
+package nl.tudelft.sem.template.cluster.integration.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * The Json util for tests.
@@ -16,6 +18,8 @@ public class JsonUtil {
      */
     public static String serialize(Object object) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper.writeValueAsString(object);
     }
 
