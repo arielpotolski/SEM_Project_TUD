@@ -32,16 +32,6 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    /**
-     * Gets example by id.
-     *
-     * @return the example found in the database with the given id
-     */
-    @GetMapping("/hello")
-    public ResponseEntity<String> helloWorld() {
-        return ResponseEntity.ok("Hello " + authManager.getNetId());
-
-    }
     @PostMapping("/notification")
     public ResponseEntity<String> receiveJobNotification(
             @RequestBody NotificationRequestModel data)

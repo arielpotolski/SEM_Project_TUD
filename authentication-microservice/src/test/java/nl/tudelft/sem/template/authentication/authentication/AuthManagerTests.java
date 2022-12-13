@@ -1,6 +1,6 @@
 package nl.tudelft.sem.template.authentication.authentication;
 
-import nl.tudelft.sem.template.authentication.authentication.authentication.AuthManager;
+import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

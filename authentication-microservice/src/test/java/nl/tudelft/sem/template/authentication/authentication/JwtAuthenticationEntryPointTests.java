@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.authentication.authentication;
 
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtAuthenticationEntryPoint;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtRequestFilter;
+import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

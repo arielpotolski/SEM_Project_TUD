@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.authentication.authentication;
 
 import io.jsonwebtoken.*;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtTokenVerifier;
+import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

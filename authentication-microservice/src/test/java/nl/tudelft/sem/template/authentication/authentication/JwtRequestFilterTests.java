@@ -2,8 +2,8 @@ package nl.tudelft.sem.template.authentication.authentication;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtRequestFilter;
-import nl.tudelft.sem.template.authentication.authentication.authentication.JwtTokenVerifier;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
+import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
