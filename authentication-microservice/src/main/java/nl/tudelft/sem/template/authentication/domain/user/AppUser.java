@@ -1,11 +1,10 @@
 package nl.tudelft.sem.template.authentication.domain.user;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
 
@@ -16,19 +15,20 @@ import nl.tudelft.sem.template.authentication.domain.HasEvents;
 @Table(name = "users")
 @NoArgsConstructor
 public class AppUser extends HasEvents {
-
     public enum Faculty {
         CIVIL,
         IO,
         EWI
     }
-
     /**
      * Identifier for the application user.
      */
+
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
 
     @Column(name = "net_id", nullable = false, unique = true)
     @Convert(converter = NetIdAttributeConverter.class)
@@ -37,6 +37,12 @@ public class AppUser extends HasEvents {
     @Column(name = "password_hash", nullable = false)
     @Convert(converter = HashedPasswordAttributeConverter.class)
     private HashedPassword password;
+
+    @ElementCollection(targetClass = Faculty.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name="faculties")
+    @Column(name = "faculty")
+    private Collection<Faculty> facultyList;
 
     /**
      * Create new application user.
@@ -48,6 +54,7 @@ public class AppUser extends HasEvents {
         this.netId = netId;
         this.password = password;
         this.recordThat(new UserWasCreatedEvent(netId));
+        this.facultyList = Collections.emptyList();
     }
 
     public void changePassword(HashedPassword password) {
@@ -81,5 +88,32 @@ public class AppUser extends HasEvents {
     @Override
     public int hashCode() {
         return Objects.hash(netId);
+    }
+
+    /**
+     * Adds faculy to this user.
+     *
+     * @param faculty to add
+     */
+
+    public void addFaculty(Faculty faculty) {
+        if (!this.facultyList.contains(faculty)) {
+            this.facultyList.add(faculty);
+        }
+    }
+
+    public Collection<Faculty> getFaculties() {
+        return this.facultyList;
+    }
+
+    /**
+     * removing faculty from the user
+     * 
+     * @param faculty that needs to be removed
+     */
+    public void removeFaculty(Faculty faculty) {
+        if (this.facultyList.contains(faculty)) {
+            this.facultyList.remove(faculty);
+        }
     }
 }
