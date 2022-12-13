@@ -88,7 +88,7 @@ public class RegistrationServiceTests {
     }
 
     @Test
-    public void AssignFaculty_throwsExceptionWithWrongUser() throws Exception {
+    public void assignFaculty_throwsExceptionWithWrongUser() {
         final NetId testUser = new NetId("SomeUser");
 
         ThrowingCallable action = () -> registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
@@ -108,7 +108,8 @@ public class RegistrationServiceTests {
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.IO);
 
         AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
-        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI) && savedUser.getFaculties().contains(AppUser.Faculty.IO)).isTrue();
+        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)
+                && savedUser.getFaculties().contains(AppUser.Faculty.IO)).isTrue();
         assertThat(savedUser.getFaculties().size()).isEqualTo(2);
     }
 
@@ -131,7 +132,7 @@ public class RegistrationServiceTests {
     }
 
     @Test
-    public void removeFaculty_WithWrongUser() throws Exception{
+    public void removeFaculty_WithWrongUser() {
         final NetId testUser = new NetId("SomeUser");
         ThrowingCallable action = () -> registrationService.removeFacultyUser(testUser, AppUser.Faculty.EWI);
 

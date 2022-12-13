@@ -6,10 +6,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
-import nl.tudelft.sem.template.authentication.models.*;
+import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.List;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -44,6 +44,9 @@ public class NotificationTests {
     private transient JwtTokenVerifier mockJwtTokenVerifier;
     private NotificationRequestModel notificationRequestModel;
 
+    /**
+     * method setup.
+     */
     @BeforeEach
     public void setupNotificationModel() {
         this.notificationRequestModel = new NotificationRequestModel();
@@ -107,6 +110,7 @@ public class NotificationTests {
         assertThat(notificationService.getNotifications("coolUser1")).containsExactly(notification);
         assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
     }
+
     @Test
     public void testMultipleNotifications() {
 

@@ -33,9 +33,10 @@ public class JwtUserDetailsServiceTests {
     private transient UserRepository userRepository;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         this.jwtUserDetailsService = new JwtUserDetailsService(userRepository);
     }
+
     @Test
     public void loadUserByUsername_withValidUser_returnsCorrectUser() {
         // Arrange

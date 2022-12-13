@@ -1,8 +1,9 @@
 package nl.tudelft.sem.template.authentication.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,9 +12,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
-import nl.tudelft.sem.template.authentication.domain.user.*;
+import nl.tudelft.sem.template.authentication.domain.user.AppUser;
+import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
+import nl.tudelft.sem.template.authentication.domain.user.NetId;
+import nl.tudelft.sem.template.authentication.domain.user.Password;
+import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
+import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
+import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
-import nl.tudelft.sem.template.authentication.models.*;
+import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
+import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
+import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
+import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
+import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
+import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +63,6 @@ public class UsersTests {
 
     @Autowired
     private transient JwtTokenVerifier mockJwtTokenVerifier;
-
-
-//    private AuthManager mockAuthManager;
 
     @Autowired
     private transient UserRepository userRepository;
@@ -97,7 +106,7 @@ public class UsersTests {
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
-        registrationService.registerUser(testUser,testPassword);
+        registrationService.registerUser(testUser, testPassword);
 
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
@@ -141,7 +150,7 @@ public class UsersTests {
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
-        registrationService.registerUser(testUser,testPassword);
+        registrationService.registerUser(testUser, testPassword);
 
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
@@ -153,8 +162,11 @@ public class UsersTests {
                 .content(JsonUtil.serialize(model)));
         resultActions.andExpect(status().isBadRequest());
         assertThat(userRepository.existsByNetId(testUser)).isTrue();
-        assertThat(userRepository.findByNetId(testUser).get().getFaculties().size()).isEqualTo(0);
+        if (userRepository.findByNetId(testUser).isPresent()) {
+            assertThat(userRepository.findByNetId(testUser).get().getFaculties().size()).isEqualTo(0);
+        }
     }
+
     @Test
     public void removeFaculty_withWrongFaculty() throws Exception {
         final NetId testUser = new NetId("SomeUser");
@@ -163,7 +175,7 @@ public class UsersTests {
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
-        registrationService.registerUser(testUser,testPassword);
+        registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
@@ -175,7 +187,9 @@ public class UsersTests {
                 .content(JsonUtil.serialize(model)));
         resultActions.andExpect(status().isBadRequest());
         assertThat(userRepository.existsByNetId(testUser)).isTrue();
-        assertThat(userRepository.findByNetId(testUser).get().getFaculties().size()).isEqualTo(1);
+        if (userRepository.findByNetId(testUser).isPresent()) {
+            assertThat(userRepository.findByNetId(testUser).get().getFaculties().size()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -204,7 +218,7 @@ public class UsersTests {
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
-        registrationService.registerUser(testUser,testPassword);
+        registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.IO);
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
@@ -245,7 +259,7 @@ public class UsersTests {
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
-        registrationService.registerUser(testUser,testPassword);
+        registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
