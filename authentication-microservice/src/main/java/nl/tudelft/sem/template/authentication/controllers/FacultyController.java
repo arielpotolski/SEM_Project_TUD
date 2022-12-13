@@ -10,6 +10,7 @@ import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,7 +78,7 @@ public class FacultyController {
      * @return 200 OK if faculty is removed
      * @throws ResponseStatusException if a user or faculty does not exist
      */
-    @PostMapping("/removeFaculty")
+    @DeleteMapping("/removeFaculty")
     public ResponseEntity<String> removeFaculties(@RequestBody ApplyFacultyRequestModel request)
             throws ResponseStatusException {
         try {

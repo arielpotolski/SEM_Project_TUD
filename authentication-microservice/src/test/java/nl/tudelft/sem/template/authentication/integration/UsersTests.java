@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -181,7 +182,7 @@ public class UsersTests {
         model.setNetId(testUser.toString());
         model.setFaculty("EWW");
 
-        ResultActions resultActions = mockMvc.perform(post("/removeFaculty")
+        ResultActions resultActions = mockMvc.perform(delete("/removeFaculty")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
@@ -202,7 +203,7 @@ public class UsersTests {
         model.setFaculty(AppUser.Faculty.EWI.toString());
 
 
-        ResultActions resultActions = mockMvc.perform(post("/removeFaculty")
+        ResultActions resultActions = mockMvc.perform(delete("/removeFaculty")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
@@ -225,7 +226,7 @@ public class UsersTests {
         model.setNetId(testUser.toString());
         model.setFaculty("EWI");
 
-        ResultActions resultActions = mockMvc.perform(post("/removeFaculty")
+        ResultActions resultActions = mockMvc.perform(delete("/removeFaculty")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
