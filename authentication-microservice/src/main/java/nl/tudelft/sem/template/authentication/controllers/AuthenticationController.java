@@ -168,4 +168,23 @@ public class AuthenticationController {
         }
         return ResponseEntity.ok(new GetFacultyResponseModel(response));
     }
+
+    /**
+     * Removes faculty from a user.
+     *
+     * @param request request from user with the data
+     * @return 200 OK if faculty is removed
+     * @throws Exception if a user or faculty does not exist
+     */
+    @PostMapping("/removeFaculty")
+    public ResponseEntity removeFaculties(@RequestBody ApplyFacultyRequestModel request) throws Exception {
+        try {
+            AppUser.Faculty faculty = AppUser.Faculty.valueOf(request.getFaculty());
+            NetId netId = new NetId(request.getNetId());
+            registrationService.removeFacultyUser(netId,faculty);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        return ResponseEntity.ok("Faculty removed");
+    }
 }
