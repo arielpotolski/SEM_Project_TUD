@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import nl.tudelft.sem.template.authentication.communicationData.Notification;
+import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import org.springframework.stereotype.Service;
 
 /**

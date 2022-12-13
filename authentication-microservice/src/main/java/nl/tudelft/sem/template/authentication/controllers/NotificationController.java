@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
-import nl.tudelft.sem.template.authentication.communicationData.Notification;
+import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
