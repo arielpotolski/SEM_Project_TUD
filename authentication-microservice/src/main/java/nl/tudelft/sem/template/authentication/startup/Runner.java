@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.authentication.startup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.tomcat.jni.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import org.springframework.context.ApplicationListener;
@@ -14,19 +13,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class runner implements ApplicationListener<ContextRefreshedEvent> {
+public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
 
     public static int counter;
     private final RestTemplate restTemplate;
 
     @Autowired
-    public runner(RestTemplateBuilder restTemplateBuilder) {
+    public Runner(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
 

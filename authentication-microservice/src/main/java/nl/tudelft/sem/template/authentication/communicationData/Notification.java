@@ -33,7 +33,7 @@ public class Notification {
 
         try {
             s = State.valueOf(data.getState());
-            d = new SimpleDateFormat("yyyy/MM/dd").parse(data.getDate());
+            d = new SimpleDateFormat("yyyy-MM-dd").parse(data.getDate());
             t = Type.valueOf(data.getType());
             return new Notification(s, d, data.getMessage(), t);
         } catch (IllegalArgumentException a){

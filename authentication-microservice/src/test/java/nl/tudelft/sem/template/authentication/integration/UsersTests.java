@@ -16,12 +16,15 @@ import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
-import nl.tudelft.sem.template.authentication.framework.integration.utils.JsonUtil;
+//import nl.tudelft.sem.template.authentication.framework.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,7 +59,15 @@ public class UsersTests {
     private transient AuthenticationManager mockAuthenticationManager;
 
     @Autowired
-    private transient UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @BeforeEach
+    public void setup(){
+        this.mockAuthenticationManager = Mockito.mock(AuthenticationManager.class);
+        this.mockJwtTokenGenerator = Mockito.mock(JwtTokenGenerator.class);
+//        this.mockPasswordEncoder = Mockito.mock(PasswordHashingService.class);
+//        this.mockAuthenticationManager = Mockito.mock(AuthenticationManager.class);
+    }
 
     @Test
     public void register_withValidData_worksCorrectly() throws Exception {
