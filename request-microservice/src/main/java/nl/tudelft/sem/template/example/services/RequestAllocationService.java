@@ -70,7 +70,7 @@ public class RequestAllocationService {
 
             return Arrays.stream(string.split(", ")).collect(Collectors.toList());
         } catch (Exception e) {
-            System.out.println("error with post" + e);
+            System.out.println("error with post:" + e);
         }
         return new ArrayList<>();
 
@@ -93,11 +93,29 @@ public class RequestAllocationService {
             return Objects.requireNonNull(result.getBody()).getResourceList();
 
         } catch (Exception e) {
-            System.out.println("error with post" + e);
+            System.out.println("error with post " + e);
         }
 
         return new ArrayList<>();
 
+    }
+
+    /**
+     * Gets rest template.
+     *
+     * @return the rest template
+     */
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
+    /**
+     * Gets request repository.
+     *
+     * @return the request repository
+     */
+    public RequestRepository getRequestRepository() {
+        return requestRepository;
     }
 
     /**
@@ -109,7 +127,6 @@ public class RequestAllocationService {
     public boolean enoughResourcesForJob(Request request) {
 
         List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate());
-        boolean flag = false;
 
         for (int i = 0; i < resources.size(); i++) {
             Resource currentResource = resources.get(i);
@@ -150,7 +167,7 @@ public class RequestAllocationService {
                 return;
             }
         } catch (Exception e) {
-            System.out.println("error with post" + e);
+            System.out.println("error with post: " + e);
         }
 
 

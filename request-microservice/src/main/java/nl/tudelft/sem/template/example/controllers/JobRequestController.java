@@ -95,6 +95,33 @@ public class JobRequestController {
     }
 
     /**
+     * Gets auth manager.
+     *
+     * @return the auth manager
+     */
+    public AuthManager getAuthManager() {
+        return authManager;
+    }
+
+    /**
+     * Gets request allocation service.
+     *
+     * @return the request allocation service
+     */
+    public RequestAllocationService getRequestAllocationService() {
+        return requestAllocationService;
+    }
+
+    /**
+     * Gets request repository.
+     *
+     * @return the request repository
+     */
+    public RequestRepository getRequestRepository() {
+        return requestRepository;
+    }
+
+    /**
      * This endpoint is responsible for accepting the ids of approved requests,
      * and see if the sender is legitimate and from the respective faculty.
      * Afterwards, the requests are sent to the cluster.
@@ -105,6 +132,7 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)
             throws JsonProcessingException {
