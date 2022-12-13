@@ -1,13 +1,12 @@
-package nl.tudelft.sem.template.authentication.communicationData;
-
-import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
+package nl.tudelft.sem.template.authentication.communicationdata;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 
 /**
- * Class to store the date of a incoming job Notification
+ * Class to store the date of a incoming job Notification.
  */
 public class Notification {
 
@@ -17,7 +16,14 @@ public class Notification {
     private final String message;
     private final LocalDate timeReceived;
 
-
+    /**
+     * Constructor of a Notification.
+     *
+     * @param state State of request/job stored in the notification
+     * @param date Date of request/job scheduled/cancelled
+     * @param message alert or a message of the notification
+     * @param type type of notification is what microservice it came from
+     */
     public Notification(State state, Date date, String message, Type type) {
         this.state = state;
         this.date = date;
@@ -26,7 +32,14 @@ public class Notification {
         this.timeReceived = LocalDate.now();
     }
 
-    public static Notification createNotification(NotificationRequestModel data) throws IllegalArgumentException{
+    /**
+     * Factory that creates a Notification from a notificationRequestModel.
+     *
+     * @param data all the data from the request
+     * @return Notification
+     * @throws IllegalArgumentException if the data is not valid
+     */
+    public static Notification createNotification(NotificationRequestModel data) throws IllegalArgumentException {
         State s;
         Date d;
         Type t;
@@ -36,11 +49,8 @@ public class Notification {
             d = new SimpleDateFormat("yyyy-MM-dd").parse(data.getDate());
             t = Type.valueOf(data.getType());
             return new Notification(s, d, data.getMessage(), t);
-        } catch (IllegalArgumentException a){
-            System.out.println(a);
-            throw new IllegalArgumentException();
-        }catch (Exception e){
-            System.out.println(e);
+        } catch (Exception a) {
+            System.out.println(a.getMessage());
             throw new IllegalArgumentException();
         }
 
@@ -68,26 +78,12 @@ public class Notification {
 
     @Override
     public String toString() {
-        return "Notification{" +
-                "state=" + state +
-                ", type=" + type +
-                ", date=" + date +
-                ", message='" + message + '\'' +
-                ", timeReceived=" + timeReceived +
-                '}';
+        return "Notification{" + "state=" + state
+                + ", type=" + type
+                + ", date=" + date
+                + ", message='" + message + '\''
+                + ", timeReceived=" + timeReceived
+                + '}';
     }
 }
 
-enum State{
-    SCHEDULED,
-    STARTED,
-    COMPLETED,
-    DELAYED,
-    DROPPED,
-    ACCEPTED,
-    REJECTED
-}
-enum Type{
-    JOB,
-    REQUEST
-}
