@@ -87,7 +87,7 @@ public class RequestAllocationService {
     public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
 
         try {
-            String url = "https://localhost:8085/resources/" + preferredDate.toString() + "/" + facultyName;
+            String url = "https://localhost:8085/resources/available" + preferredDate.toString() + "/" + facultyName;
 
             ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
             return Objects.requireNonNull(result.getBody()).getResourceList();
@@ -154,7 +154,7 @@ public class RequestAllocationService {
     public void sendRequestToCluster(Request request) throws JsonProcessingException {
 
         try {
-            String url = "https://localhost:8085/cluster/request";
+            String url = "https://localhost:8085/request";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
