@@ -112,5 +112,32 @@ public class RegistrationServiceTests {
         assertThat(savedUser.getFaculties().size()).isEqualTo(2);
     }
 
+    @Test
+    public void removeFaculty_withCorrectData() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        registrationService.registerUser(testUser, testPassword);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)).isTrue();
+        assertThat(savedUser.getFaculties().size()).isEqualTo(1);
+        registrationService.removeFacultyUser(testUser, AppUser.Faculty.EWI);
+        AppUser savedUser2 = userRepository.findByNetId(testUser).orElseThrow();
+        assertThat(savedUser2.getFaculties().contains(AppUser.Faculty.EWI)).isFalse();
+        assertThat(savedUser2.getFaculties().size()).isEqualTo(0);
+
+    }
+
+    @Test
+    public void removeFaculty_WithWrongUser() throws Exception{
+        final NetId testUser = new NetId("SomeUser");
+        ThrowingCallable action = () -> registrationService.removeFacultyUser(testUser, AppUser.Faculty.EWI);
+
+        assertThatExceptionOfType(NetIdNotFoundException.class)
+                .isThrownBy(action);
+    }
+
 
 }
