@@ -61,6 +61,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
+    /**
+     * Method which determines what happens to each incoming API request.
+     * The antMatchers say which endpoints are excluded from this pipeline, and so in this case the .
+     * endpoints can be called without an authorization token.
+     *
+     * @param http the incoming HTTP request
+     * @throws Exception when pipeline fails
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
