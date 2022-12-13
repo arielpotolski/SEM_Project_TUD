@@ -68,6 +68,11 @@ public interface JobScheduleRepository extends JpaRepository<Job, Long> {
      */
     boolean existsByScheduledFor(LocalDate scheduledFor);
 
+    /**
+     * Gets and returns the last date on which any job is currently scheduled.
+     *
+     * @return the last job existing in the repository.
+     */
     @Query(nativeQuery = true, value = "SELECT max(s.scheduled_for) FROM Schedule s")
     LocalDate findMaximumDate();
 
