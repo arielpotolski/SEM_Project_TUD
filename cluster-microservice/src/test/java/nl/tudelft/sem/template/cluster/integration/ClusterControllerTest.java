@@ -182,15 +182,15 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node has been successfully added.");
+
         assertThat(nodeRepository.count()).isEqualTo(2);
         assertThat(nodeRepository.existsByFacultyId("Board of Examiners")).isTrue();
 
         Node found = nodeRepository.findByUrl("hippity");
         assertThat(found).isNotNull();
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Your node has been successfully added.");
 
         // add node with existing url
         ResultActions result2 = mockMvc.perform(post("/nodes/add")
@@ -264,11 +264,6 @@ public class ClusterControllerTest {
         String response7 = result7.andReturn().getResponse().getContentAsString();
         assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
                 + " of memory resources.");
-    }
-
-    @Test
-    public void addNodesToExistingFacultiesTest() {
-
     }
 
     @Test
