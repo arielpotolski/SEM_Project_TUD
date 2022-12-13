@@ -97,5 +97,20 @@ public class RegistrationServiceTests {
                 .isThrownBy(action);
     }
 
+    @Test
+    public void getFaculty_withMultiple() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        registrationService.registerUser(testUser, testPassword);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.IO);
+
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI) && savedUser.getFaculties().contains(AppUser.Faculty.IO)).isTrue();
+        assertThat(savedUser.getFaculties().size()).isEqualTo(2);
+    }
+
 
 }

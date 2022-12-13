@@ -6,18 +6,20 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
+import nl.tudelft.sem.template.authentication.authentication.authentication.AuthManager;
+import nl.tudelft.sem.template.authentication.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.*;
 import nl.tudelft.sem.template.authentication.framework.integration.utils.JsonUtil;
-import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
-import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
-import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
-import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import nl.tudelft.sem.template.authentication.models.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +37,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 // activate profiles to have spring use mocks during auto-injection of certain beans.
-@ActiveProfiles({"test", "mockPasswordEncoder", "mockTokenGenerator", "mockAuthenticationManager"})
+@ActiveProfiles({"test", "mockPasswordEncoder", "mockTokenGenerator", "mockAuthenticationManager", "mockTokenVerifier"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 public class UsersTests {
@@ -52,10 +54,17 @@ public class UsersTests {
     private transient AuthenticationManager mockAuthenticationManager;
 
     @Autowired
+    private transient JwtTokenVerifier mockJwtTokenVerifier;
+
+
+    private AuthManager mockAuthManager;
+
+    @Autowired
     private transient UserRepository userRepository;
 
     @Autowired
     private transient RegistrationService registrationService;
+
 
     @Test
     public void register_withValidData_worksCorrectly() throws Exception {
@@ -85,18 +94,23 @@ public class UsersTests {
 
     @Test
     public void applyFaculty_WithValidData() throws Exception {
+
         final NetId testUser = new NetId("SomeUser");
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
         registrationService.registerUser(testUser,testPassword);
 
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
         model.setFaculty(AppUser.Faculty.EWI.toString());
         //act
+        //ResultActions res = mockMvc.perform("/")
         ResultActions resultActions = mockMvc.perform(post("/applyFaculty")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
                 .content(JsonUtil.serialize(model)));
         //Assert
         resultActions.andExpect(status().isOk());
@@ -104,6 +118,65 @@ public class UsersTests {
 
         assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)).isTrue();
         assertThat(savedUser.getFaculties().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void applyFaculty_WithWrongUser() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
+        ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
+        model.setNetId(testUser.toString());
+        model.setFaculty(AppUser.Faculty.EWI.toString());
+
+        ResultActions resultActions = mockMvc.perform(post("/applyFaculty")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(model)));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(userRepository.existsByNetId(testUser)).isFalse();
+    }
+    @Test
+    public void getFaculty_WithWrongUser() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
+        GetFacultyRequestModel model = new GetFacultyRequestModel();
+        model.setNetId(testUser.toString());
+        ResultActions resultActions = mockMvc.perform(get("/getFaculties")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(model)));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(userRepository.existsByNetId(testUser)).isFalse();
+    }
+
+    @Test
+    public void getFaculty_WithCorrectData() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
+        registrationService.registerUser(testUser,testPassword);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
+
+        GetFacultyRequestModel model = new GetFacultyRequestModel();
+        model.setNetId(testUser.toString());
+
+        ResultActions resultActions = mockMvc.perform(get("/getFaculties")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(model)));
+
+        MvcResult result = resultActions
+                .andExpect(status().isOk())
+                .andReturn();
+
+        GetFacultyResponseModel responseModel = JsonUtil.deserialize(result.getResponse().getContentAsString(),
+                GetFacultyResponseModel.class);
+        assertThat(responseModel.getFaculties().contains("EWI")).isTrue();
 
     }
 
