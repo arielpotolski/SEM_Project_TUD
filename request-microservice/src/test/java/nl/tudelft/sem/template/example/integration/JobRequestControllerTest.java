@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.integration;
 
+import java.text.SimpleDateFormat;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -15,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import java.text.SimpleDateFormat;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;

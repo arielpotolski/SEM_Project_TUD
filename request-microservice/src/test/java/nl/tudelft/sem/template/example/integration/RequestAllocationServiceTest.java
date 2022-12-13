@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.integration;
 
+import java.util.List;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
@@ -13,8 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
