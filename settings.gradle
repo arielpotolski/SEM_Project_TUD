@@ -2,4 +2,5 @@ rootProject.name = 'template'
 
 include 'authentication-microservice'
 include 'example-microservice'
+include 'cluster-microservice'
 include 'request-microservice'

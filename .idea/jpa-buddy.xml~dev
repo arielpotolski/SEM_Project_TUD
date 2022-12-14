@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+<<<<<<< HEAD:.idea/modules.xml
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request-microservice/template.request-microservice.iml" filepath="$PROJECT_DIR$/.idea/modules/request-microservice/template.request-microservice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/request-microservice/template.request-microservice.test.iml" filepath="$PROJECT_DIR$/.idea/modules/request-microservice/template.request-microservice.test.iml" />
+    </modules>
+=======
+  <component name="JpaBuddyIdeaProjectConfig">
+    <option name="defaultUnitInitialized" value="true" />
+>>>>>>> dev:.idea/jpa-buddy.xml
+  </component>
+</project>

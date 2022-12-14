@@ -16,10 +16,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+
 
 @RestController
 public class AuthenticationController {
@@ -56,11 +59,11 @@ public class AuthenticationController {
      *
      * @param request The login model
      * @return JWT token if the login is successful
-     * @throws Exception if the user does not exist or the password is incorrect
+     * @throws ResponseStatusException if the user does not exist or the password is incorrect
      */
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponseModel> authenticate(@RequestBody AuthenticationRequestModel request)
-            throws Exception {
+        throws ResponseStatusException {
 
         try {
             authenticationManager.authenticate(
@@ -83,10 +86,10 @@ public class AuthenticationController {
      *
      * @param request The registration model
      * @return 200 OK if the registration is successful
-     * @throws Exception if a user with this netid already exists
+     * @throws ResponseStatusException if a user with this netid already exists
      */
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegistrationRequestModel request) throws Exception {
+    public ResponseEntity<String> register(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
 
         try {
             NetId netId = new NetId(request.getNetId());
@@ -98,4 +101,32 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Endpoint for changing password.
+     *
+     * @param request request from user with the data
+     * @return 200 OK if the change is successful
+     * @throws ResponseStatusException if a user does not exist
+     */
+    @PostMapping("/change")
+    public  ResponseEntity<String> change(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
+        try {
+            NetId netId = new NetId(request.getNetId());
+            Password password = new Password(request.getPassword());
+            registrationService.changePassword(netId, password);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        return ResponseEntity.ok("Password is" + request.getPassword());
+    }
+
+
+    @GetMapping("/hello")
+    public ResponseEntity<String> helloWorld() {
+        return ResponseEntity.ok("Hello ");
+
+    }
+
+
 }
