@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.authentication.communicationdata;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Locale;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 
 /**
@@ -46,7 +47,7 @@ public class Notification {
 
         try {
             s = State.valueOf(data.getState());
-            d = new SimpleDateFormat("yyyy-MM-dd").parse(data.getDate());
+            d = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(data.getDate());
             t = Type.valueOf(data.getType());
             return new Notification(s, d, data.getMessage(), t);
         } catch (Exception a) {

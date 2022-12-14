@@ -6,7 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="2554e350-28cc-44ec-8d86-2d243199d559" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtAuthenticationEntryPoint.java" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtAuthenticationEntryPoint.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/communicationdata/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/communicationdata/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/FacultyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/FacultyController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/domain/user/NetIdNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/domain/user/NetIdNotFoundException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/services/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/services/NotificationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/startup/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/startup/Runner.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilter.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -109,8 +114,8 @@
       <recent name="nl.tudelft.sem.template.cluster.authentication" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.SEM11b [checkstyleMain]">
-    <configuration name="SEM11b [check]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.SEM11b [test]">
+    <configuration name="SEM11b [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -121,7 +126,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="check" />
+            <option value="build" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -143,6 +148,27 @@
         <option name="taskNames">
           <list>
             <option value="checkstyleMain" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="SEM11b [pmdMain]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="pmdMain" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -196,10 +222,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.SEM11b [test]" />
+        <item itemvalue="Gradle.SEM11b [build]" />
+        <item itemvalue="Gradle.SEM11b [pmdMain]" />
         <item itemvalue="Gradle.SEM11b [checkstyleMain]" />
         <item itemvalue="Gradle.SEM11b:cluster-microservice [checkstyleMain]" />
-        <item itemvalue="Gradle.SEM11b [check]" />
-        <item itemvalue="Gradle.SEM11b [test]" />
       </list>
     </recent_temporary>
   </component>

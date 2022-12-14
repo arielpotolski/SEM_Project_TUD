@@ -17,7 +17,9 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
-    private final RestTemplate restTemplate;
+    private final transient RestTemplate restTemplate;
+
+    private transient Thread thread;
 
     @Autowired
     public Runner(RestTemplateBuilder restTemplateBuilder) {
@@ -30,7 +32,8 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     private void sendFaculties() {
-        Thread t = new Thread(() -> {
+
+        thread = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(1000);
@@ -51,7 +54,7 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
             }
         });
         try {
-            t.start();
+            thread.start();
         } catch (Exception e) {
             System.out.println("Error with thread that talks to cluster: " + e);
         }

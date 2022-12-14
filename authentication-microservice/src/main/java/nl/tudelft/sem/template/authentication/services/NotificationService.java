@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService {
 
-    private final Map<String, List<Notification>> jobNotifications;
+    private final transient Map<String, List<Notification>> jobNotifications;
 
     /**
      * Constructor which initializes the data storage.

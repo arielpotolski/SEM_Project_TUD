@@ -23,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class NotificationController {
 
     private final transient AuthManager authManager;
-    private final NotificationService notificationService;
+    private final transient NotificationService notificationService;
 
     /**
      * Instantiates a new controller.
@@ -64,16 +64,16 @@ public class NotificationController {
      */
     @GetMapping("/getNotification")
     public ResponseEntity<String> sendJobNotifications() {
-        String json;
+
         try {
             String netId = authManager.getNetId();
             List<Notification> l = notificationService.getNotifications(netId);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            json = ow.writeValueAsString(l);
+            String json = ow.writeValueAsString(l);
+            return ResponseEntity.ok(json);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return ResponseEntity.ok(json);
     }
 
 

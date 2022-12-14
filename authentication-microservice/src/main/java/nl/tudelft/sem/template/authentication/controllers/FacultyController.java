@@ -60,15 +60,15 @@ public class FacultyController {
     @PostMapping("/getUserFaculties")
     public ResponseEntity<GetFacultyResponseModel> getFaculties(@RequestBody GetFacultyRequestModel request)
             throws ResponseStatusException {
-        String response;
+
         try {
             NetId netId = new NetId(request.getNetId());
             List<AppUser.Faculty> facultyList = registrationService.getFaculties(netId);
-            response = facultyList.toString();
+            return ResponseEntity.ok(new GetFacultyResponseModel(facultyList.toString()));
+            //response = facultyList.toString();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return ResponseEntity.ok(new GetFacultyResponseModel(response));
     }
 
     /**
