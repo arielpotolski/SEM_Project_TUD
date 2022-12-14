@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.cluster.authentication;
+package nl.tudelft.sem.template.authentication.authtemp;
 
 import java.io.IOException;
 import javax.servlet.ServletException;

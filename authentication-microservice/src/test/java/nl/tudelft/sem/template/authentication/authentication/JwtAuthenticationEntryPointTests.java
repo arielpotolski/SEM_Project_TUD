@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.cluster.authentication;
+package nl.tudelft.sem.template.authentication.authentication;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -8,13 +8,15 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nl.tudelft.sem.template.cluster.authentication.JwtAuthenticationEntryPoint;
-import nl.tudelft.sem.template.cluster.authentication.JwtRequestFilter;
+import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+
+
 
 public class JwtAuthenticationEntryPointTests {
     private transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -36,7 +38,7 @@ public class JwtAuthenticationEntryPointTests {
     }
 
     @Test
-    public void commenceTest() throws IOException, ServletException {
+    public void commenceTest() throws ServletException, IOException {
         // Act
         jwtAuthenticationEntryPoint.commence(mockRequest, mockResponse, dummyAuthenticationException);
 

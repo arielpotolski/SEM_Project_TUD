@@ -368,6 +368,7 @@ public class ClusterControllerTest {
     public void deleteNodeByUrlTestCorrectUrl() throws Exception {
         nodeRepository.save(node1);
         nodeRepository.save(node2);
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)

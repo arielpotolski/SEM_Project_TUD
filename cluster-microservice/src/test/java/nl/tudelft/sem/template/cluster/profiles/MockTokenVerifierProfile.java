@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.cluster.profiles;
 
+
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;

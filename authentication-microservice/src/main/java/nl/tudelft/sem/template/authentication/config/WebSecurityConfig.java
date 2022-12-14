@@ -2,6 +2,8 @@ package nl.tudelft.sem.template.authentication.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.tudelft.sem.template.authentication.authtemp.JwtAuthenticationEntryPoint;
+import nl.tudelft.sem.template.authentication.authtemp.JwtRequestFilter;
 import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * The type Web security config.
@@ -23,6 +26,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Getter
     @Setter(onMethod = @__({@Autowired})) // add autowired annotation on setter
     private transient UserDetailsService userDetailsService;
+    private final transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final transient JwtRequestFilter jwtRequestFilter;
+
+    public WebSecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                       JwtRequestFilter jwtRequestFilter) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
 
     /**
      * Password encoder password encoder.
@@ -50,11 +61,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
+    /**
+     * Method which determines what happens to each incoming API request.
+     * The antMatchers say which endpoints are excluded from this pipeline, and so in this case the .
+     * endpoints can be called without an authorization token.
+     *
+     * @param http the incoming HTTP request
+     * @throws Exception when pipeline fails
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests().anyRequest().permitAll()
+        http
+                .authorizeRequests().antMatchers("/register", "/authenticate").permitAll().and()
+                .csrf().disable()
+                .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

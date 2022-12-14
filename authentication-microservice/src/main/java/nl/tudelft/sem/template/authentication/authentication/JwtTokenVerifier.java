@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.cluster.authentication;
+package nl.tudelft.sem.template.authentication.authentication;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

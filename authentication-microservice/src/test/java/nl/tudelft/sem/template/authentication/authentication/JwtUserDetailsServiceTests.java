@@ -8,6 +8,7 @@ import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,11 @@ public class JwtUserDetailsServiceTests {
 
     @Autowired
     private transient UserRepository userRepository;
+
+    @BeforeEach
+    public void setup() {
+        this.jwtUserDetailsService = new JwtUserDetailsService(userRepository);
+    }
 
     @Test
     public void loadUserByUsername_withValidUser_returnsCorrectUser() {
