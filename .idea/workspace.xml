@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2554e350-28cc-44ec-8d86-2d243199d559" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/.gitlab-ci.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/build.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/settings.gradle" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/Application.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/AuthManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtAuthenticationEntryPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtTokenVerifier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/config/H2Config.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/controllers/ClusterController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/HasEvents.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/builders/JobBuilder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/builders/JobBuilderInterface.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/builders/NodeBuilder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/builders/NodeBuilderInterface.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/AvailableResourcesForDate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/FacultyDatedTotalResources.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/FacultyTotalResources.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/Job.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/JobScheduleRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/Node.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/cluster/NodeRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/providers/DateProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/providers/NumberProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/providers/implementations/CurrentDateProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/providers/implementations/RandomNumberProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/services/JobSchedulingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/services/NodeAssignmentService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/services/NodeContributionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/services/NodeInformationAccessingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/services/SchedulerInformationAccessingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/AssignNodeToLeastResourcefulFacultyStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/AssignNodeToRandomFacultyStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/EarliestPossibleDateStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/JobSchedulingStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/LatestAcceptableDateStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/LeastBusyDateStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/domain/strategies/NodeAssignmentStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/models/JobRequestModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/models/NodeRequestModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/models/TotalResourcesResponseModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application-dev.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/authentication/AuthManagerTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/authentication/JwtAuthenticationEntryPointTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilterTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/authentication/JwtTokenVerifierTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/cluster/JobTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/cluster/NodeTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ClusterControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ExampleTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/utils/JsonUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/profiles/MockAuthenticationManagerProfile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/profiles/MockTokenVerifierProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitlab-ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.gitlab-ci.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/test/java/nl/tudelft/sem/template/authentication/profiles/MockAuthenticationManagerProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/test/java/nl/tudelft/sem/template/authentication/profiles/MockAuthenticationManagerProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/checkstyle/checkstyle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/config/checkstyle/checkstyle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$/cluster-microservice">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/authentication-microservice">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="verification" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="authentication-microservice" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="authentication-microservice" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="cluster-microservice" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="cluster-microservice" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JpbToolWindowState">
+    <option name="myId2FirstActivated">
+      <map>
+        <entry key="com.haulmont.jpb.jpaStructure" value="true" />
+      </map>
+    </option>
+    <option name="myId2Visible">
+      <map>
+        <entry key="com.haulmont.jpb.jpaStructure" value="true" />
+      </map>
+    </option>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/cluster-microservice/src/main" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Media\GIT\SEM11b\cluster-microservice\src\main" />
+      <recent name="E:\Media\GIT\SEM11b\cluster-microservice" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="nl.tudelft.sem.template.cluster.profiles" />
+      <recent name="nl.tudelft.sem.template.cluster.authentication" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="SEM11b [test]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.SEM11b [test]" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>
