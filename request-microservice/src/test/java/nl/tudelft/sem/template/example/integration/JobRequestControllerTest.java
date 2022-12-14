@@ -119,9 +119,7 @@ public class JobRequestControllerTest {
 //
 //    }
 
-
     // Can also add an assert if we change the request in the controller
-
     @Test
     public void pendingRequestsTest() throws Exception {
 
