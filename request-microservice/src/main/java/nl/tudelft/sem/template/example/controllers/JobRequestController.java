@@ -94,37 +94,6 @@ public class JobRequestController {
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
-
-
-    // TODO: Remove getters in the controller they are useless.
-
-    /**
-     * Gets auth manager.
-     *
-     * @return the auth manager
-     */
-    public AuthManager getAuthManager() {
-        return authManager;
-    }
-
-    /**
-     * Gets request allocation service.
-     *
-     * @return the request allocation service
-     */
-    public RequestAllocationService getRequestAllocationService() {
-        return requestAllocationService;
-    }
-
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
-    }
-
     /**
      * This endpoint is responsible for accepting the ids of approved requests,
      * and see if the sender is legitimate and from the respective faculty.
