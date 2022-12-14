@@ -258,4 +258,5 @@ public class Request {
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
+
 }

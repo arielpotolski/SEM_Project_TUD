@@ -58,7 +58,6 @@ public class RequestAllocationService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-
             ResponseEntity<String> result = restTemplate.postForEntity(url, token, String.class);
 
             String string = result.getBody();
