@@ -47,7 +47,9 @@ public class JobRequestControllerTest {
     @Autowired
     private transient RequestRepository requestRepository;
 
-    // No need for specific token for testing
+    /**
+     * Setup so we don't need specific token for authentication for testing.
+     */
     @BeforeEach
     public void setup() {
 
@@ -59,7 +61,7 @@ public class JobRequestControllerTest {
 
 
     @Test
-    public void sendRequestTestInFacultyNull () throws Exception {
+    public void sendRequestTestInFacultyNull() throws Exception {
 
         Request request = new Request();
 
@@ -76,7 +78,7 @@ public class JobRequestControllerTest {
     }
 
     @Test
-    public void sendRequestTestNotInFaculty () throws Exception {
+    public void sendRequestTestNotInFaculty() throws Exception {
 
         String dateString = "2023-12-12";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -98,7 +100,7 @@ public class JobRequestControllerTest {
     //TODO: Cannot mock token properly, so we need a different test
 
 //    @Test
-//    public void sendRequestTestInFaculty () throws Exception {
+//    public void sendRequestTestInFaculty() throws Exception {
 //
 //        String dateString = "2023-12-12";
 //        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -121,7 +123,7 @@ public class JobRequestControllerTest {
     // Can also add an assert if we change the request in the controller
 
     @Test
-    public void pendingRequestsTest () throws Exception {
+    public void pendingRequestsTest() throws Exception {
 
         ResultActions result = mockMvc.perform(get("/job/pendingRequests")
                 .accept(MediaType.APPLICATION_JSON)
@@ -136,7 +138,7 @@ public class JobRequestControllerTest {
 
 
     @Test
-    public void sendApprovalsTest () {
+    public void sendApprovalsTest() {
     }
 
 
