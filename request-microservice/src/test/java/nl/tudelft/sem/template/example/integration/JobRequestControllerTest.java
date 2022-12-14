@@ -97,27 +97,6 @@ public class JobRequestControllerTest {
 
     }
 
-    //TODO: Cannot mock token properly, so we need a different test
-
-//    @Test
-//    public void sendRequestTestInFaculty() throws Exception {
-//
-//        String dateString = "2023-12-12";
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//
-//        Request request = new Request(123l, "Test", "Test", "Test", "AE",
-//                2.0, 1.0, 1.0, false, simpleDateFormat.parse(dateString));
-//
-//        ResultActions result = mockMvc.perform(post("/job/sendRequest")
-//                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .header("Authorization", "Bearer MockedToken"));
-//
-//        result.andExpect(status().isOk());
-//        String response = result.andReturn().getResponse().getContentAsString();
-//        assertThat(response).isEqualTo("The request was sent. Now it is to be approved by faculty.");
-//
-//    }
 
     // Can also add an assert if we change the request in the controller
     @Test
