@@ -10,6 +10,7 @@
         </processorPath>
         <module name="template.authentication-microservice.main" />
         <module name="template.cluster-microservice.main" />
+        <module name="template.request-microservice.main" />
         <module name="template.example-microservice.main" />
       </profile>
     </annotationProcessing>
