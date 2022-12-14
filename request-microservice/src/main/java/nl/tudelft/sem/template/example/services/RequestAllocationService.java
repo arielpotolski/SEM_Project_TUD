@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.example.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.ArrayList;
@@ -11,13 +10,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
-import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -29,18 +25,15 @@ import org.springframework.web.client.RestTemplate;
 public class RequestAllocationService {
 
     private final RestTemplate restTemplate;
-    private final RequestRepository requestRepository;
 
     /**
      * Instantiates a new Request allocation service.
      *
      * @param restTemplateBuilder the rest template builder
-     * @param requestRepository   the request repository
      */
     @Autowired
-    public RequestAllocationService(RestTemplateBuilder restTemplateBuilder, RequestRepository requestRepository) {
+    public RequestAllocationService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
-        this.requestRepository = requestRepository;
     }
 
 
@@ -55,8 +48,6 @@ public class RequestAllocationService {
 
         try {
             String url = "https://localhost:8081/getUserFaculties";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
 
             ResponseEntity<String> result = restTemplate.postForEntity(url, token, String.class);
 
@@ -86,7 +77,7 @@ public class RequestAllocationService {
     public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
 
         try {
-            String url = "https://localhost:8085/resources/available" + preferredDate.toString() + "/" + facultyName;
+            String url = "https://localhost:8082/resources/available" + preferredDate.toString() + "/" + facultyName;
 
             ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
             return Objects.requireNonNull(result.getBody()).getResourceList();
@@ -99,23 +90,9 @@ public class RequestAllocationService {
 
     }
 
-    /**
-     * Gets rest template.
-     *
-     * @return the rest template
-     */
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
 
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
-    }
+
+
 
     /**
      * Checks if there are enough computational resources for a given job to be executed.
@@ -127,9 +104,7 @@ public class RequestAllocationService {
 
         List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate());
 
-        for (int i = 0; i < resources.size(); i++) {
-            Resource currentResource = resources.get(i);
-
+        for (Resource currentResource : resources) {
             if (currentResource.getResourceCpu() >= request.getCpu()
                     &&
                     currentResource.getResourceGpu() >= request.getGpu()
@@ -148,23 +123,20 @@ public class RequestAllocationService {
      * If the user is verified and there are enough resources available, the job request is forwarded to the cluster service.
      *
      * @param request the request
-     * @throws JsonProcessingException the json processing exception
      */
-    public void sendRequestToCluster(Request request) throws JsonProcessingException {
+    public void sendRequestToCluster(Request request) {
 
         try {
-            String url = "https://localhost:8085/request";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            String url = "https://localhost:8082/request";
             //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
 
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(request);
             System.out.println(json);
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
-            if (result.getBody().equals("ok")) {
-                return;
-            }
+            restTemplate.postForEntity(url, json, String.class);
+            //            if (Objects.equals(result.getBody(), "ok")) {
+            //                return;
+            //            }
         } catch (Exception e) {
             System.out.println("error with post: " + e);
         }
@@ -179,23 +151,16 @@ public class RequestAllocationService {
      * @param request the request
      */
     public void sendDeclinedRequestToUserService(Request request) {
-
-
         try {
-            String url = "https://localhost:8081/notification";
-
             JSONObject json = new JSONObject();
             json.put("date", request.getPreferredDate());
             json.put("type", "REQUEST");
             json.put("state", "REJECTED");
             json.put("message", request.getDescription());
             json.put("netId", request.getNetId());
+            String url = "https://localhost:8081/notification";
+            restTemplate.postForEntity(url, json, String.class);
 
-
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
-            if (result.getBody().equals("ok")) {
-                return;
-            }
         } catch (Exception e) {
             System.out.println("error with post" + e);
         }

@@ -1,15 +1,13 @@
 package nl.tudelft.sem.template.authentication.startup;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,8 +16,6 @@ import org.springframework.web.client.RestTemplate;
 public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
     private final transient RestTemplate restTemplate;
-
-    private transient Thread thread;
 
     @Autowired
     public Runner(RestTemplateBuilder restTemplateBuilder) {
@@ -33,23 +29,26 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
     private void sendFaculties() {
 
-        thread = new Thread(() -> {
-            while (true) {
+        Thread thread = new Thread(() -> {
+
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            while (status != HttpStatus.OK) {
                 try {
                     Thread.sleep(1000);
 
-                    String url = "https://localhost:8085/faculties";
+                    String url = "http://localhost:8082/faculties";
                     List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
 
-                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                    String json = ow.writeValueAsString(enumValues);
-
-                    ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
-                    if (Objects.equals(result.getBody(), "ok")) {
+                    ResponseEntity<String> result = restTemplate.postForEntity(url, enumValues, String.class);
+                    status = result.getStatusCode();
+                    if ((result.getStatusCode() == HttpStatus.OK)) {
+                        System.out.println("Cluster service found");
                         return;
+                    } else {
+                        System.out.println(result.getStatusCode());
                     }
                 } catch (Exception e) {
-                    System.out.println("Cluster service not yet online");
+                    System.out.println("Cluster service not yet online" + e.getMessage());
                 }
             }
         });
