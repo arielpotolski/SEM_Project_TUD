@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.authentication.controllers;
 
 import java.util.List;
-
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;

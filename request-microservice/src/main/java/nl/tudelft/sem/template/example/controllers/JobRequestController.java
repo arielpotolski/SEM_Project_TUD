@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/job")
+@SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public class JobRequestController {
 
     private final transient AuthManager authManager;

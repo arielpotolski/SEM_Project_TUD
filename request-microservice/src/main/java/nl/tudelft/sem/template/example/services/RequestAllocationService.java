@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
