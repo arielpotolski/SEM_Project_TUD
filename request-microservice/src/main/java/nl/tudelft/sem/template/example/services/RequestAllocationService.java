@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
@@ -16,6 +18,7 @@ import nl.tudelft.sem.template.example.domain.Resource;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +57,13 @@ public class RequestAllocationService {
     public List<String> getFacultyUserFaculties(String token) {
 
         try {
-            String url = "https://localhost:8081/getUserFaculties";
+            String url = "http://localhost:8081/getUserFaculties";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-            ResponseEntity<String> result = restTemplate.postForEntity(url, token, String.class);
+            HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
 
             String string = result.getBody();
 
@@ -86,8 +91,9 @@ public class RequestAllocationService {
     public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
 
         try {
-            String url = "https://localhost:8085/resources/available" + preferredDate.toString() + "/" + facultyName;
+            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "/" + facultyName;
 
+            // headers?
             ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
             return Objects.requireNonNull(result.getBody()).getResourceList();
 

@@ -64,9 +64,9 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        List<String> token = headers.get("Authorization");
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
 
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
@@ -142,7 +142,8 @@ public class JobRequestController {
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
-        List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
+        List<String> facultiesOfFacultyUser = requestAllocationService
+                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
