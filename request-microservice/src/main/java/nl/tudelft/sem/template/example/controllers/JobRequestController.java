@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/job")
+@SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public class JobRequestController {
 
     private final transient AuthManager authManager;
@@ -64,9 +65,9 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        List<String> token = headers.get("Authorization");
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
 
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
@@ -94,37 +95,6 @@ public class JobRequestController {
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
-
-
-    // TODO: Remove getters in the controller they are useless.
-
-    /**
-     * Gets auth manager.
-     *
-     * @return the auth manager
-     */
-    public AuthManager getAuthManager() {
-        return authManager;
-    }
-
-    /**
-     * Gets request allocation service.
-     *
-     * @return the request allocation service
-     */
-    public RequestAllocationService getRequestAllocationService() {
-        return requestAllocationService;
-    }
-
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
-    }
-
     /**
      * This endpoint is responsible for accepting the ids of approved requests,
      * and see if the sender is legitimate and from the respective faculty.
@@ -142,7 +112,8 @@ public class JobRequestController {
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
-        List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
+        List<String> facultiesOfFacultyUser = requestAllocationService
+                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))

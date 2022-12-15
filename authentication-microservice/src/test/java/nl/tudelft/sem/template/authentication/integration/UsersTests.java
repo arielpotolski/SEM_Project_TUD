@@ -242,7 +242,7 @@ public class UsersTests {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
-        model.setNetId(testUser.toString());
+        model.setToken(testUser.toString());
         ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
@@ -259,12 +259,13 @@ public class UsersTests {
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+        when(mockJwtTokenVerifier.getNetIdFromToken("Bearer MockedToken")).thenReturn(testUser.toString());
 
         registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
-        model.setNetId(testUser.toString());
+        model.setToken("Bearer MockedToken");
 
         ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
