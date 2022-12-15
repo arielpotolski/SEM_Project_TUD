@@ -4,36 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2554e350-28cc-44ec-8d86-2d243199d559" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ClusterControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ClusterControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/.gitlab-ci.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/settings.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/Application.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/application/.keep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/AuthManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtAuthenticationEntryPoint.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtRequestFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtTokenVerifier.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/config/H2Config.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/config/RequestAuthenticationConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/controllers/DefaultController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/domain/.keep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/resources/application-dev.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/AuthManagerTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtAuthenticationEntryPointTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtRequestFilterTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtTokenVerifierTests.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/integration/ExampleTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/profiles/MockAuthenticationManagerProfile.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/profiles/MockTokenVerifierProfile.java" beforeDir="false" />
-    </list>
+    <list default="true" id="2554e350-28cc-44ec-8d86-2d243199d559" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -59,6 +30,9 @@
         <task path="$PROJECT_DIR$">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/request-microservice">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
@@ -70,6 +44,12 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="template" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="template" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
