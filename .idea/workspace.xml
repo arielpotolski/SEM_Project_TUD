@@ -5,14 +5,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2554e350-28cc-44ec-8d86-2d243199d559" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/communicationdata/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/communicationdata/Notification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/FacultyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/FacultyController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/controllers/NotificationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/domain/user/NetIdNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/domain/user/NetIdNotFoundException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/services/NotificationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/services/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/startup/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/authentication-microservice/src/main/java/nl/tudelft/sem/template/authentication/startup/Runner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/main/java/nl/tudelft/sem/template/cluster/authentication/JwtRequestFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ClusterControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/cluster-microservice/src/test/java/nl/tudelft/sem/template/cluster/integration/ClusterControllerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/.gitlab-ci.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/Application.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/application/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/AuthManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtAuthenticationEntryPoint.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtRequestFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/authentication/JwtTokenVerifier.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/config/H2Config.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/config/RequestAuthenticationConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/controllers/DefaultController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/java/nl/tudelft/sem/template/example/domain/.keep" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/resources/application-dev.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/AuthManagerTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtAuthenticationEntryPointTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtRequestFilterTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/authentication/JwtTokenVerifierTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/integration/ExampleTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/profiles/MockAuthenticationManagerProfile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example-microservice/src/test/java/nl/tudelft/sem/template/example/profiles/MockTokenVerifierProfile.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +41,9 @@
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+    <projectState path="$PROJECT_DIR$/request-microservice">
       <ProjectState />
     </projectState>
   </component>
@@ -52,25 +75,7 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="template" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="other" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="template" type="f1a62948:ProjectNode" />
-                <item name="cluster-microservice" type="2d1252cf:ModuleNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="template" type="f1a62948:ProjectNode" />
-                <item name="cluster-microservice" type="2d1252cf:ModuleNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="template" type="f1a62948:ProjectNode" />
-                <item name="cluster-microservice" type="2d1252cf:ModuleNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="other" type="c8890929:TasksNode$1" />
+                <item name="verification" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -103,6 +108,10 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$/cluster-microservice/src/main" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">

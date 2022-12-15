@@ -141,7 +141,7 @@ public class ClusterControllerTest {
         model.setRequiredCpu(2.0);
         model.setRequiredGpu(1.0);
         model.setRequiredMemory(0.5);
-        model.setPreferredCompletionDate(LocalDate.of(2022, 12, 15));
+        model.setPreferredCompletionDate(LocalDate.now().plusDays(2));
     }
 
     public boolean compareTwoDateFormats(String a, String b) {
