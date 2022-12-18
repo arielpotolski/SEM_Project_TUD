@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
@@ -104,10 +103,9 @@ public class NotificationTests {
     public void testNotificationService() {
 
         Notification notification = Notification.createNotification(notificationRequestModel);
-        notificationService.addNotification("coolUser1", notification);
+        notificationService.addNotification(notification);
 
         assertThat(notificationService.getNotifications("coolUser2")).isEmpty();
-        assertThat(notificationService.getNotifications("coolUser1")).containsExactly(notification);
         assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
     }
 
@@ -115,12 +113,10 @@ public class NotificationTests {
     public void testMultipleNotifications() {
 
         Notification notification = Notification.createNotification(notificationRequestModel);
-        notificationService.addNotification("coolUser1", notification);
-        notificationService.addNotification("coolUser1", notification);
-        notificationService.addNotification("coolUser1", notification);
+        notificationService.addNotification(notification);
+        notificationService.addNotification(notification);
+        notificationService.addNotification(notification);
 
-        List<Notification> notificationList = List.of(notification, notification, notification);
-        assertThat(notificationService.getNotifications("coolUser1")).containsExactlyElementsOf(notificationList);
         assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
     }
 }
