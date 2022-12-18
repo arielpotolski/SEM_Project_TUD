@@ -65,13 +65,15 @@ public class EarliestPossibleDateStrategyTest {
 
     @Test
     public void tooLittleCpuTest() {
-        job.setRequiredCpu(4.0);
+        job.setRequiredCpu(5.0);
+        assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(2));
+        job.setRequiredCpu(6.0);
         assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(2));
     }
 
     @Test
     public void tooLittleGpuTest() {
-        job.setRequiredGpu(3.0);
+        job.setRequiredGpu(4.0);
         assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(1));
     }
 
