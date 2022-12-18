@@ -30,6 +30,9 @@ public class EarliestPossibleDateStrategyTest {
     private List<AvailableResourcesForDate> resources;
     private Job job;
 
+    /**
+     * Sets up the tests.
+     */
     @BeforeEach
     public void setup() {
         strat = new EarliestPossibleDateStrategy();
