@@ -15,11 +15,11 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
-import nl.tudelft.sem.template.cluster.services.NodeRemovalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -365,7 +365,7 @@ public class ClusterController {
             return ResponseEntity.badRequest().body("You cannot remove nodes that"
                 + "other users have contributed to the cluster.");
         }
-        
+
         this.nodeRemovalService
             .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
         this.nodeRemovalService.removeNodesAtMidnight();
