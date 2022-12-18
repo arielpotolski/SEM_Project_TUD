@@ -19,6 +19,7 @@ import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAcces
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.services.NodeRemovalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +39,7 @@ public class ClusterController {
     private final transient NodeContributionService nodeContributionService;
     private final transient NodeInformationAccessingService nodeInformationAccessingService;
     private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
+    private final transient NodeRemovalService nodeRemovalService;
 
     private final transient DateProvider dateProvider;
 
@@ -50,12 +52,14 @@ public class ClusterController {
     public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              NodeInformationAccessingService nodeInformationAccessingService,
+                             NodeRemovalService nodeRemovalService,
                              SchedulerInformationAccessingService schedulerInformationAccessingService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
         this.nodeInformationAccessingService = nodeInformationAccessingService;
+        this.nodeRemovalService = nodeRemovalService;
         this.schedulerInformationAccessingService = schedulerInformationAccessingService;
     }
 
@@ -339,6 +343,34 @@ public class ClusterController {
         // return - change this later when refactoring
         return ResponseEntity.ok(this.schedulerInformationAccessingService
                 .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date));
+    }
+
+    /**
+     * This method deletes the node given by the url provided by the user. Since the
+     * node can only be removed on the next day after the request, we do a post mapping
+     * and add the node to be removed to a list stored in the NodeRemovalService. Once
+     * we hit midnight, the nodes contained in that list will be removed. This method
+     * will be the only removal method available to users that are not sysadmins.
+     *
+     * @param url the url of the node to be removed
+     * @return a string saying whether the removal was successfully scheduled. If not,
+     *          returns a string saying what went wrong
+     */
+    @PostMapping(value = "/node/delete/{url}")
+    public ResponseEntity<String> userRemoveNode(@PathVariable("url") String url) {
+        if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
+            return ResponseEntity.badRequest().body("A node with this url does not exist");
+        } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
+            .equals(authManager.getNetId())) {
+            return ResponseEntity.badRequest().body("You cannot remove nodes that"
+                + "other users have contributed to the cluster.");
+        }
+        
+        this.nodeRemovalService
+            .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
+        this.nodeRemovalService.removeNodesAtMidnight();
+
+        return ResponseEntity.ok("Your node will be removed at midnight.");
     }
 
 
