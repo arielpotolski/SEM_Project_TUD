@@ -4,6 +4,7 @@ import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
@@ -22,9 +23,9 @@ public class NodeAssignmentService {
     private transient NodeAssignmentStrategy strategy;
 
     @Autowired
-    public NodeAssignmentService(NodeRepository repo) {
+    public NodeAssignmentService(NodeRepository repo, NumberProvider numberProvider) {
         this.repo = repo;
-        this.strategy = new AssignNodeToRandomFacultyStrategy();
+        this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
     }
 
     public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {
