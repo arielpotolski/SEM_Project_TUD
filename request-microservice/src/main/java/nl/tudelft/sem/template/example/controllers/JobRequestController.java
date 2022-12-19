@@ -1,12 +1,10 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
