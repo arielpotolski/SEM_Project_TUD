@@ -11,11 +11,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
+import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,14 +108,47 @@ public class RequestAllocationServiceTest {
     @Test
     public void getReservedResourceTest(){
 
+        RestTemplate restTemplate = new RestTemplate();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+
+        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
+
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+
 
     }
 
     @Test
-    public void sendRequestToClusterTest(){}
+    public void sendRequestToClusterTest() throws JsonProcessingException, ParseException {
+
+        String dateString = "2025-12-12";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Request request = new Request(1L,"test","name","desc",
+                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        boolean b = requestAllocationService.sendRequestToCluster(request);
+
+        assertThat(b).isFalse();
+    }
 
     @Test
-    public void sendDeclinedRequestToUserService(){}
+    public void sendDeclinedRequestToUserService() throws ParseException {
+
+
+        String dateString = "2025-12-12";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Request request = new Request(1L,"test","name","desc",
+                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        boolean b = requestAllocationService.sendDeclinedRequestToUserService(request);
+
+        assertThat(b).isFalse();
+
+    }
 
 
 }
