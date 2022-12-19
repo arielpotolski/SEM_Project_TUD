@@ -4,7 +4,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignmentStrategy {
 
     /**

@@ -5,6 +5,7 @@ import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
+import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class NodeAssignmentService {
     @Autowired
     public NodeAssignmentService(NodeRepository repo) {
         this.repo = repo;
-        this.strategy = new AssignNodeToLeastResourcefulFacultyStrategy();
+        this.strategy = new AssignNodeToRandomFacultyStrategy();
     }
 
     public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {

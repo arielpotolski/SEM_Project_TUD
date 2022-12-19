@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines a strategy in which a job is scheduled for the date with the most available resources in the preferred range.
  * If no match found, default to "earliest possible date" strategy starting with day after last preferred.
  */
+@Component
 public class LeastBusyDateStrategy implements JobSchedulingStrategy {
 
     /**

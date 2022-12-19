@@ -89,4 +89,19 @@ public class LatestAcceptableDateStrategyTest {
         job.setRequiredMemory(4.0);
         assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(1));
     }
+
+    @Test
+    public void tooLittleCpuPastPreferredTest() {
+
+    }
+
+    @Test
+    public void tooLittleGpuPastPreferredTest() {
+
+    }
+
+    @Test
+    public void tooLittleMemoryPastPreferredTest() {
+
+    }
 }
