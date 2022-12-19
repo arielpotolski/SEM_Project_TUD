@@ -25,6 +25,7 @@ import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,6 +114,41 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+
+    }
+
+    @Test
+    public void sendRequestForTodayDate() throws Exception {
+
+        LocalDate localDate = LocalDate.now();
+        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+
+        JSONObject jsonObject = new JSONObject();
+
+        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
+
+        jsonObject.put("netId","test");
+        jsonObject.put("name","test");
+        jsonObject.put("description","test");
+        jsonObject.put("faculty","test");
+        jsonObject.put("cpu",9.0);
+        jsonObject.put("gpu",5.0);
+        jsonObject.put("memory",11.0);
+        jsonObject.put("approved",true);
+        jsonObject.put("faculty",date);
+
+//        Request request = new Request(123L, "Test", "Test", "Test", "AE",
+//                2.0, 1.0, 1.0, true, d);
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        // Need to mock the faculty
+        //assertThat(response).isEqualTo("You cannot send requests for the same day.");
 
     }
 

@@ -1,6 +1,12 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -63,6 +69,30 @@ public class JobRequestController {
         if (request.getFaculty() == null) {
             return ResponseEntity.ok()
                     .body("You are not verified to send requests to this faculty");
+        }
+
+        LocalDateTime preferredDate = request.getPreferredDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        LocalDate onlyDate = request.getPreferredDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        LocalDateTime d1 = LocalDateTime.now();
+        LocalDate d2 = LocalDate.now().plusDays(1L);
+        LocalDateTime ref = d2.atStartOfDay();
+
+        long minutes = d1.until(ref, ChronoUnit.MINUTES);
+
+        if (d2.isEqual(onlyDate)) {
+            return ResponseEntity.ok()
+                    .body("You cannot send requests for the same day.");
+        } else if (!d2.isEqual(onlyDate)) {
+            if (minutes <= 5) {
+                return ResponseEntity.ok()
+                        .body("You cannot send requests 5 min before the following day.");
+            }
         }
 
         String token = headers.get("authorization").get(0).replace("Bearer ", "");
