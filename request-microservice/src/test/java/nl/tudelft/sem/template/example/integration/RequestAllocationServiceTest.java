@@ -3,23 +3,40 @@ package nl.tudelft.sem.template.example.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.List;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
+import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestTemplate;
 
 
 @SpringBootTest
@@ -43,20 +60,43 @@ public class RequestAllocationServiceTest {
     @Autowired
     private transient AuthManager mockAuthenticationManager;
 
+    @Autowired
+    @Mock
+    private transient RequestRepository requestRepository;
+
+    @Autowired
+    private transient RequestAllocationService requestAllocationService;
+
+
     /**
      * Don't need a specific token,so we can test with this setup.
      */
     @BeforeEach
     public void setup() {
 
-        when(mockAuthenticationManager.getNetId()).thenReturn("Alexander");
+        when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
+
 
     }
 
     @Test
-    public void getFacultyUserFacultiesTest() {
+    public void getFacultyUserFacultiesTest() throws Exception {
+
+        // Test without prior loading from the user microservice
+
+        RestTemplate restTemplate = new RestTemplate();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+
+        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
+
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+
 
     }
 
