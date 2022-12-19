@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.integration;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -7,16 +8,12 @@ import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
@@ -27,21 +24,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestTemplate;
+
 
 
 @SpringBootTest
@@ -106,7 +100,7 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void getReservedResourceTest(){
+    public void getReservedResourceTest() {
 
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
@@ -114,7 +108,6 @@ public class RequestAllocationServiceTest {
         server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
-
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
         assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
@@ -128,8 +121,8 @@ public class RequestAllocationServiceTest {
         String dateString = "2025-12-12";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Request request = new Request(1L,"test","name","desc",
-                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        Request request = new Request(1L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
         boolean b = requestAllocationService.sendRequestToCluster(request);
 
         assertThat(b).isFalse();
@@ -138,17 +131,14 @@ public class RequestAllocationServiceTest {
     @Test
     public void sendDeclinedRequestToUserService() throws ParseException {
 
-
         String dateString = "2025-12-12";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Request request = new Request(1L,"test","name","desc",
-                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        Request request = new Request(1L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request);
 
         assertThat(b).isFalse();
 
     }
-
-
 }

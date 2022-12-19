@@ -15,9 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
@@ -29,7 +27,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -127,18 +124,16 @@ public class JobRequestControllerTest {
 
         String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
 
-        jsonObject.put("netId","test");
-        jsonObject.put("name","test");
-        jsonObject.put("description","test");
-        jsonObject.put("faculty","test");
-        jsonObject.put("cpu",9.0);
-        jsonObject.put("gpu",5.0);
-        jsonObject.put("memory",11.0);
-        jsonObject.put("approved",true);
-        jsonObject.put("faculty",date);
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "test");
+        jsonObject.put("cpu", 9.0);
+        jsonObject.put("gpu", 5.0);
+        jsonObject.put("memory", 11.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("faculty", date);
 
-//        Request request = new Request(123L, "Test", "Test", "Test", "AE",
-//                2.0, 1.0, 1.0, true, d);
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
@@ -176,14 +171,14 @@ public class JobRequestControllerTest {
         String dateString = "2025-12-12";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Request req1 = new Request(1L,"test","name","desc",
-                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        Request req1 = new Request(1L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
 
-        Request req2 = new Request(2L,"test","name","desc",
-                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        Request req2 = new Request(2L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
 
-        Request req3 = new Request(3L,"test","name","desc",
-                "Cs",2.0,3.0,1.0,false,simpleDateFormat.parse(dateString));
+        Request req3 = new Request(3L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
 
         List<Request> requests = new ArrayList<>();
         requests.add(req1);
@@ -207,7 +202,7 @@ public class JobRequestControllerTest {
         //when(requestAllocationService.getFacultyUserFaculties("")).thenReturn(List.of("Cs"));
 
 
-        Long[] ids = {1L, 2L,3L};
+        Long[] ids = {1L, 2L, 3L};
         ApprovalInformation approvalInformation = new ApprovalInformation();
         approvalInformation.setIds(ids);
 
