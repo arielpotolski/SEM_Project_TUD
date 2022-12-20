@@ -110,7 +110,7 @@ public class FacultyController {
             List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
             return ResponseEntity.ok(enumValues);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 }
