@@ -91,16 +91,22 @@ public class LatestAcceptableDateStrategyTest {
 
     @Test
     public void tooLittleCpuPastPreferredTest() {
-
+        job.setPreferredCompletionDate(dateProvider.getTomorrow());
+        job.setRequiredCpu(5.0);
+        assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(2));
     }
 
     @Test
     public void tooLittleGpuPastPreferredTest() {
-
+        job.setPreferredCompletionDate(dateProvider.getTomorrow());
+        job.setRequiredGpu(4.0);
+        assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(1));
     }
 
     @Test
     public void tooLittleMemoryPastPreferredTest() {
-
+        job.setPreferredCompletionDate(dateProvider.getTomorrow());
+        job.setRequiredMemory(4.0);
+        assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(1));
     }
 }
