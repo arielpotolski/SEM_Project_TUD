@@ -31,5 +31,5 @@ test-request-microservice:
   stage: test
   script:
     - gradle request-microservice:test request-microservice:jacocoTestReport
-    - cat request-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
+    - cat request-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?%.*?([0-9]{1,3})%"
   coverage: /([0-9]{1,3})%/

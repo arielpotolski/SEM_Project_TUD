@@ -30,5 +30,5 @@ test-authentication-microservice:
   stage: test
   script:
     - gradle authentication-microservice:test authentication-microservice:jacocoTestReport
-    - cat authentication-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
+    - cat authentication-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?%.*?([0-9]{1,3})%"
   coverage: /([0-9]{1,3})%/
