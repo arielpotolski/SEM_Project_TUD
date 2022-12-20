@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
