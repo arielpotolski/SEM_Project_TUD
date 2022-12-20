@@ -3,7 +3,9 @@ package nl.tudelft.sem.template.cluster.config;
 import nl.tudelft.sem.template.cluster.authentication.JwtAuthenticationEntryPoint;
 import nl.tudelft.sem.template.cluster.authentication.JwtRequestFilter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -12,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * The type Web security config.
  */
 @Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class RequestAuthenticationConfig extends WebSecurityConfigurerAdapter {
     private final transient JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final transient JwtRequestFilter jwtRequestFilter;

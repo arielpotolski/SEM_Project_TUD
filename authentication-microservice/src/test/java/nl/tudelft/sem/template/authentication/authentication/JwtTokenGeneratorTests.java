@@ -9,10 +9,11 @@ import io.jsonwebtoken.Jwts;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
+import java.util.List;
 import nl.tudelft.sem.template.authentication.domain.providers.TimeProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -37,7 +38,7 @@ public class JwtTokenGeneratorTests {
         jwtTokenGenerator = new JwtTokenGenerator(timeProvider);
         this.injectSecret(secret);
 
-        user = new User(netId, "someHash", new ArrayList<>());
+        user = new User(netId, "someHash", List.of(new SimpleGrantedAuthority("USER")));
     }
 
     @Test
@@ -68,6 +69,16 @@ public class JwtTokenGeneratorTests {
         // Assert
         Claims claims = getClaims(token);
         assertThat(claims.getSubject()).isEqualTo(netId);
+    }
+
+    @Test
+    public void generatedTokenHasCorrectRole() {
+        // Act
+        String token = jwtTokenGenerator.generateToken(user);
+
+        // Assert
+        Claims claims = getClaims(token);
+        assertThat(claims.get("roles")).isEqualTo("USER");
     }
 
     private Claims getClaims(String token) {

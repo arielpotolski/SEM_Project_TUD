@@ -72,7 +72,8 @@ public class JobRequestControllerTest {
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
 
     }
 
