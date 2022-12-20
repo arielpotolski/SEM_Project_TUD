@@ -25,6 +25,13 @@ public class NodeAssignmentService {
 
     private final transient NodeInformationAccessingService nodeInformationAccessingService;
 
+    /**
+     * Creates a new NodeAssignmentService object.
+     *
+     * @param repo the node repository to store all nodes.
+     * @param numberProvider the random number provider for the default assignment strategy.
+     * @param nodeInformationAccessingService service for accessing data from the repo
+     */
     @Autowired
     public NodeAssignmentService(NodeRepository repo, NumberProvider numberProvider,
                                  NodeInformationAccessingService nodeInformationAccessingService) {
@@ -38,7 +45,7 @@ public class NodeAssignmentService {
     }
 
     /**
-     * Uses the current startegy to pick a faculty to which to assign the given node.
+     * Uses the current strategy to pick a faculty to which to assign the given node.
      *
      * @param node the node to assign to a faculty.
      */

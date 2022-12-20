@@ -185,8 +185,15 @@ public class SchedulerInformationAccessingService {
         return availableResources;
     }
 
-    public List<DatedResourcesResponseModel> convertAvailableResourcesForDateToResponseModels
-            (List<AvailableResourcesForDate> rawResources) {
+    /**
+     * Converts the AvailableResourcesForDate objects into response models.
+     *
+     * @param rawResources the objects to be converted into response models.
+     *
+     * @return a list of response models based on the input.
+     */
+    public List<DatedResourcesResponseModel> convertAvailableResourcesForDateToResponseModels(
+            List<AvailableResourcesForDate> rawResources) {
         List<DatedResourcesResponseModel> models = new ArrayList<>();
         for (AvailableResourcesForDate resources : rawResources) {
             models.add(new DatedResourcesResponseModel(resources.getDate(), resources.getAvailableCpu(),

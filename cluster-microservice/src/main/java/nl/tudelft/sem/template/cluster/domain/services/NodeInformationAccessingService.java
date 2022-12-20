@@ -39,6 +39,13 @@ public class NodeInformationAccessingService {
                 node.getName(), node.getUrl(), node.getUserNetId(), node.getFacultyId());
     }
 
+    /**
+     * Converts all nodes in the provided list into NodeResponseModels.
+     *
+     * @param nodes the nodes to be converted into models.
+     *
+     * @return list of NodeResponseModels, each corresponding to one Node from the input list.
+     */
     public List<NodeResponseModel> convertAllNodesToResponseModels(List<Node> nodes) {
         List<NodeResponseModel> models = new ArrayList<>();
         for (Node node : nodes) {
@@ -52,8 +59,15 @@ public class NodeInformationAccessingService {
                 rawResources.getGpu_Resources(), rawResources.getMemory_Resources());
     }
 
-    public List<FacultyResourcesResponseModel> convertAllFacultyTotalResourcesToResponseModels
-            (List<FacultyTotalResources> rawResources) {
+    /**
+     * Converts all Spring Projection Interfaces of FacultyTotalResources class into FacultyResourcesResponseModels.
+     *
+     * @param rawResources the list of interfaces to be converted into response models.
+     *
+     * @return a list of response models based on the provided input.
+     */
+    public List<FacultyResourcesResponseModel> convertAllFacultyTotalResourcesToResponseModels(
+            List<FacultyTotalResources> rawResources) {
         List<FacultyResourcesResponseModel> models = new ArrayList<>();
         for (FacultyTotalResources resources : rawResources) {
             models.add(this.convertFacultyTotalResourcesToResponseModel(resources));
