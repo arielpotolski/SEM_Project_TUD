@@ -18,7 +18,6 @@ import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
@@ -65,8 +64,6 @@ public class ClusterControllerTest {
     @Autowired
     private transient DateProvider dateProvider;
 
-    private transient NodeRemovalService nodeRemovalService;
-
     private Node node1;
     private Node node2;
     private Node node3;
@@ -86,8 +83,6 @@ public class ClusterControllerTest {
         when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
-
-        this.nodeRemovalService = new NodeRemovalService(this.nodeRepository);
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
