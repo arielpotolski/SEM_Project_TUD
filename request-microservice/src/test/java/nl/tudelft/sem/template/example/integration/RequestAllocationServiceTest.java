@@ -147,23 +147,7 @@ public class RequestAllocationServiceTest {
     @Test
     public void notEnoughResourceForJobTest(){}
 
-//    @Test
-//    public void enoughResourcesForJobTest() {
-////
-////        String dateString = "2025-12-12";
-////        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-////
-////        Request request = new Request(1L, "test", "name", "desc",
-////                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
-////
-////        RestTemplate restTemplate = new RestTemplate();
-////        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
-////
-////        server.expect(manyTimes(), requestTo("http://localhost:8081/enoughResourcesForJob"))
-////                .andExpect(method(HttpMethod.POST))
-////                .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
-////
-////
-//    }
+    @Test
+    public void enoughResourcesForJobTest() {}
 
 }
