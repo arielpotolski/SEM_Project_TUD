@@ -158,7 +158,7 @@ public class RequestAllocationService {
     public boolean sendRequestToCluster(Request request) throws JsonProcessingException {
 
         try {
-            String url = "https://localhost:8085/request";
+            String url = "https://localhost:8082/request";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
