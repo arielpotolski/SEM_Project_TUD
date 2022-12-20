@@ -11,7 +11,8 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import org.springframework.stereotype.Service;
 
 
@@ -87,8 +88,8 @@ public class SchedulerInformationAccessingService {
      *
      * @return converted data as a list.
      */
-    public List<TotalResourcesResponseModel> convertToResponseModels(List<FacultyDatedTotalResources> rawData) {
-        return rawData.stream().map(x -> new TotalResourcesResponseModel(x.getScheduled_Date(),
+    public List<FacultyDatedResourcesResponseModel> convertToResponseModels(List<FacultyDatedTotalResources> rawData) {
+        return rawData.stream().map(x -> new FacultyDatedResourcesResponseModel(x.getScheduled_Date(),
                         x.getFaculty_Id(), x.getCpu_Resources(),
                         x.getGpu_Resources(), x.getMemory_Resources()))
                 .collect(Collectors.toList());
@@ -182,5 +183,15 @@ public class SchedulerInformationAccessingService {
             availableResources.add(availableResourcesForTheDay);
         }
         return availableResources;
+    }
+
+    public List<DatedResourcesResponseModel> convertAvailableResourcesForDateToResponseModels
+            (List<AvailableResourcesForDate> rawResources) {
+        List<DatedResourcesResponseModel> models = new ArrayList<>();
+        for (AvailableResourcesForDate resources : rawResources) {
+            models.add(new DatedResourcesResponseModel(resources.getDate(), resources.getAvailableCpu(),
+                    resources.getAvailableGpu(), resources.getAvailableMemory()));
+        }
+        return models;
     }
 }

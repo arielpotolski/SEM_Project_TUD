@@ -1,10 +1,13 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,33 @@ public class NodeInformationAccessingService {
 
     public boolean existsByFacultyId(String facultyId) {
         return this.nodeRepository.existsByFacultyId(facultyId);
+    }
+
+    public NodeResponseModel convertNodeToResponseModel(Node node) {
+        return new NodeResponseModel(node.getCpuResources(), node.getGpuResources(), node.getMemoryResources(),
+                node.getName(), node.getUrl(), node.getUserNetId(), node.getFacultyId());
+    }
+
+    public List<NodeResponseModel> convertAllNodesToResponseModels(List<Node> nodes) {
+        List<NodeResponseModel> models = new ArrayList<>();
+        for (Node node : nodes) {
+            models.add(this.convertNodeToResponseModel(node));
+        }
+        return models;
+    }
+
+    public FacultyResourcesResponseModel convertFacultyTotalResourcesToResponseModel(FacultyTotalResources rawResources) {
+        return new FacultyResourcesResponseModel(rawResources.getFaculty_Id(), rawResources.getCpu_Resources(),
+                rawResources.getGpu_Resources(), rawResources.getMemory_Resources());
+    }
+
+    public List<FacultyResourcesResponseModel> convertAllFacultyTotalResourcesToResponseModels
+            (List<FacultyTotalResources> rawResources) {
+        List<FacultyResourcesResponseModel> models = new ArrayList<>();
+        for (FacultyTotalResources resources : rawResources) {
+            models.add(this.convertFacultyTotalResourcesToResponseModel(resources));
+        }
+        return models;
     }
 
     public List<Node> getAllNodes() {

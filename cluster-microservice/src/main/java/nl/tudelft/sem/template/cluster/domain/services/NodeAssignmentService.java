@@ -8,6 +8,7 @@ import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,14 @@ public class NodeAssignmentService {
 
     private transient NodeAssignmentStrategy strategy;
 
+    private final transient NodeInformationAccessingService nodeInformationAccessingService;
+
     @Autowired
-    public NodeAssignmentService(NodeRepository repo, NumberProvider numberProvider) {
+    public NodeAssignmentService(NodeRepository repo, NumberProvider numberProvider,
+                                 NodeInformationAccessingService nodeInformationAccessingService) {
         this.repo = repo;
         this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
+        this.nodeInformationAccessingService = nodeInformationAccessingService;
     }
 
     public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {
@@ -40,7 +45,9 @@ public class NodeAssignmentService {
     public void assignNodeToFaculty(Node node) {
         // pick faculty using strategy
         List<FacultyTotalResources> list = this.repo.findTotalResourcesPerFaculty();
-        String chosenId = strategy.pickFacultyToAssignNodeTo(list);
+        List<FacultyResourcesResponseModel> testableList = this.nodeInformationAccessingService
+                .convertAllFacultyTotalResourcesToResponseModels(list);
+        String chosenId = strategy.pickFacultyToAssignNodeTo(testableList);
 
         // set facultyId of node
         node.setFacultyId(chosenId);

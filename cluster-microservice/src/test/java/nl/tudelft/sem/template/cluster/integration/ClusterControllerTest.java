@@ -3,7 +3,6 @@ package nl.tudelft.sem.template.cluster.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,20 +14,17 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
-import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -603,7 +599,7 @@ public class ClusterControllerTest {
     @Test
     public void getResourcesReservedPerFacultyPerDay() throws Exception {
         // check both url paths
-        TotalResourcesResponseModel testingModel = new TotalResourcesResponseModel(
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
                 LocalDate.of(2022, 12, 14), "EWI",
                 5.0, 1.0, 1.0);
 

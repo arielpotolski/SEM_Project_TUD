@@ -3,7 +3,7 @@ package nl.tudelft.sem.template.cluster.domain.strategies;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,10 +48,10 @@ public class AssignNodeToLeastResourcefulFacultyStrategy implements NodeAssignme
      *
      * @return String representation of the facultyId.
      */
-    public String pickFacultyToAssignNodeTo(List<FacultyTotalResources> faculties) {
+    public String pickFacultyToAssignNodeTo(List<FacultyResourcesResponseModel> faculties) {
         return faculties.stream()
-                .map(x -> new Pair<String, Double>(x.getFaculty_Id(),
-                        x.getCpu_Resources() + x.getGpu_Resources() + x.getMemory_Resources()))
+                .map(x -> new Pair<String, Double>(x.getFacultyId(),
+                        x.getTotalCpu() + x.getTotalGpu() + x.getTotalMemory()))
                 .sorted(Comparator.comparingDouble(x -> x.value)).map(x -> x.key).collect(Collectors.toList()).get(0);
     }
 
