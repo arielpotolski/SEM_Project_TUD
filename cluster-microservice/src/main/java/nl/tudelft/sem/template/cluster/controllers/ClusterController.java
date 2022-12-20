@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -21,6 +22,8 @@ import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
+import nl.tudelft.sem.template.cluster.notifications.Notification;
+import nl.tudelft.sem.template.cluster.notifications.service.SendNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +45,7 @@ public class ClusterController {
     private final transient NodeInformationAccessingService nodeInformationAccessingService;
     private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
     private final transient NodeRemovalService nodeRemovalService;
+    private final transient SendNotificationService sendNotificationService;
 
     private final transient DateProvider dateProvider;
 
@@ -55,7 +59,8 @@ public class ClusterController {
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              NodeInformationAccessingService nodeInformationAccessingService,
                              NodeRemovalService nodeRemovalService,
-                             SchedulerInformationAccessingService schedulerInformationAccessingService) {
+                             SchedulerInformationAccessingService schedulerInformationAccessingService,
+                             SendNotificationService sendNotificationService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
@@ -63,6 +68,7 @@ public class ClusterController {
         this.nodeInformationAccessingService = nodeInformationAccessingService;
         this.nodeRemovalService = nodeRemovalService;
         this.schedulerInformationAccessingService = schedulerInformationAccessingService;
+        this.sendNotificationService = sendNotificationService;
     }
 
     /**
@@ -207,7 +213,8 @@ public class ClusterController {
      * @return a ResponseEntity with an informative message.
      */
     @PostMapping("/request")
-    public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel) {
+    public ResponseEntity<String> forwardRequestToCluster(@RequestBody JobRequestModel jobModel)
+        throws JsonProcessingException {
         // extract job from request model
         Job job = new JobBuilder().requestedThroughFaculty(jobModel.getFacultyId())
                 .requestedByUserWithNetId(jobModel.getUserNetId())
@@ -242,6 +249,14 @@ public class ClusterController {
 
         // schedule job
         this.scheduling.scheduleJob(job);
+
+        //send notification for the user microservice, saying the job was scheduled.
+        LocalDate date = LocalDate.now();
+        Notification notification = new Notification(job, jobModel.getUserNetId(),
+            "scheduled", date.toString());
+        notification.setMessage();
+
+        this.sendNotificationService.sendNotificationToUser(notification);
 
         // return
         return ResponseEntity.ok("Successfully scheduled job.");
