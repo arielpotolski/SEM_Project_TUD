@@ -56,6 +56,7 @@ public class JobRequestControllerTest {
         when(mockAuthenticationManager.getNetId()).thenReturn("Alexander");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
 
     }
 
@@ -97,8 +98,6 @@ public class JobRequestControllerTest {
 
     }
 
-
-    // Can also add an assert if we change the request in the controller
     @Test
     public void pendingRequestsTest() throws Exception {
 

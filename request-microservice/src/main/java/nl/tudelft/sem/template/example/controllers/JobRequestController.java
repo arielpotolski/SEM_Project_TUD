@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,6 +91,7 @@ public class JobRequestController {
      * @return the response entity
      */
     @GetMapping("pendingRequests")
+    @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
@@ -106,6 +108,7 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
+    @PreAuthorize("hasRole('FACULTY')")
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)
