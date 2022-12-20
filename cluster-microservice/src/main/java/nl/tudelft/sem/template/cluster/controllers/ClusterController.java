@@ -21,6 +21,7 @@ import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -254,8 +255,17 @@ public class ClusterController {
      * object if facultyId specified).
      */
     @GetMapping(value = {"/resources/assigned", "/resources/assigned/{facultyId}"})
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<FacultyResourcesResponseModel>> getResourcesAssignedToFaculty(
             @PathVariable(value = "facultyId", required = false) String facultyId) {
+        String role = authManager.getRole(); // role necessary to determine which actions allowed
+        boolean adminPermissions = "SYSADMIN".equals(role);
+
+        // if requesting all faculties or not your faculty, return forbidden
+//        if (!adminPermissions && (facultyId == null || )) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+
         if (facultyId == null) {
             var rawResources = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
             return ResponseEntity.ok(this.nodeInformationAccessingService
