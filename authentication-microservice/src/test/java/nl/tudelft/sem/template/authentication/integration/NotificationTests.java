@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
@@ -24,7 +25,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.List;
 
 
 @SpringBootTest

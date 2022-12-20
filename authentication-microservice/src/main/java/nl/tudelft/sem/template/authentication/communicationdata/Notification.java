@@ -101,8 +101,12 @@ public class Notification {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Notification)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Notification)) {
+            return false;
+        }
         Notification that = (Notification) o;
         return Objects.equals(id, that.id) && Objects.equals(netId, that.netId)
                 && stateOfStatus == that.stateOfStatus && notificationOrigin == that.notificationOrigin
