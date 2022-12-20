@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,8 +19,8 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
-import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -31,6 +31,9 @@ public class RandomFacultyStrategyTest {
 
     private List<FacultyResourcesResponseModel> faculties;
 
+    /**
+     * Setup for the tests.
+     */
     @BeforeEach
     public void setup() {
         when(mockRandomNumberProvider.betweenZeroAndSpecified(5)).thenReturn(3);

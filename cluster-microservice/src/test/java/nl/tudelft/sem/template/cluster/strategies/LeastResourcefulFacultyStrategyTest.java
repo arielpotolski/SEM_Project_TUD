@@ -1,7 +1,11 @@
 package nl.tudelft.sem.template.cluster.strategies;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.ArrayList;
+import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
-import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,13 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -26,6 +23,9 @@ public class LeastResourcefulFacultyStrategyTest {
 
     private List<FacultyResourcesResponseModel> faculties;
 
+    /**
+     * Setup for the tests.
+     */
     @BeforeEach
     public void setup() {
         strat = new AssignNodeToLeastResourcefulFacultyStrategy();
