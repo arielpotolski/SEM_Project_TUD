@@ -63,4 +63,13 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteNotifications(long id) throws Exception {
+        Notification notification = notificationRepository.findById(id).orElseThrow();
+        notificationRepository.delete(notification);
+    }
+
+    public Notification getNotificationById(long id) {
+        return notificationRepository.findById(id).orElseThrow();
+    }
+
 }

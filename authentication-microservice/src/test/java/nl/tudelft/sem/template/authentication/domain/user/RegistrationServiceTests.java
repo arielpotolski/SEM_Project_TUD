@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
 import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.services.RoleControlService;

@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.authentication.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
@@ -18,6 +20,8 @@ import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.communicationdata.State;
 import nl.tudelft.sem.template.authentication.communicationdata.Type;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.authentication.models.DeleteNotificationRequestModel;
+import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import nl.tudelft.sem.template.authentication.models.GetNotifactionsRequestModel;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
@@ -136,7 +140,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationWithDateWhenCorrect() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -161,7 +164,7 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationOnStartDate() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -186,7 +189,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationOnEndDate() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -211,7 +213,7 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationOutsideOfScope() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -237,7 +239,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationNoEndDate() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -262,7 +263,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationNoStartDate() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -286,7 +286,7 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationOneOutsideOneInside() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -315,7 +315,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationTwoNotifications() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -346,7 +345,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationNoOtherUsers() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -377,7 +375,6 @@ public class NotificationTests {
 
     @Test
     public void testGetNotificationNoJsonSent() throws Exception {
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
         Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
@@ -399,6 +396,66 @@ public class NotificationTests {
         String expected2 = ow.writeValueAsString(notification2);
         assertThat(result.getResponse().getContentAsString().contains(expected)).isTrue();
         assertThat(result.getResponse().getContentAsString().contains(expected2)).isTrue();
+
+    }
+
+    @Test
+    public void deleteNotificationTestWithCorrectData() throws Exception {
+        when(authManager.getNetId()).thenReturn("user1");
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2022, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
+        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2021, 10, 2));
+        notificationService.addNotification(notification1);
+        notificationService.addNotification(notification2);
+        long id = notificationService.getNotifications("user1").get(0).getId();
+        assertThat(notificationService.getNotifications("user1").size()).isEqualTo(2);
+
+        DeleteNotificationRequestModel requestModel = new DeleteNotificationRequestModel();
+        requestModel.setId(id);
+        ResultActions resultActions = mockMvc.perform(delete("/DeleteNotification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(requestModel)));
+        resultActions.andExpect(status().isOk());
+        assertThat(notificationService.getNotifications("user1").size()).isEqualTo(1);
+    }
+
+    @Test
+    public void deleteNotificationTestWithWrongUser() throws Exception {
+        when(authManager.getNetId()).thenReturn("user1");
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user2", LocalDate.of(2022, 10, 2));
+        notificationService.addNotification(notification1);
+        Notification notificationWithId = notificationService.getNotifications("user2").get(0);
+        long id = notificationWithId.getId();
+        List<Notification> notifications = notificationService.getNotifications("user2");
+        assertThat(notifications.size()).isEqualTo(1);
+        DeleteNotificationRequestModel requestModel = new DeleteNotificationRequestModel();
+        requestModel.setId(id);
+        ResultActions resultActions = mockMvc.perform(delete("/DeleteNotification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(requestModel)));
+        resultActions.andExpect(status().isBadRequest());
+        notifications = notificationService.getNotifications("user2");
+        assertThat(notifications.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void deleteNotificationTestWithWrongId() throws Exception {
+        when(authManager.getNetId()).thenReturn("user2");
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user2", LocalDate.of(2022, 10, 2));
+        notificationService.addNotification(notification1);
+        long id = 2;
+        DeleteNotificationRequestModel requestModel = new DeleteNotificationRequestModel();
+        requestModel.setId(id);
+        ResultActions resultActions = mockMvc.perform(delete("/DeleteNotification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(requestModel)));
+        resultActions.andExpect(status().isBadRequest());
 
     }
 
