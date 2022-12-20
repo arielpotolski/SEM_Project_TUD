@@ -33,7 +33,7 @@ public class LeastBusyDateStrategy implements JobSchedulingStrategy {
 
         var beforePreferredDate = availableResourcesForDates.subList(0, index + 1);
         beforePreferredDate.sort(Comparator.comparingDouble((AvailableResourcesForDate x) ->
-                x.getAvailableCpu() + x.getAvailableGpu() + x.getAvailableMemory()).reversed());
+                x.getAvailableCpu() + x.getAvailableGpu() + x.getAvailableMemory()));
         for (AvailableResourcesForDate availableResources : beforePreferredDate) {
             if (job.getRequiredCpu() <= availableResources.getAvailableCpu()
                     && job.getRequiredGpu() <= availableResources.getAvailableGpu()
