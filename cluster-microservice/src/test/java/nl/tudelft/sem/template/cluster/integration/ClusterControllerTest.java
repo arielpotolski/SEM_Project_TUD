@@ -629,7 +629,7 @@ public class ClusterControllerTest {
     public void getResourcesReservedForGivenFacultyForGivenDay() throws Exception {
     }
 
- @Test
+    @Test
     public void scheduleNodeRemovalNodeNotFoundTest() throws Exception {
         ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
             .post("/nodes/delete/user/a")
