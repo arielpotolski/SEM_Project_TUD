@@ -1,5 +1,7 @@
-package nl.tudelft.sem.template.authentication.domain.user;
+package nl.tudelft.sem.template.authentication.services;
 
+import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
+import nl.tudelft.sem.template.authentication.domain.user.Password;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**

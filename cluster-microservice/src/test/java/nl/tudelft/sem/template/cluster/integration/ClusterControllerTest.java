@@ -80,9 +80,10 @@ public class ClusterControllerTest {
      */
     @BeforeEach
     public void setup() {
-        when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
+        when(mockAuthenticationManager.getNetId()).thenReturn("ALAN");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ALAN");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_SYSADMIN");
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
@@ -139,10 +140,6 @@ public class ClusterControllerTest {
         model.setPreferredCompletionDate(LocalDate.now().plusDays(2));
     }
 
-    public boolean compareTwoDateFormats(String a, String b) {
-        return false;
-    }
-
     @Test
     public void getAllNodesTest() throws Exception {
 
@@ -189,8 +186,6 @@ public class ClusterControllerTest {
         result3.andExpect(status().isOk());
         String response3 = result3.andReturn().getResponse().getContentAsString();
         assertThat(response3).isEqualTo(JsonUtil.serialize(List.of(node1))); // one element list
-
-        // TODO: generate random number of random nodes and check
     }
 
     @Test
@@ -363,7 +358,6 @@ public class ClusterControllerTest {
     public void deleteNodeByUrlTestCorrectUrl() throws Exception {
         nodeRepository.save(node1);
         nodeRepository.save(node2);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)

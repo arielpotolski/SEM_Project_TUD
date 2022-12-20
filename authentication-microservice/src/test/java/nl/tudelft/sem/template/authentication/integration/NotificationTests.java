@@ -49,6 +49,10 @@ public class NotificationTests {
      */
     @BeforeEach
     public void setupNotificationModel() {
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+        when(mockJwtTokenVerifier.getNetIdFromToken("MockedToken")).thenReturn("goodUser");
+        when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("USER");
+
         this.notificationRequestModel = new NotificationRequestModel();
         this.notificationRequestModel.setDate("2003-04-29");
         this.notificationRequestModel.setMessage("message");
@@ -59,9 +63,6 @@ public class NotificationTests {
 
     @Test
     public void testValidNotification() throws Exception {
-
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-
         ResultActions resultActions = mockMvc.perform(post("/notification")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.serialize(notificationRequestModel))
@@ -72,8 +73,6 @@ public class NotificationTests {
 
     @Test
     public void testInvalidNotificationDate() throws Exception {
-
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         NotificationRequestModel invalid = notificationRequestModel;
         invalid.setDate("2003/01/23");
 
@@ -87,8 +86,6 @@ public class NotificationTests {
 
     @Test
     public void testInvalidNotificationEnum() throws Exception {
-
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         NotificationRequestModel invalid = notificationRequestModel;
         invalid.setType("NOTASERVICE");
 
@@ -102,7 +99,6 @@ public class NotificationTests {
 
     @Test
     public void testNotificationService() {
-
         Notification notification = Notification.createNotification(notificationRequestModel);
         notificationService.addNotification("coolUser1", notification);
 
@@ -113,7 +109,6 @@ public class NotificationTests {
 
     @Test
     public void testMultipleNotifications() {
-
         Notification notification = Notification.createNotification(notificationRequestModel);
         notificationService.addNotification("coolUser1", notification);
         notificationService.addNotification("coolUser1", notification);

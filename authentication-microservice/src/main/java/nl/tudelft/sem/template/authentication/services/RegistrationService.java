@@ -1,8 +1,14 @@
-package nl.tudelft.sem.template.authentication.domain.user;
+package nl.tudelft.sem.template.authentication.services;
 
 import java.util.List;
-import java.util.Optional;
-import org.springframework.data.jpa.repository.Modifying;
+import nl.tudelft.sem.template.authentication.domain.user.AppUser;
+import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
+import nl.tudelft.sem.template.authentication.domain.user.NetId;
+import nl.tudelft.sem.template.authentication.domain.user.NetIdAlreadyInUseException;
+import nl.tudelft.sem.template.authentication.domain.user.NetIdNotFoundException;
+import nl.tudelft.sem.template.authentication.domain.user.Password;
+import nl.tudelft.sem.template.authentication.domain.user.Role;
+import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class RegistrationService {
     private final transient UserRepository userRepository;
     private final transient PasswordHashingService passwordHashingService;
+    private final transient RoleControlService roleControlService;
 
     /**
      * Instantiates a new UserService.
@@ -19,9 +26,11 @@ public class RegistrationService {
      * @param userRepository  the user repository
      * @param passwordHashingService the password encoder
      */
-    public RegistrationService(UserRepository userRepository, PasswordHashingService passwordHashingService) {
+    public RegistrationService(UserRepository userRepository, PasswordHashingService passwordHashingService,
+                               RoleControlService roleControlService) {
         this.userRepository = userRepository;
         this.passwordHashingService = passwordHashingService;
+        this.roleControlService = roleControlService;
     }
 
     /**
@@ -32,13 +41,27 @@ public class RegistrationService {
      * @throws Exception if the user already exists
      */
     public AppUser registerUser(NetId netId, Password password) throws Exception {
-
         if (checkNetIdIsUnique(netId)) {
             // Hash password
             HashedPassword hashedPassword = passwordHashingService.hash(password);
 
             // Create new account
             AppUser user = new AppUser(netId, hashedPassword);
+
+            // give role based on netId - SYSTEM is only used by services themselves
+            String roleName;
+            if (netId.toString().startsWith("adm")) {
+                roleName = "SYSADMIN";
+            } else if (netId.toString().startsWith("fac")) {
+                roleName = "FACULTY";
+            } else {
+                roleName = "USER";
+            }
+
+            Role role = roleControlService.findByName(roleName);
+
+            // set role
+            user.setRole(role);
 
             userRepository.save(user);
 

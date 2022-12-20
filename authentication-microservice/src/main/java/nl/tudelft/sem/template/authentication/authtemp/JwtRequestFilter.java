@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -66,9 +67,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 try {
                     if (jwtTokenVerifier.validateToken(token)) {
                         String netId = jwtTokenVerifier.getNetIdFromToken(token);
+                        String role = jwtTokenVerifier.getRoleFromToken(token);
                         var authenticationToken = new UsernamePasswordAuthenticationToken(
                                 netId,
-                                null, List.of() // no credentials and no authorities
+                                null, List.of(new SimpleGrantedAuthority(role))
                         );
                         authenticationToken.setDetails(new WebAuthenticationDetailsSource()
                                 .buildDetails(request));

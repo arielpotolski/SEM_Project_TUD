@@ -4,13 +4,16 @@ import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsService;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
-import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
+import nl.tudelft.sem.template.authentication.domain.user.Role;
 import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
+import nl.tudelft.sem.template.authentication.services.RoleControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -22,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-
-
 @RestController
 public class AuthenticationController {
 
@@ -34,6 +35,8 @@ public class AuthenticationController {
     private final transient JwtUserDetailsService jwtUserDetailsService;
 
     private final transient RegistrationService registrationService;
+
+    private final transient RoleControlService roleControlService;
 
     /**
      * Instantiates a new UsersController.
@@ -47,11 +50,13 @@ public class AuthenticationController {
     public AuthenticationController(AuthenticationManager authenticationManager,
                                     JwtTokenGenerator jwtTokenGenerator,
                                     JwtUserDetailsService jwtUserDetailsService,
-                                    RegistrationService registrationService) {
+                                    RegistrationService registrationService,
+                                    RoleControlService roleControlService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenGenerator = jwtTokenGenerator;
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.registrationService = registrationService;
+        this.roleControlService = roleControlService;
     }
 
     /**
@@ -90,7 +95,12 @@ public class AuthenticationController {
      */
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
-
+        if (this.roleControlService.count() == 0) {
+            this.roleControlService.save(new Role("USER"));
+            this.roleControlService.save(new Role("FACULTY"));
+            this.roleControlService.save(new Role("SYSADMIN"));
+            this.roleControlService.save(new Role("SYSTEM"));
+        }
         try {
             NetId netId = new NetId(request.getNetId());
             Password password = new Password(request.getPassword());
@@ -123,9 +133,9 @@ public class AuthenticationController {
 
 
     @GetMapping("/hello")
+    @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<String> helloWorld() {
         return ResponseEntity.ok("Hello ");
-
     }
 
 
