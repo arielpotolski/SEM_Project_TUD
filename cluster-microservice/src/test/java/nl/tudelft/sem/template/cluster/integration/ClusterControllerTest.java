@@ -629,4 +629,56 @@ public class ClusterControllerTest {
     public void getResourcesReservedForGivenFacultyForGivenDay() throws Exception {
     }
 
+    @Test
+    public void scheduleNodeRemovalNodeNotFoundTest() throws Exception {
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Could not find the node to be deleted."
+            + " Check if the url provided is correct.");
+        assertThat(this.nodeRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void scheduleNodeRemovalUserNotOwnerTest() throws Exception {
+        this.node1.setUrl("a");
+        this.nodeRepository.save(node1);
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("You cannot remove nodes that"
+            + " other users have contributed to the cluster.");
+        assertThat(this.nodeRepository.count()).isEqualTo(1);
+    }
+
+    /*@Test
+    public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception{
+        this.node1.setUrl("a");
+        this.nodeRepository.save(node1);
+
+        when(this.mockAuthenticationManager.getNetId()).thenReturn(this.node1.getUserNetId());
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node will be removed at midnight.");
+        assertThat(this.nodeRepository.count()).isEqualTo(0);
+    }*/
+
 }
