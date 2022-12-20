@@ -1,11 +1,11 @@
 package nl.tudelft.sem.template.authentication.services;
 
 import java.util.List;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdAlreadyInUseException;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.NetIdAlreadyInUseException;
-import nl.tudelft.sem.template.authentication.domain.user.NetIdNotFoundException;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.Role;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
