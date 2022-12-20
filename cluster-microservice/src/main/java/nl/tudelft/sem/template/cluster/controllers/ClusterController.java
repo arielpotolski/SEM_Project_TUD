@@ -70,6 +70,7 @@ public class ClusterController {
      * exists in the database).
      */
     @GetMapping(value = {"/nodes", "/nodes/**"})
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<List<NodeResponseModel>> getNodeInformation(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
         String slashCheck = "/";
