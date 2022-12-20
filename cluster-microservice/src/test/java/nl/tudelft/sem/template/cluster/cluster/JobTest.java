@@ -25,7 +25,23 @@ public class JobTest {
     }
 
     @Test
-    void differentCpuEqualsTest() {
+    public void equalsNullObjectReturnsFalse() {
+        assertThat(this.job.equals(null)).isFalse();
+    }
+
+    @Test
+    public void equalsObjectOfOtherClassReturnsFalse() {
+        assertThat(this.job.equals(1)).isFalse();
+    }
+
+    @Test
+    public void equalsSameObjectReturnsTrue() {
+        Job that = this.job;
+        assertThat(this.job.equals(that)).isTrue();
+    }
+
+    @Test
+    public void differentCpuEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             3, 1, 1, date);
@@ -34,7 +50,7 @@ public class JobTest {
     }
 
     @Test
-    void differentGpuEqualsTest() {
+    public void differentGpuEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             2, 2, 1, date);
@@ -43,7 +59,7 @@ public class JobTest {
     }
 
     @Test
-    void differentMemoryEqualsTest() {
+    public void differentMemoryEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             2, 1, 2, date);
@@ -52,7 +68,7 @@ public class JobTest {
     }
 
     @Test
-    void differentFacultyIdEqualsTest() {
+    public void differentFacultyIdEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("2", "1", "name1", "desc1",
             2, 1, 1, date);
@@ -61,7 +77,7 @@ public class JobTest {
     }
 
     @Test
-    void differentUserNetIdEqualsTest() {
+    public void differentUserNetIdEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "2", "name1", "desc1",
             2, 1, 1, date);
@@ -70,7 +86,7 @@ public class JobTest {
     }
 
     @Test
-    void differentNameEqualsTest() {
+    public void differentNameEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name2", "desc1",
             2, 1, 1, date);
@@ -79,7 +95,7 @@ public class JobTest {
     }
 
     @Test
-    void differentDescriptionEqualsTest() {
+    public void differentDescriptionEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc2",
             2, 1, 1, date);
@@ -88,7 +104,7 @@ public class JobTest {
     }
 
     @Test
-    void differentPrefDateEqualsTest() {
+    public void differentPrefDateEqualsTest() {
         LocalDate date = LocalDate.of(2022, 12, 25);
         Job j = new Job("1", "1", "name1", "desc1",
             2, 1, 1, date);
@@ -97,7 +113,7 @@ public class JobTest {
     }
 
     @Test
-    void equalsTestIsTrue() {
+    public void equalsTestIsTrue() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             2, 1, 1, date);
@@ -106,7 +122,7 @@ public class JobTest {
     }
 
     @Test
-    void hashCodeIsDifferent() {
+    public void hashCodeIsDifferent() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             3, 1, 1, date);
@@ -115,7 +131,7 @@ public class JobTest {
     }
 
     @Test
-    void hashCodeIsEqual() {
+    public void hashCodeIsEqual() {
         LocalDate date = LocalDate.of(2022, 12, 24);
         Job j = new Job("1", "1", "name1", "desc1",
             2, 1, 1, date);
