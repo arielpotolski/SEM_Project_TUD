@@ -11,6 +11,9 @@ public class NodeTest {
 
     private Node node;
 
+    /**
+     * sets up the tests.
+     */
     @BeforeEach
     public void setup() {
         this.node = new Node(3, 2, 3,
