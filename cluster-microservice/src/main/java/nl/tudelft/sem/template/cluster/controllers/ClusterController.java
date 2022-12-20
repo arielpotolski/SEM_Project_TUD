@@ -302,10 +302,21 @@ public class ClusterController {
      */
     @GetMapping(value = {"/resources/reserved", "/resources/reserved/{date}&{facultyId}",
         "/resources/reserved/{date}&", "/resources/reserved/&{facultyId}", "resources/reserved/&"})
-    @PreAuthorize("hasRole('SYSADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
+            @RequestHeader HttpHeaders headers,
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
+        String role = authManager.getRole();
+        boolean adminPermissions = role.equals("SYSADMIN");
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+
+        // if requesting all faculties or not your faculty, return forbidden
+        if (!adminPermissions
+                && (facultyId == null || !dataProcessingService.getFacultiesOfGivenUser(token).contains(facultyId))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
