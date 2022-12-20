@@ -106,4 +106,10 @@ public class LeastBusyDateStrategyTest {
         assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(4));
     }
 
+    @Test
+    public void noMatchTest() {
+        job.setRequiredMemory(6.0);
+        assertThat(strat.scheduleJobFor(resources, job)).isEqualTo(dateProvider.getTomorrow().plusDays(4));
+    }
+
 }
