@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.authentication.domain.user;
 
 import lombok.EqualsAndHashCode;
 
+
 /**
  * A DDD value object representing a NetID in our domain.
  */
@@ -10,7 +11,6 @@ public class NetId {
     private final transient String netIdValue;
 
     public NetId(String netId) {
-        // validate NetID
         this.netIdValue = netId;
     }
 
