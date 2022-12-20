@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 
 import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.services.RegistrationService;
+import nl.tudelft.sem.template.authentication.services.RoleControlService;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,18 @@ public class RegistrationServiceTests {
     private transient PasswordHashingService mockPasswordEncoder;
 
     @Autowired
+    private transient RoleControlService roleControlService;
+
+    @Autowired
     private transient UserRepository userRepository;
+
+    @BeforeEach
+    public void setup() {
+        this.roleControlService.save(new Role("USER"));
+        this.roleControlService.save(new Role("FACULTY"));
+        this.roleControlService.save(new Role("SYSADMIN"));
+        this.roleControlService.save(new Role("SYSTEM"));
+    }
 
     @Test
     public void createUser_withValidData_worksCorrectly() throws Exception {
@@ -39,6 +52,7 @@ public class RegistrationServiceTests {
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
 
+
         // Act
         registrationService.registerUser(testUser, testPassword);
 
@@ -47,6 +61,7 @@ public class RegistrationServiceTests {
 
         assertThat(savedUser.getNetId()).isEqualTo(testUser);
         assertThat(savedUser.getPassword()).isEqualTo(testHashedPassword);
+        assertThat(savedUser.getRole()).isEqualTo(new Role("USER"));
     }
 
     @Test
