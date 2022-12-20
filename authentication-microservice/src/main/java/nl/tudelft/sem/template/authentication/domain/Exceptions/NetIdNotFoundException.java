@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.authentication.domain.Exceptions;
+package nl.tudelft.sem.template.authentication.domain.exceptions;
 
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 

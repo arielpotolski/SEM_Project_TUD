@@ -1,9 +1,8 @@
 package nl.tudelft.sem.template.authentication.domain.user;
 
 import java.util.List;
-
-import nl.tudelft.sem.template.authentication.domain.Exceptions.NetIdAlreadyInUseException;
-import nl.tudelft.sem.template.authentication.domain.Exceptions.NetIdNotFoundException;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdAlreadyInUseException;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
