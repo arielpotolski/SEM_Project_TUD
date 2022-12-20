@@ -356,19 +356,19 @@ public class ClusterController {
      * @return a string saying whether the removal was successfully scheduled. If not,
      *          returns a string saying what went wrong
      */
-    @PostMapping(value = "/node/delete/{url}")
-    public ResponseEntity<String> userRemoveNode(@PathVariable("url") String url) {
+    @PostMapping(value = "/nodes/delete/user/{url}")
+    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
         if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
-            return ResponseEntity.badRequest().body("A node with this url does not exist");
+            return ResponseEntity.badRequest().body("Could not find the node to be deleted."
+                + " Check if the url provided is correct.");
         } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
             .equals(authManager.getNetId())) {
             return ResponseEntity.badRequest().body("You cannot remove nodes that"
-                + "other users have contributed to the cluster.");
+                + " other users have contributed to the cluster.");
         }
 
         this.nodeRemovalService
             .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
-        this.nodeRemovalService.removeNodesAtMidnight();
 
         return ResponseEntity.ok("Your node will be removed at midnight.");
     }
