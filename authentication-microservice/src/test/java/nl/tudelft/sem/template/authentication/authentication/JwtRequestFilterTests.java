@@ -60,15 +60,17 @@ public class JwtRequestFilterTests {
         // Arrange
         String token = "randomtoken123";
         String user = "user123";
+        String role = "USER";
         when(mockRequest.getHeader("Authorization")).thenReturn("Bearer " + token);
         when(mockJwtTokenVerifier.validateToken(token)).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(token)).thenReturn(user);
+        when(mockJwtTokenVerifier.getRoleFromToken(token)).thenReturn(role);
 
         // Act
         jwtRequestFilter.doFilterInternal(mockRequest, mockResponse, mockFilterChain);
 
         // Assert
-        assertThat(SecurityContextHolder.getContext().getAuthentication().getName())
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                 .isEqualTo(user);
     }
 

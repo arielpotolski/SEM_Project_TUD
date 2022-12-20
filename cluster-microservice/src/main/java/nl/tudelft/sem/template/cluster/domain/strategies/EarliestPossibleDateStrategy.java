@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines a strategy in which a job is scheduled for the earliest available date.
  */
+@Component
 public class EarliestPossibleDateStrategy implements JobSchedulingStrategy {
 
     /**

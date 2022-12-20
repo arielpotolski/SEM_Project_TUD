@@ -1,12 +1,13 @@
 package nl.tudelft.sem.template.authentication.controllers;
 
 import java.util.List;
+import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
 import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class FacultyController {
 
     private final transient RegistrationService registrationService;
+    private final transient JwtTokenVerifier tokenVerifier;
 
     @Autowired
-    public FacultyController(RegistrationService registrationService) {
+    public FacultyController(RegistrationService registrationService,
+                             JwtTokenVerifier tokenVerifier) {
         this.registrationService = registrationService;
+        this.tokenVerifier = tokenVerifier;
     }
 
     /**
@@ -62,7 +66,7 @@ public class FacultyController {
             throws ResponseStatusException {
 
         try {
-            NetId netId = new NetId(request.getNetId());
+            NetId netId = new NetId(tokenVerifier.getNetIdFromToken(request.getToken()));
             List<AppUser.Faculty> facultyList = registrationService.getFaculties(netId);
             return ResponseEntity.ok(new GetFacultyResponseModel(facultyList.toString()));
             //response = facultyList.toString();

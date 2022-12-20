@@ -19,8 +19,8 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
-import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,9 +80,10 @@ public class ClusterControllerTest {
      */
     @BeforeEach
     public void setup() {
-        when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
+        when(mockAuthenticationManager.getNetId()).thenReturn("ALAN");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ALAN");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_SYSADMIN");
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
@@ -139,10 +140,6 @@ public class ClusterControllerTest {
         model.setPreferredCompletionDate(LocalDate.now().plusDays(2));
     }
 
-    public boolean compareTwoDateFormats(String a, String b) {
-        return false;
-    }
-
     @Test
     public void getAllNodesTest() throws Exception {
 
@@ -189,8 +186,6 @@ public class ClusterControllerTest {
         result3.andExpect(status().isOk());
         String response3 = result3.andReturn().getResponse().getContentAsString();
         assertThat(response3).isEqualTo(JsonUtil.serialize(List.of(node1))); // one element list
-
-        // TODO: generate random number of random nodes and check
     }
 
     @Test
@@ -363,7 +358,6 @@ public class ClusterControllerTest {
     public void deleteNodeByUrlTestCorrectUrl() throws Exception {
         nodeRepository.save(node1);
         nodeRepository.save(node2);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -598,7 +592,7 @@ public class ClusterControllerTest {
     @Test
     public void getResourcesReservedPerFacultyPerDay() throws Exception {
         // check both url paths
-        TotalResourcesResponseModel testingModel = new TotalResourcesResponseModel(
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
                 LocalDate.of(2022, 12, 14), "EWI",
                 5.0, 1.0, 1.0);
 

@@ -7,8 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
-import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
@@ -17,11 +15,15 @@ import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
+import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
-import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
+import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,13 +74,16 @@ public class ClusterController {
      * exists in the database).
      */
     @GetMapping(value = {"/nodes", "/nodes/**"})
-    public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
+    @PreAuthorize("hasRole('SYSADMIN')")
+    public ResponseEntity<List<NodeResponseModel>> getNodeInformation(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
         String slashCheck = "/";
         if (url.isEmpty() || url.equals(slashCheck)) {
-            return ResponseEntity.ok(this.nodeInformationAccessingService.getAllNodes());
+            var rawNodes = this.nodeInformationAccessingService.getAllNodes();
+            return ResponseEntity.ok(this.nodeInformationAccessingService.convertAllNodesToResponseModels(rawNodes));
         } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
-            return ResponseEntity.ok(List.of(this.nodeInformationAccessingService.getByUrl(url)));
+            return ResponseEntity.ok(this.nodeInformationAccessingService
+                    .convertAllNodesToResponseModels(List.of(this.nodeInformationAccessingService.getByUrl(url))));
         } else {
             return ResponseEntity.badRequest().build();
         }
@@ -136,6 +141,7 @@ public class ClusterController {
      * @return a string saying whether the node(s) was deleted or not
      */
     @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<String> deleteNode(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
         String slashCheck = "/";
@@ -188,6 +194,7 @@ public class ClusterController {
      * @return list of all jobs in the schedule.
      */
     @GetMapping("/schedule")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public List<Job> getSchedule() {
         return this.schedulerInformationAccessingService.getAllJobsFromSchedule();
     }
@@ -251,13 +258,17 @@ public class ClusterController {
      * object if facultyId specified).
      */
     @GetMapping(value = {"/resources/assigned", "/resources/assigned/{facultyId}"})
-    public ResponseEntity<List<FacultyTotalResources>> getResourcesAssignedToFaculty(
+    public ResponseEntity<List<FacultyResourcesResponseModel>> getResourcesAssignedToFaculty(
             @PathVariable(value = "facultyId", required = false) String facultyId) {
         if (facultyId == null) {
-            return ResponseEntity.ok(this.nodeInformationAccessingService.getAssignedResourcesPerFaculty());
+            var rawResources = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
+            return ResponseEntity.ok(this.nodeInformationAccessingService
+                    .convertAllFacultyTotalResourcesToResponseModels(rawResources));
         } else if (this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
-            return ResponseEntity.ok(List.of(this.nodeInformationAccessingService
-                    .getAssignedResourcesForGivenFaculty(facultyId)));
+            var rawResources = List.of(this.nodeInformationAccessingService
+                    .getAssignedResourcesForGivenFaculty(facultyId));
+            return ResponseEntity.ok(this.nodeInformationAccessingService
+                    .convertAllFacultyTotalResourcesToResponseModels(rawResources));
         } else {
             return ResponseEntity.badRequest().build();
         }
@@ -277,7 +288,7 @@ public class ClusterController {
      */
     @GetMapping(value = {"/resources/reserved", "/resources/reserved/{date}&{facultyId}",
         "/resources/reserved/{date}&", "/resources/reserved/&{facultyId}", "resources/reserved/&"})
-    public ResponseEntity<List<TotalResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
+    public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
         LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
@@ -326,7 +337,7 @@ public class ClusterController {
      * @return response entity containing a list of available resources per day from tomorrow until given.
      */
     @GetMapping(value = "/resources/available/{date}/{facultyId}")
-    public ResponseEntity<List<AvailableResourcesForDate>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
+    public ResponseEntity<List<DatedResourcesResponseModel>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
             @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
         // anti-corruption
         try {
@@ -341,8 +352,10 @@ public class ClusterController {
         }
 
         // return - change this later when refactoring
+        var rawResources = this.schedulerInformationAccessingService
+                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date);
         return ResponseEntity.ok(this.schedulerInformationAccessingService
-                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date));
+                .convertAvailableResourcesForDateToResponseModels(rawResources));
     }
 
     /**

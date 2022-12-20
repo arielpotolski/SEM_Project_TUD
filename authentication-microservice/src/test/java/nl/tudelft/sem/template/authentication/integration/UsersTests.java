@@ -17,8 +17,7 @@ import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
-import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
-import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
+import nl.tudelft.sem.template.authentication.domain.user.Role;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
@@ -27,6 +26,10 @@ import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel
 import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
+import nl.tudelft.sem.template.authentication.services.RoleControlService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +74,23 @@ public class UsersTests {
     @Autowired
     private transient RegistrationService registrationService;
 
+    @Autowired
+    private transient RoleControlService roleControlService;
+
+    /**
+     * Sets up the tests.
+     */
+    @BeforeEach
+    public void setup() {
+        this.roleControlService.save(new Role("USER"));
+        this.roleControlService.save(new Role("FACULTY"));
+        this.roleControlService.save(new Role("SYSADMIN"));
+        this.roleControlService.save(new Role("SYSTEM"));
+        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
+        when(mockJwtTokenVerifier.getNetIdFromToken("MockedToken")).thenReturn("SomeUser");
+        when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("USER");
+    }
+
 
     @Test
     public void register_withValidData_worksCorrectly() throws Exception {
@@ -105,7 +125,6 @@ public class UsersTests {
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         registrationService.registerUser(testUser, testPassword);
 
@@ -129,7 +148,6 @@ public class UsersTests {
     @Test
     public void applyFaculty_WithWrongUser() throws Exception {
         final NetId testUser = new NetId("SomeUser");
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
@@ -149,7 +167,6 @@ public class UsersTests {
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         registrationService.registerUser(testUser, testPassword);
 
@@ -174,7 +191,6 @@ public class UsersTests {
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
@@ -196,7 +212,6 @@ public class UsersTests {
     @Test
     public void removeFaculty_WithWrongUser() throws Exception {
         final NetId testUser = new NetId("SomeUser");
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         ApplyFacultyRequestModel model = new ApplyFacultyRequestModel();
         model.setNetId(testUser.toString());
@@ -217,7 +232,6 @@ public class UsersTests {
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
@@ -239,10 +253,9 @@ public class UsersTests {
     @Test
     public void getFaculty_WithWrongUser() throws Exception {
         final NetId testUser = new NetId("SomeUser");
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
-        model.setNetId(testUser.toString());
+        model.setToken(testUser.toString());
         ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
@@ -258,13 +271,12 @@ public class UsersTests {
         final Password testPassword = new Password("password123");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
 
         registrationService.registerUser(testUser, testPassword);
         registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
 
         GetFacultyRequestModel model = new GetFacultyRequestModel();
-        model.setNetId(testUser.toString());
+        model.setToken("MockedToken");
 
         ResultActions resultActions = mockMvc.perform(post("/getUserFaculties")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -289,7 +301,10 @@ public class UsersTests {
         final HashedPassword existingTestPassword = new HashedPassword("password123");
 
         AppUser existingAppUser = new AppUser(testUser, existingTestPassword);
+        Role role = roleControlService.findByName("USER");
+        existingAppUser.setRole(role);
         userRepository.save(existingAppUser);
+
 
         RegistrationRequestModel model = new RegistrationRequestModel();
         model.setNetId(testUser.toString());
@@ -328,6 +343,8 @@ public class UsersTests {
         ).thenReturn(testToken);
 
         AppUser appUser = new AppUser(testUser, testHashedPassword);
+        Role role = roleControlService.findByName("USER");
+        appUser.setRole(role);
         userRepository.save(appUser);
 
         AuthenticationRequestModel model = new AuthenticationRequestModel();

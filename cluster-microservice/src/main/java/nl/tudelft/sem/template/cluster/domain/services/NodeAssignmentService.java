@@ -4,8 +4,11 @@ import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToLeastResourcefulFacultyStrategy;
+import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +23,21 @@ public class NodeAssignmentService {
 
     private transient NodeAssignmentStrategy strategy;
 
+    private final transient NodeInformationAccessingService nodeInformationAccessingService;
+
+    /**
+     * Creates a new NodeAssignmentService object.
+     *
+     * @param repo the node repository to store all nodes.
+     * @param numberProvider the random number provider for the default assignment strategy.
+     * @param nodeInformationAccessingService service for accessing data from the repo
+     */
     @Autowired
-    public NodeAssignmentService(NodeRepository repo) {
+    public NodeAssignmentService(NodeRepository repo, NumberProvider numberProvider,
+                                 NodeInformationAccessingService nodeInformationAccessingService) {
         this.repo = repo;
-        this.strategy = new AssignNodeToLeastResourcefulFacultyStrategy();
+        this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
+        this.nodeInformationAccessingService = nodeInformationAccessingService;
     }
 
     public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {
@@ -31,14 +45,16 @@ public class NodeAssignmentService {
     }
 
     /**
-     * Uses the current startegy to pick a faculty to which to assign the given node.
+     * Uses the current strategy to pick a faculty to which to assign the given node.
      *
      * @param node the node to assign to a faculty.
      */
     public void assignNodeToFaculty(Node node) {
         // pick faculty using strategy
         List<FacultyTotalResources> list = this.repo.findTotalResourcesPerFaculty();
-        String chosenId = strategy.pickFacultyToAssignNodeTo(list);
+        List<FacultyResourcesResponseModel> testableList = this.nodeInformationAccessingService
+                .convertAllFacultyTotalResourcesToResponseModels(list);
+        String chosenId = strategy.pickFacultyToAssignNodeTo(testableList);
 
         // set facultyId of node
         node.setFacultyId(chosenId);
