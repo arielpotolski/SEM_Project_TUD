@@ -1,9 +1,7 @@
 package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,20 +13,18 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,6 +65,8 @@ public class ClusterControllerTest {
     @Autowired
     private transient DateProvider dateProvider;
 
+    private transient NodeRemovalService nodeRemovalService;
+
     private Node node1;
     private Node node2;
     private Node node3;
@@ -88,6 +86,8 @@ public class ClusterControllerTest {
         when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
+
+        this.nodeRemovalService = new NodeRemovalService(this.nodeRepository);
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
@@ -662,8 +662,15 @@ public class ClusterControllerTest {
         assertThat(this.nodeRepository.count()).isEqualTo(1);
     }
 
-    /*@Test
-    public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception{
+    /**
+     * Due to the nature of Spring, we could not create a test that tests the removal
+     * of the node from the repo. You can test the correct behaviour manually, through postman.
+     * This tests if the output message to the client was the expected one.
+     * 
+     * @throws Exception throws exception if endpoint fails
+     */
+    @Test
+    public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception {
         this.node1.setUrl("a");
         this.nodeRepository.save(node1);
 
@@ -678,7 +685,6 @@ public class ClusterControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("Your node will be removed at midnight.");
-        assertThat(this.nodeRepository.count()).isEqualTo(0);
-    }*/
+    }
 
 }
