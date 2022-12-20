@@ -59,6 +59,7 @@ public class JobRequestController {
      * @param request the request
      * @return the response entity
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     @PostMapping("/sendRequest")
     public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
 
@@ -80,6 +81,7 @@ public class JobRequestController {
         LocalDateTime d1 = LocalDateTime.now();
         LocalDate d2 = LocalDate.now().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
+        int timeLimit = 5;
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
 
@@ -87,7 +89,7 @@ public class JobRequestController {
             return ResponseEntity.ok()
                     .body("You cannot send requests for the same day.");
         } else if (!d2.isEqual(onlyDate)) {
-            if (minutes <= 5) {
+            if (minutes <= timeLimit) {
                 return ResponseEntity.ok()
                         .body("You cannot send requests 5 min before the following day.");
             }
