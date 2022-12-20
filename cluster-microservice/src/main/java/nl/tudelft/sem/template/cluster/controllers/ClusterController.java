@@ -69,7 +69,7 @@ public class ClusterController {
      * exists in the database).
      */
     @GetMapping(value = {"/nodes", "/nodes/**"})
-    @PreAuthorize("hasAuthority('SYSADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
         String slashCheck = "/";
@@ -134,7 +134,7 @@ public class ClusterController {
      * @return a string saying whether the node(s) was deleted or not
      */
     @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
-    @PreAuthorize("hasAuthority('SYSADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<String> deleteNode(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
         String slashCheck = "/";
@@ -187,7 +187,7 @@ public class ClusterController {
      * @return list of all jobs in the schedule.
      */
     @GetMapping("/schedule")
-    @PreAuthorize("hasAuthority('SYSADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public List<Job> getSchedule() {
         return this.schedulerInformationAccessingService.getAllJobsFromSchedule();
     }

@@ -88,7 +88,7 @@ public class ClusterControllerTest {
         when(mockAuthenticationManager.getNetId()).thenReturn("ALAN");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ALAN");
-        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("SYSADMIN");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_SYSADMIN");
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
