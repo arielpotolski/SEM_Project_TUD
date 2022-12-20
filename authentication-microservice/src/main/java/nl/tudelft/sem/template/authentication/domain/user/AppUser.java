@@ -19,7 +19,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
 
@@ -28,7 +27,6 @@ import nl.tudelft.sem.template.authentication.domain.HasEvents;
  * A DDD entity representing an application user in our domain.
  */
 @Entity
-@Table(name = "users")
 @NoArgsConstructor
 public class AppUser extends HasEvents {
     public enum Faculty {
@@ -41,9 +39,9 @@ public class AppUser extends HasEvents {
      */
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
 
     @Column(name = "net_id", nullable = false, unique = true)
@@ -60,13 +58,13 @@ public class AppUser extends HasEvents {
     @Column(name = "faculty")
     private Collection<Faculty> facultyList;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinTable(name = "USER_ROLES",
                 joinColumns = {
-                    @JoinColumn(name = "USER_ID")
+                    @JoinColumn(name = "USER_ID", referencedColumnName = "id")
                 },
                 inverseJoinColumns = {
-                    @JoinColumn(name = "ROLE_ID") })
+                    @JoinColumn(name = "ROLE_ID", referencedColumnName = "id") })
     private Role role;
 
     /**

@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsService;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
+import nl.tudelft.sem.template.authentication.domain.user.Role;
 import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
@@ -58,8 +59,6 @@ public class AuthenticationController {
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.registrationService = registrationService;
         this.roleControlService = roleControlService;
-
-        this.roleControlService.initialize();
     }
 
     /**
@@ -98,7 +97,12 @@ public class AuthenticationController {
      */
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
-
+        if (this.roleControlService.count() == 0) {
+            this.roleControlService.save(new Role("USER"));
+            this.roleControlService.save(new Role("FACULTY"));
+            this.roleControlService.save(new Role("SYSADMIN"));
+            this.roleControlService.save(new Role("SYSTEM"));
+        }
         try {
             NetId netId = new NetId(request.getNetId());
             Password password = new Password(request.getPassword());
