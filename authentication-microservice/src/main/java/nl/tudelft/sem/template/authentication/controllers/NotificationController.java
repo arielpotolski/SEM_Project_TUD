@@ -47,9 +47,8 @@ public class NotificationController {
     public ResponseEntity<String> receiveJobNotification(
             @RequestBody NotificationRequestModel data) {
         try {
-            String netId = data.getNetId();
             Notification notificationData = Notification.createNotification(data);
-            notificationService.addNotification(netId, notificationData);
+            notificationService.addNotification(notificationData);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

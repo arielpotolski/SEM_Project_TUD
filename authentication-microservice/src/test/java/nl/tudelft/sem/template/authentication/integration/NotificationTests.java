@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 
+
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 // activate profiles to have spring use mocks during auto-injection of certain beans.
@@ -100,22 +101,22 @@ public class NotificationTests {
     @Test
     public void testNotificationService() {
         Notification notification = Notification.createNotification(notificationRequestModel);
-        notificationService.addNotification("coolUser1", notification);
+        notification.setId(1L);
 
-        assertThat(notificationService.getNotifications("coolUser2")).isEmpty();
-        assertThat(notificationService.getNotifications("coolUser1")).containsExactly(notification);
+        notificationService.addNotification(notification);
+
         assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
+        assertThat(notificationService.getNotifications("goodUser")).contains(notification);
     }
 
     @Test
     public void testMultipleNotifications() {
         Notification notification = Notification.createNotification(notificationRequestModel);
-        notificationService.addNotification("coolUser1", notification);
-        notificationService.addNotification("coolUser1", notification);
-        notificationService.addNotification("coolUser1", notification);
+        Notification notification2 = Notification.createNotification(notificationRequestModel);
+        notificationService.addNotification(notification);
+        notificationService.addNotification(notification2);
 
-        List<Notification> notificationList = List.of(notification, notification, notification);
-        assertThat(notificationService.getNotifications("coolUser1")).containsExactlyElementsOf(notificationList);
-        assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
+        List<Notification> notifications = List.of(notification, notification2);
+        assertThat(notificationService.getNotifications("goodUser")).containsExactlyElementsOf(notifications);
     }
 }
