@@ -11,12 +11,14 @@ import java.util.List;
 import java.util.Locale;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
+import nl.tudelft.sem.template.authentication.models.DeleteNotificationRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetNotifactionsRequestModel;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -107,6 +109,30 @@ public class NotificationController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    /**
+     * End point for deleting a notification.
+     *
+     * @param request the Data (Id) from the user
+     * @return the response it is supposed to give
+     */
+    @DeleteMapping("/DeleteNotification")
+    public ResponseEntity<String> deleteNotification(@RequestBody DeleteNotificationRequestModel request) {
+        try {
+            long id = request.getId();
+            String netId = authManager.getNetId();
+            Notification notification = notificationService.getNotificationById(id);
+            if (notification.getNetId().equals(netId)) {
+                notificationService.deleteNotifications(id);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        return ResponseEntity.ok("Notification is deleted");
     }
 
 

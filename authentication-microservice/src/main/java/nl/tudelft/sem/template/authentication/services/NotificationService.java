@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
+import nl.tudelft.sem.template.authentication.domain.exceptions.IdNotFoundException;
 import nl.tudelft.sem.template.authentication.domain.user.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,15 @@ public class NotificationService {
                 .stream()
                 .filter(c -> !(c.getTimeReceived().isBefore(dateFrom) || c.getTimeReceived().isAfter(dateUntil)))
                 .collect(Collectors.toList());
+    }
+
+    public void deleteNotifications(long id) throws Exception {
+        Notification notification = notificationRepository.findById(id).orElseThrow();
+        notificationRepository.delete(notification);
+    }
+
+    public Notification getNotificationById(long id) {
+        return notificationRepository.findById(id).orElseThrow();
     }
 
 }

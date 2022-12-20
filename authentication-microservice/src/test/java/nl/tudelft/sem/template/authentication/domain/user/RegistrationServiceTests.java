@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
 import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.services.RoleControlService;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
