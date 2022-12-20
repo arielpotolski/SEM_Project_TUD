@@ -21,6 +21,7 @@ import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,6 +69,7 @@ public class ClusterController {
      * exists in the database).
      */
     @GetMapping(value = {"/nodes", "/nodes/**"})
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<List<Node>> getNodeInformation(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
         String slashCheck = "/";
@@ -132,6 +134,7 @@ public class ClusterController {
      * @return a string saying whether the node(s) was deleted or not
      */
     @DeleteMapping(value = {"/nodes/delete", "/nodes/delete/**"})
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<String> deleteNode(HttpServletRequest request) {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
         String slashCheck = "/";
@@ -184,6 +187,7 @@ public class ClusterController {
      * @return list of all jobs in the schedule.
      */
     @GetMapping("/schedule")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public List<Job> getSchedule() {
         return this.schedulerInformationAccessingService.getAllJobsFromSchedule();
     }
@@ -340,8 +344,5 @@ public class ClusterController {
         return ResponseEntity.ok(this.schedulerInformationAccessingService
                 .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date));
     }
-
-
-    // free resources per day for given faculty
 
 }
