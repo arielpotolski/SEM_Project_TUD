@@ -2,9 +2,16 @@ package nl.tudelft.sem.template.authentication.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
+import nl.tudelft.sem.template.authentication.models.GetNotifactionsRequestModel;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +69,34 @@ public class NotificationController {
      * @throws ResponseStatusException when bad request
      */
     @GetMapping("/getNotification")
-    public ResponseEntity<String> sendJobNotifications() {
+    @SuppressWarnings("PMD")
+    public ResponseEntity<String> sendJobNotifications(@RequestBody (required = false) GetNotifactionsRequestModel request) {
+        try {
+            request.check();
+            LocalDate begin = LocalDate.now();
+            LocalDate end = LocalDate.MIN;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            formatter = formatter.localizedBy(Locale.ENGLISH);
+
+            try {
+                begin = LocalDate.parse(request.getStart(), formatter);
+            } catch (Exception e) {
+                System.out.println("No Start in body");
+            }
+            try {
+                end = LocalDate.parse(request.getEnd(), formatter);
+            } catch (Exception e) {
+                System.out.println("No End in body");
+            }
+            String netId = authManager.getNetId();
+            List<Notification> resultList = notificationService.getNotificationsWithDate(netId, begin, end);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String json = ow.writeValueAsString(resultList);
+            return ResponseEntity.ok(json);
+        } catch (Exception e) {
+            System.out.println("No Request Body");
+        }
+
 
         try {
             String netId = authManager.getNetId();
