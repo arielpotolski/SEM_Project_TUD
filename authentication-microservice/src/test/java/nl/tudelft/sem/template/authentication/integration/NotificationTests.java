@@ -24,6 +24,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.List;
+
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -103,20 +105,23 @@ public class NotificationTests {
     public void testNotificationService() {
 
         Notification notification = Notification.createNotification(notificationRequestModel);
+        notification.setId(1L);
+
         notificationService.addNotification(notification);
 
-        assertThat(notificationService.getNotifications("coolUser2")).isEmpty();
         assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
+        assertThat(notificationService.getNotifications("goodUser")).contains(notification);
     }
 
     @Test
     public void testMultipleNotifications() {
 
         Notification notification = Notification.createNotification(notificationRequestModel);
+        Notification notification2 = Notification.createNotification(notificationRequestModel);
         notificationService.addNotification(notification);
-        notificationService.addNotification(notification);
-        notificationService.addNotification(notification);
+        notificationService.addNotification(notification2);
 
-        assertThat(notificationService.getNotifications("coolUser1")).isEmpty();
+        List<Notification> notifications = List.of(notification, notification2);
+        assertThat(notificationService.getNotifications("goodUser")).containsExactlyElementsOf(notifications);
     }
 }

@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,16 +31,15 @@ public class Notification {
 
     @Column
     private String netId;
-
-    @Column()
-    private State state;
-    @Column()
-    private Type type;
-    @Column()
-    private  Date date;
-    @Column()
+    @Column
+    private State stateOfStatus;
+    @Column
+    private Type notificationOrigin;
+    @Column(columnDefinition = "DATE")
+    private  Date dateCreated;
+    @Column
     private  String message;
-    @Column()
+    @Column
     private  LocalDate timeReceived;
 
     /**
@@ -52,10 +52,10 @@ public class Notification {
      */
     public Notification(State state, Date date, String message, Type type, String netId) {
         this.netId = netId;
-        this.state = state;
-        this.date = date;
+        this.stateOfStatus = state;
+        this.dateCreated = date;
         this.message = message;
-        this.type = type;
+        this.notificationOrigin = type;
         this.timeReceived = LocalDate.now();
     }
 
@@ -86,36 +86,33 @@ public class Notification {
 
     }
 
-    //    public State getState() {
-    //        return state;
-    //    }
-    //
-    //    public Type getType() {
-    //        return type;
-    //    }
-    //
-    //    public Date getDate() {
-    //        return date;
-    //    }
-    //
-    //    public String getMessage() {
-    //        return message;
-    //    }
-    //
-    //    public LocalDate getTimeReceived() {
-    //        return timeReceived;
-    //    }
-
     @Override
     public String toString() {
         return "Notification{"
-                + "netId='" + netId + '\''
-                + ", state=" + state
-                + ", type=" + type
-                + ", date=" + date
+               + "id=" + id
+                + ", netId='" + netId + '\''
+                + ", state=" + stateOfStatus
+                + ", type=" + notificationOrigin
+                + ", date=" + dateCreated
                 + ", message='" + message + '\''
                 + ", timeReceived=" + timeReceived
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Notification)) return false;
+        Notification that = (Notification) o;
+        return Objects.equals(id, that.id) && Objects.equals(netId, that.netId)
+                && stateOfStatus == that.stateOfStatus && notificationOrigin == that.notificationOrigin
+                && Objects.equals(message, that.message) && Objects.equals(timeReceived, that.timeReceived)
+                && (this.dateCreated.getTime() == that.dateCreated.getTime());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, netId, stateOfStatus, notificationOrigin, dateCreated, message, timeReceived);
     }
 }
 
