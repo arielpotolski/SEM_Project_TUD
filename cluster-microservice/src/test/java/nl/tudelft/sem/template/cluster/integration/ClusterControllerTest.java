@@ -81,6 +81,7 @@ public class ClusterControllerTest {
     @BeforeEach
     public void setup() {
         when(mockAuthenticationManager.getNetId()).thenReturn("ALAN");
+        when(mockAuthenticationManager.getRole()).thenReturn("SYSADMIN");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ALAN");
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_SYSADMIN");
