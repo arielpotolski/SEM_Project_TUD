@@ -1,6 +1,10 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/job")
+@SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public class JobRequestController {
 
     private final transient AuthManager authManager;
@@ -54,6 +60,7 @@ public class JobRequestController {
      * @param request the request
      * @return the response entity
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     @PostMapping("/sendRequest")
     public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
 
@@ -64,9 +71,34 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        List<String> token = headers.get("Authorization");
+        LocalDateTime preferredDate = request.getPreferredDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
 
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token.get(0));
+        LocalDate onlyDate = request.getPreferredDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        LocalDateTime d1 = LocalDateTime.now();
+        LocalDate d2 = LocalDate.now().plusDays(1L);
+        LocalDateTime ref = d2.atStartOfDay();
+        int timeLimit = 5;
+
+        long minutes = d1.until(ref, ChronoUnit.MINUTES);
+
+        if (d2.isEqual(onlyDate)) {
+            return ResponseEntity.ok()
+                    .body("You cannot send requests for the same day.");
+        } else if (!d2.isEqual(onlyDate)) {
+            if (minutes <= timeLimit) {
+                return ResponseEntity.ok()
+                        .body("You cannot send requests 5 min before the following day.");
+            }
+        }
+
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
@@ -89,40 +121,10 @@ public class JobRequestController {
      * @return the response entity
      */
     @GetMapping("pendingRequests")
+    @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
-    }
-
-
-
-    // TODO: Remove getters in the controller they are useless.
-
-    /**
-     * Gets auth manager.
-     *
-     * @return the auth manager
-     */
-    public AuthManager getAuthManager() {
-        return authManager;
-    }
-
-    /**
-     * Gets request allocation service.
-     *
-     * @return the request allocation service
-     */
-    public RequestAllocationService getRequestAllocationService() {
-        return requestAllocationService;
-    }
-
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
     }
 
     /**
@@ -136,13 +138,15 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
+    @PreAuthorize("hasRole('FACULTY')")
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
-        List<String> facultiesOfFacultyUser = requestAllocationService.getFacultyUserFaculties(headers.get("token").get(0));
+        List<String> facultiesOfFacultyUser = requestAllocationService
+                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))

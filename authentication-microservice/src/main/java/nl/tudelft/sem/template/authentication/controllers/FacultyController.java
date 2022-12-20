@@ -1,16 +1,19 @@
 package nl.tudelft.sem.template.authentication.controllers;
 
+import java.util.Arrays;
 import java.util.List;
+import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
 import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +26,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class FacultyController {
 
     private final transient RegistrationService registrationService;
+    private final transient JwtTokenVerifier tokenVerifier;
 
     @Autowired
-    public FacultyController(RegistrationService registrationService) {
+    public FacultyController(RegistrationService registrationService,
+                             JwtTokenVerifier tokenVerifier) {
         this.registrationService = registrationService;
+        this.tokenVerifier = tokenVerifier;
     }
 
     /**
@@ -62,7 +68,7 @@ public class FacultyController {
             throws ResponseStatusException {
 
         try {
-            NetId netId = new NetId(request.getNetId());
+            NetId netId = new NetId(tokenVerifier.getNetIdFromToken(request.getToken()));
             List<AppUser.Faculty> facultyList = registrationService.getFaculties(netId);
             return ResponseEntity.ok(new GetFacultyResponseModel(facultyList.toString()));
             //response = facultyList.toString();
@@ -89,5 +95,22 @@ public class FacultyController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         return ResponseEntity.ok("Faculty removed");
+    }
+
+    /**
+     * Method to retrieve all existing faculties that the University contains.
+     *
+     * @return List of Strings of all the faculties
+     * @throws ResponseStatusException when there is an error retrieving the faculties
+     */
+    @GetMapping("/getAllFaculties")
+    public ResponseEntity<List<String>> getAllFaculties()
+            throws ResponseStatusException {
+        try {
+            List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
+            return ResponseEntity.ok(enumValues);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

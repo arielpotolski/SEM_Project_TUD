@@ -1,11 +1,15 @@
 package nl.tudelft.sem.template.authentication.services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
+import nl.tudelft.sem.template.authentication.domain.user.NotificationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 /**
  * Service class to store, handle, and sent out incoming notifications.
@@ -13,30 +17,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService {
 
-    private final transient Map<String, List<Notification>> jobNotifications;
+
+    private final transient NotificationRepository notificationRepository;
 
     /**
      * Constructor which initializes the data storage.
      */
-    public NotificationService() {
-        this.jobNotifications = new HashMap<>();
+    @Autowired
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
+
 
     /**
      * Method which stores an incoming notification.
      *
-     * @param netId netId of the user of which the notification belongs to
      * @param notificationData all the data fields of the notification
      */
-    public void addNotification(String netId, Notification notificationData) {
-        if (!jobNotifications.containsKey(netId)) {
-            jobNotifications.put(netId, List.of(notificationData));
-
-        } else {
-            List<Notification> l = new ArrayList<>(jobNotifications.get(netId));
-            l.add(notificationData);
-            jobNotifications.put(netId, l);
-        }
+    public void addNotification(Notification notificationData) {
+        notificationRepository.save(notificationData);
     }
 
     /**
@@ -46,13 +45,31 @@ public class NotificationService {
      * @return list containing notifications, can be emtpy.
      */
     public List<Notification> getNotifications(String netId) {
-        if (jobNotifications.containsKey(netId)) {
-            List<Notification> l =  jobNotifications.get(netId);
-            jobNotifications.remove(netId);
-            return l;
-        } else {
-            return new ArrayList<>();
-        }
+        return notificationRepository.findByNetId(netId);
+    }
+
+    /**
+     * Method which will return a list containing all notifications of the user, or an empty list if there are none.
+     *
+     * @param netId netId of the user
+     * @param dateUntil the end of the timeframe (Most recent)
+     * @param dateFrom the begin of the time frame (Least recent)
+     * @return list containing notifications, can be emtpy.
+     */
+    public List<Notification> getNotificationsWithDate(String netId, LocalDate dateUntil, LocalDate dateFrom) {
+        return notificationRepository.findByNetId(netId)
+                .stream()
+                .filter(c -> !(c.getTimeReceived().isBefore(dateFrom) || c.getTimeReceived().isAfter(dateUntil)))
+                .collect(Collectors.toList());
+    }
+
+    public void deleteNotifications(long id) throws Exception {
+        Notification notification = notificationRepository.findById(id).orElseThrow();
+        notificationRepository.delete(notification);
+    }
+
+    public Notification getNotificationById(long id) {
+        return notificationRepository.findById(id).orElseThrow();
     }
 
 }

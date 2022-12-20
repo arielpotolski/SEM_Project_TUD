@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.cluster.cluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +11,14 @@ public class NodeTest {
 
     private Node node;
 
+    /**
+     * sets up the tests.
+     */
     @BeforeEach
     public void setup() {
-        this.node = new Node(3, 2, 3, "node1", "url1", "netid1");
+        this.node = new Node(3, 2, 3,
+            "node1", "url1", "netid1");
+        this.node.setFacultyId("ewi");
     }
 
     @Test
@@ -81,6 +87,11 @@ public class NodeTest {
     }
 
     @Test
+    public void getFacultyIdTest() {
+        assertThat(this.node.getFacultyId()).isEqualTo("ewi");
+    }
+
+    @Test
     public void setFacultyIdTest() {
         this.node.setFacultyId("facId");
         assertThat(this.node.getFacultyId()).isEqualTo("facId");
@@ -89,6 +100,18 @@ public class NodeTest {
     @Test
     public void hasEnoughCpuNegativeGpuTest() {
         this.node.setGpuResources(-1);
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("None of the resources can be negative.");
+    }
+
+    @Test
+    public void hasEnoughCpuNegativeCpuTest() {
+        this.node.setCpuResources(-1);
+        assertThat(this.node.hasEnoughCpu()).isEqualTo("None of the resources can be negative.");
+    }
+
+    @Test
+    public void hasEnoughCpuNegativeMemoryTest() {
+        this.node.setMemoryResources(-1);
         assertThat(this.node.hasEnoughCpu()).isEqualTo("None of the resources can be negative.");
     }
 
@@ -125,56 +148,88 @@ public class NodeTest {
     }
 
     @Test
+    public void intObjectReturnsFalseOnEqualsTest() {
+        assertThat(this.node.equals(1)).isFalse();
+    }
+
+    @Test
+    public void compareToNullObjectReturnsFalse() {
+        assertThat(this.node.equals(null)).isFalse();
+    }
+
+    @Test
+    public void sameNodeEqualsTestReturnTrue() {
+        Node that = this.node;
+        assertThat(this.node.equals(that)).isTrue();
+    }
+
+    @Test
     public void differentGpuEqualsTest() {
         Node that = new Node(3, 3, 3, "node1", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void differentCpuEqualsTest() {
         Node that = new Node(2, 2, 3, "node1", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void differentMemoryEqualsTest() {
-        Node that = new Node(2, 3, 4, "node1", "url1", "netid1");
+        Node that = new Node(3, 2, 4, "node1", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void differentNameEqualsTest() {
-        Node that = new Node(2, 3, 3, "node2", "url1", "netid1");
+        Node that = new Node(3, 2, 3, "node2", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void differentUrlEqualsTest() {
-        Node that = new Node(2, 3, 3, "node1", "url2", "netid1");
+        Node that = new Node(3, 2, 3, "node1", "url2", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void differentNetIdEqualsTest() {
-        Node that = new Node(3, 3, 3, "node1", "url1", "netid2");
+        Node that = new Node(3, 2, 3, "node1", "url1", "netid2");
+        that.setFacultyId("ewi");
+        assertThat(this.node.equals(that)).isFalse();
+    }
+
+    @Test
+    public void differentFacultyIdEqualsTest() {
+        Node that = new Node(3, 2, 3, "node1", "url1", "netid1");
+        that.setFacultyId("ae");
         assertThat(this.node.equals(that)).isFalse();
     }
 
     @Test
     public void equalsTestTrue() {
         Node that = new Node(3, 2, 3, "node1", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.equals(that)).isTrue();
     }
 
     @Test
     public void hashCodeTest() {
         Node that = new Node(3, 2, 3, "node1", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.hashCode()).isEqualTo(that.hashCode());
     }
 
     @Test
     public void hashCodeFails() {
         Node that = new Node(2, 3, 3, "node2", "url1", "netid1");
+        that.setFacultyId("ewi");
         assertThat(this.node.hashCode()).isNotEqualTo(that.hashCode());
     }
 }

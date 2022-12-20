@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import org.springframework.stereotype.Component;
 
 /**
  * Defines a strategy in which a job is scheduled for the latest date that fits in the "preferred" boundaries.
@@ -12,6 +13,7 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Job;
  * means that no possible date in the preferred range is available - defaults to "earliest possible date"
  * strategy.
  */
+@Component
 public class LatestAcceptableDateStrategy implements JobSchedulingStrategy {
 
     /**

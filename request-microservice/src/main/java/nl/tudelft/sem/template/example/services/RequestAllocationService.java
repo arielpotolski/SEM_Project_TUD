@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
@@ -16,6 +17,7 @@ import nl.tudelft.sem.template.example.domain.Resource;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +56,13 @@ public class RequestAllocationService {
     public List<String> getFacultyUserFaculties(String token) {
 
         try {
-            String url = "https://localhost:8081/getUserFaculties";
+            String url = "http://localhost:8081/getUserFaculties";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-            ResponseEntity<String> result = restTemplate.postForEntity(url, token, String.class);
+            HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
 
             String string = result.getBody();
 
@@ -86,8 +90,9 @@ public class RequestAllocationService {
     public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
 
         try {
-            String url = "https://localhost:8085/resources/available" + preferredDate.toString() + "/" + facultyName;
+            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "/" + facultyName;
 
+            // headers?
             ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
             return Objects.requireNonNull(result.getBody()).getResourceList();
 
@@ -150,10 +155,10 @@ public class RequestAllocationService {
      * @param request the request
      * @throws JsonProcessingException the json processing exception
      */
-    public void sendRequestToCluster(Request request) throws JsonProcessingException {
+    public boolean sendRequestToCluster(Request request) throws JsonProcessingException {
 
         try {
-            String url = "https://localhost:8085/request";
+            String url = "https://localhost:8082/request";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
@@ -163,11 +168,13 @@ public class RequestAllocationService {
             System.out.println(json);
             ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post: " + e);
+            return false;
         }
+        return true;
 
 
     }
@@ -178,7 +185,7 @@ public class RequestAllocationService {
      *
      * @param request the request
      */
-    public void sendDeclinedRequestToUserService(Request request) {
+    public boolean sendDeclinedRequestToUserService(Request request) {
 
 
         try {
@@ -194,11 +201,13 @@ public class RequestAllocationService {
 
             ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post" + e);
+            return false;
         }
+        return true;
 
 
     }

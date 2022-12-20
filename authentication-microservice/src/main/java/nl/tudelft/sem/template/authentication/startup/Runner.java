@@ -38,7 +38,7 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
                 try {
                     Thread.sleep(1000);
 
-                    String url = "https://localhost:8085/faculties";
+                    String url = "https://localhost:8082/faculties";
                     List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
 
                     ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

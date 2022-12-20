@@ -1,9 +1,7 @@
 package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,20 +13,17 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
+import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
-import nl.tudelft.sem.template.cluster.models.TotalResourcesResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -85,9 +80,10 @@ public class ClusterControllerTest {
      */
     @BeforeEach
     public void setup() {
-        when(mockAuthenticationManager.getNetId()).thenReturn("Alan&Ariel");
+        when(mockAuthenticationManager.getNetId()).thenReturn("ALAN");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alan&Ariel");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("ALAN");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_SYSADMIN");
 
         node1 = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
@@ -144,10 +140,6 @@ public class ClusterControllerTest {
         model.setPreferredCompletionDate(LocalDate.now().plusDays(2));
     }
 
-    public boolean compareTwoDateFormats(String a, String b) {
-        return false;
-    }
-
     @Test
     public void getAllNodesTest() throws Exception {
 
@@ -194,8 +186,6 @@ public class ClusterControllerTest {
         result3.andExpect(status().isOk());
         String response3 = result3.andReturn().getResponse().getContentAsString();
         assertThat(response3).isEqualTo(JsonUtil.serialize(List.of(node1))); // one element list
-
-        // TODO: generate random number of random nodes and check
     }
 
     @Test
@@ -368,7 +358,6 @@ public class ClusterControllerTest {
     public void deleteNodeByUrlTestCorrectUrl() throws Exception {
         nodeRepository.save(node1);
         nodeRepository.save(node2);
-        when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -603,7 +592,7 @@ public class ClusterControllerTest {
     @Test
     public void getResourcesReservedPerFacultyPerDay() throws Exception {
         // check both url paths
-        TotalResourcesResponseModel testingModel = new TotalResourcesResponseModel(
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
                 LocalDate.of(2022, 12, 14), "EWI",
                 5.0, 1.0, 1.0);
 
@@ -627,6 +616,64 @@ public class ClusterControllerTest {
 
     @Test
     public void getResourcesReservedForGivenFacultyForGivenDay() throws Exception {
+    }
+
+    @Test
+    public void scheduleNodeRemovalNodeNotFoundTest() throws Exception {
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Could not find the node to be deleted."
+            + " Check if the url provided is correct.");
+        assertThat(this.nodeRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void scheduleNodeRemovalUserNotOwnerTest() throws Exception {
+        this.node1.setUrl("a");
+        this.nodeRepository.save(node1);
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("You cannot remove nodes that"
+            + " other users have contributed to the cluster.");
+        assertThat(this.nodeRepository.count()).isEqualTo(1);
+    }
+
+    /**
+     * Due to the nature of Spring, we could not create a test that tests the removal
+     * of the node from the repo. You can test the correct behaviour manually, through postman.
+     * This tests if the output message to the client was the expected one.
+     *
+     * @throws Exception throws exception if endpoint fails
+     */
+    @Test
+    public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception {
+        this.node1.setUrl("a");
+        this.nodeRepository.save(node1);
+
+        when(this.mockAuthenticationManager.getNetId()).thenReturn(this.node1.getUserNetId());
+
+        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
+            .post("/nodes/delete/user/a")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node will be removed at midnight.");
     }
 
 }
