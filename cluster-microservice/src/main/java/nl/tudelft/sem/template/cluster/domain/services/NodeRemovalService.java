@@ -2,6 +2,8 @@ package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 @EnableAsync
 @EnableScheduling
+@Setter
 public class NodeRemovalService {
 
     private List<Node> nodesToRemove;  // list of nodes to be removed after midnight.
 
-    private NodeRepository nodeRepo;
+    private final transient NodeRepository nodeRepo;
 
     /**
      * Constructor of the service class.
