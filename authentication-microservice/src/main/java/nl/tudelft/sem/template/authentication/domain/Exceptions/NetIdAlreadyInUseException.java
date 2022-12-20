@@ -1,4 +1,6 @@
-package nl.tudelft.sem.template.authentication.domain.user;
+package nl.tudelft.sem.template.authentication.domain.Exceptions;
+
+import nl.tudelft.sem.template.authentication.domain.user.NetId;
 
 /**
  * Exception to indicate the NetID is already in use.
