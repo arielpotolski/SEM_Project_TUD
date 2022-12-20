@@ -27,8 +27,7 @@ public class JwtTokenGenerator {
     @Value("${jwt.secret}")  // automatically loads jwt.secret from resources/application.properties
     private transient String jwtSecret;
 
-    @Value("${jwt.authorities.key}")
-    private transient String AUTHORITIES_KEY;
+    private final transient String AUTHORITIES_KEY = "roles";
 
     /**
      * Time provider to make testing easier.
