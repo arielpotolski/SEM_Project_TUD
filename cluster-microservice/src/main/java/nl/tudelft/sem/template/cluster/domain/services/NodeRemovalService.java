@@ -71,15 +71,14 @@ public class NodeRemovalService {
     /**
      * This method removes the nodes in the nodesToRemoveList every time it's midnight.
      */
-    @Scheduled(cron = "0 33 4 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     @Async
     public void removeNodesAtMidnight() {
-        System.out.println(this.nodeRepo.count());
         for (Node node : this.nodesToRemove) {
             Node n = this.nodeRepo.findByUrl(node.getUrl());
             this.nodeRepo.delete(n);
         }
-        System.out.println(this.nodeRepo.count());
+
         this.nodesToRemove = new ArrayList<>();
     }
 }
