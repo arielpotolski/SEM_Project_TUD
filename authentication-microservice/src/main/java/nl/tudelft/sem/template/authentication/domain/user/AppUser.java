@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -15,6 +16,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
@@ -56,6 +60,15 @@ public class AppUser extends HasEvents {
     @Column(name = "faculty")
     private Collection<Faculty> facultyList;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "USER_ROLES",
+                joinColumns = {
+                    @JoinColumn(name = "USER_ID")
+                },
+                inverseJoinColumns = {
+                    @JoinColumn(name = "ROLE_ID") })
+    private Role role;
+
     /**
      * Create new application user.
      *
@@ -80,6 +93,14 @@ public class AppUser extends HasEvents {
 
     public HashedPassword getPassword() {
         return password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     /**

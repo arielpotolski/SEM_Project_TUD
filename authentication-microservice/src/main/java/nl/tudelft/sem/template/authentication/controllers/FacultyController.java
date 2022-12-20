@@ -4,7 +4,7 @@ import java.util.List;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;

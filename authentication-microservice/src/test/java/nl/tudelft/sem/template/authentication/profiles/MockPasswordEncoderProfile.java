@@ -1,6 +1,6 @@
 package nl.tudelft.sem.template.authentication.profiles;
 
-import nl.tudelft.sem.template.authentication.domain.user.PasswordHashingService;
+import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

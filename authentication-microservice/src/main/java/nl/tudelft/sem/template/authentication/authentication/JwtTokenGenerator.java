@@ -5,9 +5,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import nl.tudelft.sem.template.authentication.domain.providers.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +26,9 @@ public class JwtTokenGenerator {
 
     @Value("${jwt.secret}")  // automatically loads jwt.secret from resources/application.properties
     private transient String jwtSecret;
+
+    @Value("${jwt.authorities.key}")
+    private transient String AUTHORITIES_KEY;
 
     /**
      * Time provider to make testing easier.
@@ -41,8 +47,10 @@ public class JwtTokenGenerator {
      * @return the JWT token
      */
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
+        String authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        return Jwts.builder().setSubject(userDetails.getUsername())
+                .claim(AUTHORITIES_KEY, authorities)
                 .setIssuedAt(new Date(timeProvider.getCurrentTime().toEpochMilli()))
                 .setExpiration(new Date(timeProvider.getCurrentTime().toEpochMilli() + JWT_TOKEN_VALIDITY))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
