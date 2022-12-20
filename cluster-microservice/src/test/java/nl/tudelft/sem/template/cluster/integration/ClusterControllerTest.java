@@ -666,7 +666,7 @@ public class ClusterControllerTest {
      * Due to the nature of Spring, we could not create a test that tests the removal
      * of the node from the repo. You can test the correct behaviour manually, through postman.
      * This tests if the output message to the client was the expected one.
-     * 
+     *
      * @throws Exception throws exception if endpoint fails
      */
     @Test
