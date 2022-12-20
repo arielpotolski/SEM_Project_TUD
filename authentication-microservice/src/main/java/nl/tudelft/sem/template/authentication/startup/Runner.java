@@ -2,14 +2,24 @@ package nl.tudelft.sem.template.authentication.startup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
+import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsService;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
+import nl.tudelft.sem.template.authentication.domain.user.NetId;
+import nl.tudelft.sem.template.authentication.domain.user.Password;
+import nl.tudelft.sem.template.authentication.domain.user.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,14 +28,26 @@ import org.springframework.web.client.RestTemplate;
 public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
     private final transient RestTemplate restTemplate;
+    private final transient RegistrationService registrationService;
+    private final transient JwtTokenGenerator jwtTokenGenerator;
+    private final transient JwtUserDetailsService jwtUserDetailsService;
 
-    private transient Thread thread;
-
+    /**
+     * Constructor of the class.
+     *
+     * @param restTemplateBuilder object that makes the request
+     * @param registrationService service which can register a user
+     * @param jwtTokenGenerator service that generates the token
+     * @param jwtUserDetailsService service that generates the user details
+     */
     @Autowired
-    public Runner(RestTemplateBuilder restTemplateBuilder) {
+    public Runner(RestTemplateBuilder restTemplateBuilder, RegistrationService registrationService,
+                  JwtTokenGenerator jwtTokenGenerator, JwtUserDetailsService jwtUserDetailsService) {
         this.restTemplate = restTemplateBuilder.build();
+        this.registrationService = registrationService;
+        this.jwtTokenGenerator = jwtTokenGenerator;
+        this.jwtUserDetailsService = jwtUserDetailsService;
     }
-
 
     @Override public void onApplicationEvent(ContextRefreshedEvent event) {
         sendFaculties();
@@ -33,31 +55,52 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
 
     private void sendFaculties() {
 
-        thread = new Thread(() -> {
+        Thread thread = new Thread(() -> {
             while (true) {
+                HttpURLConnection connection;
+                try {
+                    URL u = new URL("http://localhost:8082");
+                    connection = (HttpURLConnection) u.openConnection();
+                    connection.setRequestMethod("HEAD");
+                    int code = connection.getResponseCode();
+                    if (code == 200 || code == 401) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    System.out.println("error" + e.getMessage());
+                }
+            }
+            System.out.println("Successfully polled Cluster Microservice");
+            try {
+                registrationService.registerUser(new NetId("user"), new Password("pass"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String token = jwtTokenGenerator.generateToken(jwtUserDetailsService.loadUserByUsername("user"));
+
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            while (status != HttpStatus.OK) {
                 try {
                     Thread.sleep(1000);
-
-                    String url = "https://localhost:8085/faculties";
+                    String url = "http://localhost:8082/faculties";
                     List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
-
                     ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
                     String json = ow.writeValueAsString(enumValues);
 
-                    ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
-                    if (Objects.equals(result.getBody(), "ok")) {
-                        return;
-                    }
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.setBearerAuth(token);
+                    HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+                    ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
+                    status = result.getStatusCode();
                 } catch (Exception e) {
-                    System.out.println("Cluster service not yet online");
+                    System.out.println("error with reaching Cluster Microservice. Trying again \n" + e.getMessage());
                 }
             }
+            System.out.println("Successfully sent all faculties to Cluster Microservice");
         });
-        try {
-            thread.start();
-        } catch (Exception e) {
-            System.out.println("Error with thread that talks to cluster: " + e);
-        }
+        thread.start();
     }
 
 
