@@ -18,8 +18,6 @@ import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.Role;
-import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
-import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.authentication.models.ApplyFacultyRequestModel;
@@ -28,6 +26,8 @@ import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel
 import nl.tudelft.sem.template.authentication.models.GetFacultyRequestModel;
 import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import nl.tudelft.sem.template.authentication.services.PasswordHashingService;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.services.RoleControlService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +77,9 @@ public class UsersTests {
     @Autowired
     private transient RoleControlService roleControlService;
 
+    /**
+     * Sets up the tests.
+     */
     @BeforeEach
     public void setup() {
         this.roleControlService.save(new Role("USER"));

@@ -36,6 +36,9 @@ public class RegistrationServiceTests {
     @Autowired
     private transient UserRepository userRepository;
 
+    /**
+     * Sets up the tests.
+     */
     @BeforeEach
     public void setup() {
         this.roleControlService.save(new Role("USER"));
