@@ -30,6 +30,10 @@ public class NodeAssignmentService {
         this.strategy = strategy;
     }
 
+    public NodeAssignmentStrategy getStrategy() {
+        return this.strategy;
+    }
+
     /**
      * Uses the current startegy to pick a faculty to which to assign the given node.
      *
