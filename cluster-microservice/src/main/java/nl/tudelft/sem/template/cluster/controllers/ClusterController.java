@@ -284,6 +284,7 @@ public class ClusterController {
      */
     @GetMapping(value = {"/resources/reserved", "/resources/reserved/{date}&{facultyId}",
         "/resources/reserved/{date}&", "/resources/reserved/&{facultyId}", "resources/reserved/&"})
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getReservedResourcesPerFacultyPerDay(
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
