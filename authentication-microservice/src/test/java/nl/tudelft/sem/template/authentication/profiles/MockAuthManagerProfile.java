@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 
 
-
 /**
  * This is a configuration profile.
  * A configuration can be used to define beans to be used during injection.
@@ -23,22 +22,18 @@ import org.springframework.security.authentication.AuthenticationManager;
  *.
  * A configuration profile to allow injection of a mock AuthenticationManager.
  */
-@Profile("mockAuthenticationManager")
+@Profile("mockAuthManager")
 @Configuration
-public class MockAuthenticationManagerProfile {
+public class MockAuthManagerProfile {
 
     /**
      * Mocks the AuthenticationManager.
      *
      * @return A mocked AuthenticationManager.
      */
-    @Bean
-    @Primary  // marks this bean as the first bean to use when trying to inject an AuthenticationManager
-    public AuthenticationManager getMockAuthenticationManager() {
-        return Mockito.mock(AuthenticationManager.class);
-    }
 
     @Bean
+    @Primary
     public AuthManager getMockAuthManager() {
         return Mockito.mock(AuthManager.class);
     }

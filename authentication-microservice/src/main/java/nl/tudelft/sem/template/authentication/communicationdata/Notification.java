@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.authentication.communicationdata;
 
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Locale;
@@ -14,6 +15,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Class which stores notifications data, and allows it to be stored in a repository.
@@ -23,6 +25,7 @@ import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 @Getter
 @Setter
 public class Notification {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,6 +45,8 @@ public class Notification {
     @Column
     private  LocalDate timeReceived;
 
+
+
     /**
      * Constructor of a Notification.
      *
@@ -50,13 +55,13 @@ public class Notification {
      * @param message alert or a message of the notification
      * @param type type of notification is what microservice it came from
      */
-    public Notification(State state, Date date, String message, Type type, String netId) {
+    public Notification(State state, Date date, String message, Type type, String netId, LocalDate timeCreated) {
         this.netId = netId;
         this.stateOfStatus = state;
         this.dateCreated = date;
         this.message = message;
+        this.timeReceived = timeCreated;
         this.notificationOrigin = type;
-        this.timeReceived = LocalDate.now();
     }
 
     public Notification() {
@@ -78,7 +83,7 @@ public class Notification {
             s = State.valueOf(data.getState());
             d = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(data.getDate());
             t = Type.valueOf(data.getType());
-            return new Notification(s, d, data.getMessage(), t, data.getNetId());
+            return new Notification(s, d, data.getMessage(), t, data.getNetId(), LocalDate.now());
         } catch (Exception a) {
             System.out.println(a.getMessage());
             throw new IllegalArgumentException();

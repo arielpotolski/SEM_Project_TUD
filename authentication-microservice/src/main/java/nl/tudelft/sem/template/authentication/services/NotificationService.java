@@ -1,10 +1,15 @@
 package nl.tudelft.sem.template.authentication.services;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.domain.user.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 /**
  * Service class to store, handle, and sent out incoming notifications.
@@ -23,6 +28,7 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
+
     /**
      * Method which stores an incoming notification.
      *
@@ -40,6 +46,21 @@ public class NotificationService {
      */
     public List<Notification> getNotifications(String netId) {
         return notificationRepository.findByNetId(netId);
+    }
+
+    /**
+     * Method which will return a list containing all notifications of the user, or an empty list if there are none.
+     *
+     * @param netId netId of the user
+     * @param dateUntil the end of the timeframe (Most recent)
+     * @param dateFrom the begin of the time frame (Least recent)
+     * @return list containing notifications, can be emtpy.
+     */
+    public List<Notification> getNotificationsWithDate(String netId, LocalDate dateUntil, LocalDate dateFrom) {
+        return notificationRepository.findByNetId(netId)
+                .stream()
+                .filter(c -> !(c.getTimeReceived().isBefore(dateFrom) || c.getTimeReceived().isAfter(dateUntil)))
+                .collect(Collectors.toList());
     }
 
 }
