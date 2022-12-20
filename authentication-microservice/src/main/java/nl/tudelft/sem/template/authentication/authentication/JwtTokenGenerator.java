@@ -3,10 +3,7 @@ package nl.tudelft.sem.template.authentication.authentication;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
-
 import nl.tudelft.sem.template.authentication.domain.providers.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +24,7 @@ public class JwtTokenGenerator {
     @Value("${jwt.secret}")  // automatically loads jwt.secret from resources/application.properties
     private transient String jwtSecret;
 
-    private final transient String AUTHORITIES_KEY = "roles";
+    private final transient String authoritiesKey = "roles";
 
     /**
      * Time provider to make testing easier.
@@ -49,7 +46,7 @@ public class JwtTokenGenerator {
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         return Jwts.builder().setSubject(userDetails.getUsername())
-                .claim(AUTHORITIES_KEY, authorities)
+                .claim(authoritiesKey, authorities)
                 .setIssuedAt(new Date(timeProvider.getCurrentTime().toEpochMilli()))
                 .setExpiration(new Date(timeProvider.getCurrentTime().toEpochMilli() + JWT_TOKEN_VALIDITY))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();

@@ -52,7 +52,7 @@ public class RegistrationService {
             String roleName;
             if (netId.toString().startsWith("adm")) {
                 roleName = "SYSADMIN";
-            } else if (netId.toString().startsWith("fac")){
+            } else if (netId.toString().startsWith("fac")) {
                 roleName = "FACULTY";
             } else {
                 roleName = "USER";

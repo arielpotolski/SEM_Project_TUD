@@ -5,10 +5,10 @@ import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsServi
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.Role;
-import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.models.AuthenticationRequestModel;
 import nl.tudelft.sem.template.authentication.models.AuthenticationResponseModel;
 import nl.tudelft.sem.template.authentication.models.RegistrationRequestModel;
+import nl.tudelft.sem.template.authentication.services.RegistrationService;
 import nl.tudelft.sem.template.authentication.services.RoleControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-
 
 @RestController
 public class AuthenticationController {

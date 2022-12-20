@@ -9,7 +9,7 @@ public class RoleControlService {
 
     private final transient RoleRepository roleRepository;
 
-    public RoleControlService (RoleRepository roleRepository) {
+    public RoleControlService(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 

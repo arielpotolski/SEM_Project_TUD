@@ -62,6 +62,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    /**
+     * Establishes the role hierarchy. An admin has all the privileges of a user and faculty account, while a faculty
+     * account has all the privileges of a user. System is outside this hierarchy as the endpoints users and
+     * the system call should not be the same.
+     *
+     * @return the hierarchy of roles.
+     */
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
