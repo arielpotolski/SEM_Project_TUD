@@ -155,7 +155,7 @@ public class RequestAllocationService {
      * @param request the request
      * @throws JsonProcessingException the json processing exception
      */
-    public void sendRequestToCluster(Request request) throws JsonProcessingException {
+    public boolean sendRequestToCluster(Request request) throws JsonProcessingException {
 
         try {
             String url = "https://localhost:8085/request";
@@ -168,11 +168,13 @@ public class RequestAllocationService {
             System.out.println(json);
             ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post: " + e);
+            return false;
         }
+        return true;
 
 
     }
@@ -183,7 +185,7 @@ public class RequestAllocationService {
      *
      * @param request the request
      */
-    public void sendDeclinedRequestToUserService(Request request) {
+    public boolean sendDeclinedRequestToUserService(Request request) {
 
 
         try {
@@ -199,11 +201,13 @@ public class RequestAllocationService {
 
             ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post" + e);
+            return false;
         }
+        return true;
 
 
     }
