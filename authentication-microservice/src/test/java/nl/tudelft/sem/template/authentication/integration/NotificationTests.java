@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.time.LocalDate;
+import java.util.Date;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import nl.tudelft.sem.template.authentication.communicationdata.Notification;
@@ -35,9 +37,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Date;
 
 
 @SpringBootTest
@@ -144,7 +143,8 @@ public class NotificationTests {
     public void testGetNotificationWithDateWhenCorrect() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setEnd("2021-01-01");
@@ -165,10 +165,11 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationOnStartDate() throws Exception{
+    public void testGetNotificationOnStartDate() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setEnd("2021-01-01");
@@ -189,10 +190,11 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationOnEndDate() throws Exception{
+    public void testGetNotificationOnEndDate() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setEnd("2022-10-02");
@@ -213,10 +215,11 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationOutsideOfScope() throws Exception{
+    public void testGetNotificationOutsideOfScope() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setEnd("2021-01-01");
@@ -238,10 +241,11 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationNoEndDate() throws Exception{
+    public void testGetNotificationNoEndDate() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setStart("2022-11-02");
@@ -262,10 +266,11 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationNoStartDate() throws Exception{
+    public void testGetNotificationNoStartDate() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
         requestModel.setEnd("2022-09-02");
@@ -285,11 +290,13 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationOneOutsideOneInside() throws Exception{
+    public void testGetNotificationOneOutsideOneInside() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
-        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2023,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
+        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2023, 10, 2));
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
@@ -312,11 +319,13 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationTwoNotifications() throws Exception{
+    public void testGetNotificationTwoNotifications() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
-        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2021,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
+        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2021, 10, 2));
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
@@ -341,11 +350,13 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationNoOtherUsers() throws Exception{
+    public void testGetNotificationNoOtherUsers() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
-        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user", LocalDate.of(2021,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
+        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023, 02, 1),
+                "mes", Type.JOB, "user", LocalDate.of(2021, 10, 2));
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
@@ -370,11 +381,13 @@ public class NotificationTests {
     }
 
     @Test
-    public void testGetNotificationNoJsonSent() throws Exception{
+    public void testGetNotificationNoJsonSent() throws Exception {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(authManager.getNetId()).thenReturn("user1");
-        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2022,10,2));
-        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023,02, 1), "mes", Type.JOB, "user1", LocalDate.of(2021,10,2));
+        Notification notification1 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
+        Notification notification2 = new Notification(State.ACCEPTED, new Date(2023, 02,  1),
+                "mes", Type.JOB, "user1", LocalDate.of(2021, 10, 2));
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
 
