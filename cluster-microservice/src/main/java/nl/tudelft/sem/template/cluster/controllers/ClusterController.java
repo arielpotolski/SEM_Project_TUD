@@ -10,6 +10,7 @@ import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
+import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
@@ -21,6 +22,7 @@ import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -41,6 +44,7 @@ public class ClusterController {
     private final transient NodeContributionService nodeContributionService;
     private final transient NodeInformationAccessingService nodeInformationAccessingService;
     private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
+    private final transient DataProcessingService dataProcessingService;
 
     private final transient DateProvider dateProvider;
 
@@ -53,13 +57,15 @@ public class ClusterController {
     public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              NodeInformationAccessingService nodeInformationAccessingService,
-                             SchedulerInformationAccessingService schedulerInformationAccessingService) {
+                             SchedulerInformationAccessingService schedulerInformationAccessingService,
+                             DataProcessingService dataProcessingService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
         this.nodeInformationAccessingService = nodeInformationAccessingService;
         this.schedulerInformationAccessingService = schedulerInformationAccessingService;
+        this.dataProcessingService = dataProcessingService;
     }
 
     /**
@@ -257,14 +263,16 @@ public class ClusterController {
     @GetMapping(value = {"/resources/assigned", "/resources/assigned/{facultyId}"})
     @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<FacultyResourcesResponseModel>> getResourcesAssignedToFaculty(
-            @PathVariable(value = "facultyId", required = false) String facultyId) {
+            @RequestHeader HttpHeaders headers, @PathVariable(value = "facultyId", required = false) String facultyId) {
         String role = authManager.getRole(); // role necessary to determine which actions allowed
-        boolean adminPermissions = "SYSADMIN".equals(role);
+        boolean adminPermissions = role.equals("SYSADMIN");
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
 
         // if requesting all faculties or not your faculty, return forbidden
-//        if (!adminPermissions && (facultyId == null || )) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-//        }
+        if (!adminPermissions
+                && (facultyId == null || !dataProcessingService.getFacultiesOfGivenUser(token).contains(facultyId))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         if (facultyId == null) {
             var rawResources = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
