@@ -31,5 +31,5 @@ test-cluster-microservice:
   stage: test
   script:
     - gradle cluster-microservice:test cluster-microservice:jacocoTestReport
-    - cat cluster-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
+    - cat cluster-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?%.*?([0-9]{1,3})%"
   coverage: /([0-9]{1,3})%/

@@ -1,10 +1,10 @@
 package nl.tudelft.sem.template.cluster.domain.strategies;
 
 import java.util.List;
-import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 
 public interface NodeAssignmentStrategy {
 
-    String pickFacultyToAssignNodeTo(List<FacultyTotalResources> faculties);
+    String pickFacultyToAssignNodeTo(List<FacultyResourcesResponseModel> faculties);
 
 }

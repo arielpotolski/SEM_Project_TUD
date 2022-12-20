@@ -75,13 +75,13 @@ public class RequestAllocationServiceTest {
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
-
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
 
     }
 
     @Test
-    public void getFacultyUserFacultiesTest() throws Exception {
+    public void getFacultyUserFacultiesTest() {
 
         // Test without prior loading from the user microservice
 
@@ -92,8 +92,8 @@ public class RequestAllocationServiceTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
 
-
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+
         assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
 
 
@@ -110,8 +110,8 @@ public class RequestAllocationServiceTest {
                 .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
-        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
 
+        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
 
     }
 
@@ -123,6 +123,7 @@ public class RequestAllocationServiceTest {
 
         Request request = new Request(1L, "test", "name", "desc",
                 "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+
         boolean b = requestAllocationService.sendRequestToCluster(request);
 
         assertThat(b).isFalse();
@@ -136,9 +137,17 @@ public class RequestAllocationServiceTest {
 
         Request request = new Request(1L, "test", "name", "desc",
                 "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request);
 
         assertThat(b).isFalse();
 
     }
+
+    @Test
+    public void notEnoughResourceForJobTest(){}
+
+    @Test
+    public void enoughResourcesForJobTest() {}
+
 }

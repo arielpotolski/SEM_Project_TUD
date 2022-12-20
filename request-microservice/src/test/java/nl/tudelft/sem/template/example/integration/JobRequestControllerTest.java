@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.example.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -39,7 +38,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestTemplate;
 
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 // activate profiles to have spring use mocks during auto-injection of certain beans.
@@ -72,10 +70,10 @@ public class JobRequestControllerTest {
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
 
     }
-
 
     @Test
     public void sendRequestTestInFacultyNull() throws Exception {
@@ -87,11 +85,44 @@ public class JobRequestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
+        result.andExpect(status().isOk());
+
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+
+    }
+
+    @Test
+    public void sendRequestForTodayNotApproved() throws Exception {
+
+        LocalDate localDate = LocalDate.now();
+        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+
+        JSONObject jsonObject = new JSONObject();
+
+        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "AE");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("faculty", date);
+        jsonObject.put("id", 123L);
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
 
+        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
     }
 
     @Test
@@ -110,6 +141,7 @@ public class JobRequestControllerTest {
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
+
         assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
 
     }
@@ -134,7 +166,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("faculty", date);
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,6 +177,44 @@ public class JobRequestControllerTest {
         //assertThat(response).isEqualTo("You cannot send requests for the same day.");
 
     }
+
+    @Test
+    public void sendRequest5MinBeforeNextDayTest() throws Exception {
+
+        LocalDate localDate = LocalDate.now();
+        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+
+        JSONObject jsonObject = new JSONObject();
+
+        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "test");
+        jsonObject.put("cpu", 9.0);
+        jsonObject.put("gpu", 5.0);
+        jsonObject.put("memory", 11.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("faculty", date);
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        // Need to mock the faculty and date 5 min before
+        //assertThat(response).isEqualTo("You cannot send requests 5 min before the following day.");
+
+
+    }
+
+    @Test
+    public void sendRequestWaitingApproval(){}
+
 
 
     // Can also add an assert if we change the request in the controller
@@ -186,7 +255,6 @@ public class JobRequestControllerTest {
         requests.add(req3);
 
         requestRepository.saveAll(requests);
-
 
         RestTemplate restTemplate = new RestTemplate();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();

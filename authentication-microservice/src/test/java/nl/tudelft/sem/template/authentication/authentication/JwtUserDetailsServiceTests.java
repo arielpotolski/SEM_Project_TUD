@@ -3,10 +3,14 @@ package nl.tudelft.sem.template.authentication.authentication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.List;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
+import nl.tudelft.sem.template.authentication.domain.user.Role;
+import nl.tudelft.sem.template.authentication.domain.user.RoleRepository;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
+import nl.tudelft.sem.template.authentication.services.RoleControlService;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,11 +34,18 @@ public class JwtUserDetailsServiceTests {
     private transient JwtUserDetailsService jwtUserDetailsService;
 
     @Autowired
+    private transient RoleControlService roleControlService;
+
+    @Autowired
     private transient UserRepository userRepository;
+
+    @Autowired
+    private transient RoleRepository roleRepository;
 
     @BeforeEach
     public void setup() {
         this.jwtUserDetailsService = new JwtUserDetailsService(userRepository);
+        this.roleControlService = new RoleControlService(roleRepository);
     }
 
     @Test
@@ -44,6 +55,9 @@ public class JwtUserDetailsServiceTests {
         final HashedPassword testHashedPassword = new HashedPassword("password123Hash");
 
         AppUser appUser = new AppUser(testUser, testHashedPassword);
+        roleControlService.save(new Role("FACULTY"));
+        Role role = roleControlService.findByName("FACULTY");
+        appUser.setRole(role);
         userRepository.save(appUser);
 
         // Act

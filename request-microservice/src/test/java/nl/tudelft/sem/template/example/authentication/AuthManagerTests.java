@@ -17,7 +17,7 @@ public class AuthManagerTests {
     }
 
     @Test
-    public void getNetidTest() {
+    public void getNetIdTest() {
         // Arrange
         String expected = "user123";
         var authenticationToken = new UsernamePasswordAuthenticationToken(

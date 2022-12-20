@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -15,7 +16,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.authentication.domain.HasEvents;
 
@@ -24,7 +27,6 @@ import nl.tudelft.sem.template.authentication.domain.HasEvents;
  * A DDD entity representing an application user in our domain.
  */
 @Entity
-@Table(name = "users")
 @NoArgsConstructor
 public class AppUser extends HasEvents {
     public enum Faculty {
@@ -37,9 +39,9 @@ public class AppUser extends HasEvents {
      */
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
 
     @Column(name = "net_id", nullable = false, unique = true)
@@ -55,6 +57,15 @@ public class AppUser extends HasEvents {
     @CollectionTable(name = "faculties")
     @Column(name = "faculty")
     private Collection<Faculty> facultyList;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinTable(name = "USER_ROLES",
+                joinColumns = {
+                    @JoinColumn(name = "USER_ID", referencedColumnName = "id")
+                },
+                inverseJoinColumns = {
+                    @JoinColumn(name = "ROLE_ID", referencedColumnName = "id") })
+    private Role role;
 
     /**
      * Create new application user.
@@ -80,6 +91,14 @@ public class AppUser extends HasEvents {
 
     public HashedPassword getPassword() {
         return password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     /**
