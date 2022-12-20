@@ -9,7 +9,6 @@ import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.strategies.EarliestPossibleDateStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LatestAcceptableDateStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
