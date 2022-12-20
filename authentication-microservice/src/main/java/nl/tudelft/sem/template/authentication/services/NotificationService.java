@@ -52,14 +52,14 @@ public class NotificationService {
      * Method which will return a list containing all notifications of the user, or an empty list if there are none.
      *
      * @param netId netId of the user
-     * @param start the begin of the timeframe (Most recent)
-     * @param end the end of the time frame (Least recent)
+     * @param dateUntil the end of the timeframe (Most recent)
+     * @param dateFrom the begin of the time frame (Least recent)
      * @return list containing notifications, can be emtpy.
      */
-    public List<Notification> getNotificationsWithDate(String netId, LocalDate start, LocalDate end) {
+    public List<Notification> getNotificationsWithDate(String netId, LocalDate dateUntil, LocalDate dateFrom) {
         return notificationRepository.findByNetId(netId)
                 .stream()
-                .filter(c -> !(c.getTimeReceived().isBefore(end) || c.getTimeReceived().isAfter(start)))
+                .filter(c -> !(c.getTimeReceived().isBefore(dateFrom) || c.getTimeReceived().isAfter(dateUntil)))
                 .collect(Collectors.toList());
     }
 

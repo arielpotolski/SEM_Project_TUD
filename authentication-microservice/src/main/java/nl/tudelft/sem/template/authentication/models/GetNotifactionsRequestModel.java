@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class GetNotifactionsRequestModel {
     //String netId;
-    String start;
-    String end;
+    String dateUntil;
+    String dateFrom;
 
     public void check() {
         return;

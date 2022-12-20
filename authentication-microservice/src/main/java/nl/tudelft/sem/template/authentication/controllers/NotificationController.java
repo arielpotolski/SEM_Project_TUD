@@ -79,12 +79,12 @@ public class NotificationController {
             formatter = formatter.localizedBy(Locale.ENGLISH);
 
             try {
-                begin = LocalDate.parse(request.getStart(), formatter);
+                begin = LocalDate.parse(request.getDateUntil(), formatter);
             } catch (Exception e) {
                 System.out.println("No Start in body");
             }
             try {
-                end = LocalDate.parse(request.getEnd(), formatter);
+                end = LocalDate.parse(request.getDateFrom(), formatter);
             } catch (Exception e) {
                 System.out.println("No End in body");
             }

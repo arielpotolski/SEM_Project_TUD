@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.authentication.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,7 +17,6 @@ import nl.tudelft.sem.template.authentication.communicationdata.Notification;
 import nl.tudelft.sem.template.authentication.communicationdata.State;
 import nl.tudelft.sem.template.authentication.communicationdata.Type;
 import nl.tudelft.sem.template.authentication.integration.utils.JsonUtil;
-import nl.tudelft.sem.template.authentication.models.GetFacultyResponseModel;
 import nl.tudelft.sem.template.authentication.models.GetNotifactionsRequestModel;
 import nl.tudelft.sem.template.authentication.models.NotificationRequestModel;
 import nl.tudelft.sem.template.authentication.services.NotificationService;
@@ -29,15 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-
-
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -77,9 +72,7 @@ public class NotificationTests {
 
     @Test
     public void testValidNotification() throws Exception {
-
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-
         ResultActions resultActions = mockMvc.perform(post("/notification")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.serialize(notificationRequestModel))
@@ -147,8 +140,8 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setEnd("2021-01-01");
-        requestModel.setStart("2023-01-01");
+        requestModel.setDateFrom("2021-01-01");
+        requestModel.setDateUntil("2023-01-01");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -172,8 +165,8 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setEnd("2021-01-01");
-        requestModel.setStart("2022-10-02");
+        requestModel.setDateFrom("2021-01-01");
+        requestModel.setDateUntil("2022-10-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -197,8 +190,8 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setEnd("2022-10-02");
-        requestModel.setStart("2023-10-02");
+        requestModel.setDateFrom("2022-10-02");
+        requestModel.setDateUntil("2023-10-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -222,8 +215,8 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setEnd("2021-01-01");
-        requestModel.setStart("2022-09-02");
+        requestModel.setDateFrom("2021-01-01");
+        requestModel.setDateUntil("2022-09-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +241,7 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setStart("2022-11-02");
+        requestModel.setDateUntil("2022-11-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -273,7 +266,7 @@ public class NotificationTests {
                 "mes", Type.JOB, "user1", LocalDate.of(2022, 10, 2));
         notificationService.addNotification(notification1);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setEnd("2022-09-02");
+        requestModel.setDateFrom("2022-09-02");
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken")
@@ -300,8 +293,8 @@ public class NotificationTests {
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setStart("2022-11-02");
-        requestModel.setEnd("2020-11-02");
+        requestModel.setDateUntil("2022-11-02");
+        requestModel.setDateFrom("2020-11-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -329,8 +322,8 @@ public class NotificationTests {
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setStart("2022-11-02");
-        requestModel.setEnd("2020-11-02");
+        requestModel.setDateUntil("2022-11-02");
+        requestModel.setDateFrom("2020-11-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -360,8 +353,8 @@ public class NotificationTests {
         notificationService.addNotification(notification1);
         notificationService.addNotification(notification2);
         GetNotifactionsRequestModel requestModel = new GetNotifactionsRequestModel();
-        requestModel.setStart("2022-11-02");
-        requestModel.setEnd("2020-11-02");
+        requestModel.setDateUntil("2022-11-02");
+        requestModel.setDateFrom("2020-11-02");
 
         ResultActions resultActions = mockMvc.perform(get("/getNotification")
                 .contentType(MediaType.APPLICATION_JSON)
