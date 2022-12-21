@@ -36,16 +36,16 @@ public class SendNotificationService {
      */
     public void sendNotificationToUser(Notification notification) throws JsonProcessingException {
         try {
-            String url = "https://localhost:8081/notification";
+            String url = "http://localhost:8081/notification";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(notification);
             ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
-            if (result.getBody().equals("ok")) {
+            /*if (result.getBody().equals("ok")) {
                 return;
-            }
+            }*/
         } catch (Exception e) {
             System.out.println("error with post: " + e);
         }
