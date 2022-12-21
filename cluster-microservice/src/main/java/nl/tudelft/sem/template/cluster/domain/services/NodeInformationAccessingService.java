@@ -34,47 +34,6 @@ public class NodeInformationAccessingService {
         return this.nodeRepository.existsByFacultyId(facultyId);
     }
 
-    public NodeResponseModel convertNodeToResponseModel(Node node) {
-        return new NodeResponseModel(node.getCpuResources(), node.getGpuResources(), node.getMemoryResources(),
-                node.getName(), node.getUrl(), node.getUserNetId(), node.getFacultyId());
-    }
-
-    /**
-     * Converts all nodes in the provided list into NodeResponseModels.
-     *
-     * @param nodes the nodes to be converted into models.
-     *
-     * @return list of NodeResponseModels, each corresponding to one Node from the input list.
-     */
-    public List<NodeResponseModel> convertAllNodesToResponseModels(List<Node> nodes) {
-        List<NodeResponseModel> models = new ArrayList<>();
-        for (Node node : nodes) {
-            models.add(this.convertNodeToResponseModel(node));
-        }
-        return models;
-    }
-
-    public FacultyResourcesResponseModel convertFacultyTotalResourcesToResponseModel(FacultyTotalResources rawResources) {
-        return new FacultyResourcesResponseModel(rawResources.getFaculty_Id(), rawResources.getCpu_Resources(),
-                rawResources.getGpu_Resources(), rawResources.getMemory_Resources());
-    }
-
-    /**
-     * Converts all Spring Projection Interfaces of FacultyTotalResources class into FacultyResourcesResponseModels.
-     *
-     * @param rawResources the list of interfaces to be converted into response models.
-     *
-     * @return a list of response models based on the provided input.
-     */
-    public List<FacultyResourcesResponseModel> convertAllFacultyTotalResourcesToResponseModels(
-            List<FacultyTotalResources> rawResources) {
-        List<FacultyResourcesResponseModel> models = new ArrayList<>();
-        for (FacultyTotalResources resources : rawResources) {
-            models.add(this.convertFacultyTotalResourcesToResponseModel(resources));
-        }
-        return models;
-    }
-
     public List<Node> getAllNodes() {
         return this.nodeRepository.findAll();
     }
@@ -85,6 +44,10 @@ public class NodeInformationAccessingService {
 
     public List<Node> getByFacultyId(String facultyId) {
         return this.getAllNodes().stream().filter(x -> x.getFacultyId().equals(facultyId)).collect(Collectors.toList());
+    }
+
+    public void save(Node node) {
+        this.nodeRepository.save(node);
     }
 
     public void deleteNode(Node node) {
