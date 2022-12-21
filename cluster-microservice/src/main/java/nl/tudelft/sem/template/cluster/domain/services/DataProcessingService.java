@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
@@ -228,8 +230,11 @@ public class DataProcessingService {
 
             // if there are no jobs scheduled on the current date or for the current faculty, available resources are
             // full
+            var reserved = this
+                    .getReservedResourcesForGivenDayForGivenFaculty(day, facultyId);
             if (!this.jobScheduleRepository.existsByFacultyId(facultyId)
-                    || !this.jobScheduleRepository.existsByScheduledFor(day)) {
+                    || !this.jobScheduleRepository.existsByScheduledFor(day)
+                    || (reserved.isEmpty())) {
                 availableResourcesForTheDay = new AvailableResourcesForDate(day,
                         assignedResources.getCpu_Resources(),
                         assignedResources.getGpu_Resources(),
@@ -237,8 +242,7 @@ public class DataProcessingService {
                 );
             } else {
                 // there are jobs scheduled for the given date
-                var reservedResources = this
-                        .getReservedResourcesForGivenDayForGivenFaculty(day, facultyId).get(0);
+                var reservedResources = reserved.get(0);
                 availableResourcesForTheDay = new AvailableResourcesForDate(day,
                         assignedResources.getCpu_Resources() - reservedResources.getCpu_Resources(),
                         assignedResources.getGpu_Resources() - reservedResources.getGpu_Resources(),
@@ -293,8 +297,16 @@ public class DataProcessingService {
      * resources for that faculty on the given day.
      */
     public List<FacultyDatedResourcesResponseModel> getAvailableResourcesForAllFacultiesForGivenDay(LocalDate date) {
-        return this.getAvailableResourcesForAllFacultiesForAllDays().stream()
+        var res = this.getAvailableResourcesForAllFacultiesForAllDays().stream()
                 .filter(x -> x.getDate().isEqual(date)).collect(Collectors.toList());
+        if (res.isEmpty()) {
+            return this.getAssignedResourcesPerFaculty().stream()
+                    .map(x -> new FacultyDatedResourcesResponseModel(
+                            date, x.getFaculty_Id(), x.getCpu_Resources(), x.getGpu_Resources(), x.getMemory_Resources()
+                    )).collect(Collectors.toList());
+        } else {
+            return res;
+        }
     }
 
     /**
@@ -308,10 +320,18 @@ public class DataProcessingService {
      */
     public List<FacultyDatedResourcesResponseModel> getAvailableResourcesForGivenFacultyForGivenDay(LocalDate date,
                                                                                                     String facultyId) {
-        return this.getAvailableResourcesForAllFacultiesForAllDays().stream()
+        var res = this.getAvailableResourcesForAllFacultiesForAllDays().stream()
                 .filter(x -> x.getDate().isEqual(date))
                 .filter(x -> x.getFacultyId().equals(facultyId))
                 .collect(Collectors.toList());
+        if (res.isEmpty()) {
+            return Stream.of(this.getAssignedResourcesForGivenFaculty(facultyId))
+                    .map(x -> new FacultyDatedResourcesResponseModel(
+                            date, x.getFaculty_Id(), x.getCpu_Resources(), x.getGpu_Resources(), x.getMemory_Resources()
+                    )).collect(Collectors.toList());
+        } else {
+            return res;
+        }
     }
 
 }

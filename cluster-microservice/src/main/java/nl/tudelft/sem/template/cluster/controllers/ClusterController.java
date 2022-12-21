@@ -361,9 +361,6 @@ public class ClusterController {
             // for all dates, for all faculties
             return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForAllDays());
         } else if (date != null && facultyId == null) {
-            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)) {
-                return ResponseEntity.badRequest().build();
-            }
 
             // for given date, for all faculties
             return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForGivenDay(date));
@@ -376,8 +373,7 @@ public class ClusterController {
             return ResponseEntity.ok(this.dataProcessingService
                     .getAvailableResourcesForGivenFacultyForAllDays(facultyId));
         } else {
-            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)
-                    || !this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
