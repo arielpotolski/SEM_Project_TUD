@@ -81,21 +81,6 @@ public class SchedulerInformationAccessingService {
     }
 
     /**
-     * Converts the input from Spring Projection Interfaces from SQL queries into response models to be returned through
-     * HTTP.
-     *
-     * @param rawData the data to convert.
-     *
-     * @return converted data as a list.
-     */
-    public List<FacultyDatedResourcesResponseModel> convertToResponseModels(List<FacultyDatedTotalResources> rawData) {
-        return rawData.stream().map(x -> new FacultyDatedResourcesResponseModel(x.getScheduled_Date(),
-                        x.getFaculty_Id(), x.getCpu_Resources(),
-                        x.getGpu_Resources(), x.getMemory_Resources()))
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Gets and returns the already reserved resources per faculty per day.
      *
      * @return list of object containing dates, facultyIds, and the three doubles, representing the reserved

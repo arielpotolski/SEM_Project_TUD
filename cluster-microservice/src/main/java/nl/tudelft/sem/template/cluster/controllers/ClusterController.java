@@ -14,6 +14,7 @@ import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
+import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
 import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
 import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
@@ -45,6 +46,7 @@ public class ClusterController {
     private final transient NodeInformationAccessingService nodeInformationAccessingService;
     private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
     private final transient DataProcessingService dataProcessingService;
+    private final transient PrivilegeVerificationService privilegeVerificationService;
 
     private final transient DateProvider dateProvider;
 
@@ -58,7 +60,8 @@ public class ClusterController {
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              NodeInformationAccessingService nodeInformationAccessingService,
                              SchedulerInformationAccessingService schedulerInformationAccessingService,
-                             DataProcessingService dataProcessingService) {
+                             DataProcessingService dataProcessingService,
+                             PrivilegeVerificationService privilegeVerificationService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
@@ -66,6 +69,7 @@ public class ClusterController {
         this.nodeInformationAccessingService = nodeInformationAccessingService;
         this.schedulerInformationAccessingService = schedulerInformationAccessingService;
         this.dataProcessingService = dataProcessingService;
+        this.privilegeVerificationService = privilegeVerificationService;
     }
 
     /**
@@ -83,9 +87,9 @@ public class ClusterController {
         String slashCheck = "/";
         if (url.isEmpty() || url.equals(slashCheck)) {
             var rawNodes = this.nodeInformationAccessingService.getAllNodes();
-            return ResponseEntity.ok(this.nodeInformationAccessingService.convertAllNodesToResponseModels(rawNodes));
+            return ResponseEntity.ok(NodeResponseModel.convertAllNodesToResponseModels(rawNodes));
         } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
-            return ResponseEntity.ok(this.nodeInformationAccessingService
+            return ResponseEntity.ok(NodeResponseModel
                     .convertAllNodesToResponseModels(List.of(this.nodeInformationAccessingService.getByUrl(url))));
         } else {
             return ResponseEntity.badRequest().build();
@@ -118,7 +122,7 @@ public class ClusterController {
         }
 
         if (this.nodeInformationAccessingService.existsByUrl(node.getUrl())) {
-            return ResponseEntity.ok("Failed to add node. A node with this url already exists.");
+            return ResponseEntity.badRequest().body("Failed to add node. A node with this url already exists.");
         }
         String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Node n = new NodeBuilder()
@@ -133,7 +137,7 @@ public class ClusterController {
         if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
             this.nodeContributionService.addNodeToCluster(n);
         }
-        return ResponseEntity.ok(n.hasEnoughCpu());
+        return ResponseEntity.badRequest().body(n.hasEnoughCpu());
     }
 
     /**
@@ -264,24 +268,19 @@ public class ClusterController {
     @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<FacultyResourcesResponseModel>> getResourcesAssignedToFaculty(
             @RequestHeader HttpHeaders headers, @PathVariable(value = "facultyId", required = false) String facultyId) {
-        String role = authManager.getRole(); // role necessary to determine which actions allowed
-        boolean adminPermissions = role.equals("SYSADMIN");
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
-
-        // if requesting all faculties or not your faculty, return forbidden
-        if (!adminPermissions
-                && (facultyId == null || !dataProcessingService.getFacultiesOfGivenUser(token).contains(facultyId))) {
+        // check whether the user actually can make this request
+        if (!this.privilegeVerificationService.verifyAccountOfCorrectFaculty(headers, facultyId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         if (facultyId == null) {
             var rawResources = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
-            return ResponseEntity.ok(this.nodeInformationAccessingService
+            return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
         } else if (this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
             var rawResources = List.of(this.nodeInformationAccessingService
                     .getAssignedResourcesForGivenFaculty(facultyId));
-            return ResponseEntity.ok(this.nodeInformationAccessingService
+            return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
         } else {
             return ResponseEntity.badRequest().build();
@@ -307,20 +306,15 @@ public class ClusterController {
             @RequestHeader HttpHeaders headers,
             @PathVariable(value = "date", required = false) String rawDate,
             @PathVariable(value = "facultyId", required = false) String facultyId) {
-        String role = authManager.getRole();
-        boolean adminPermissions = role.equals("SYSADMIN");
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
-
-        // if requesting all faculties or not your faculty, return forbidden
-        if (!adminPermissions
-                && (facultyId == null || !dataProcessingService.getFacultiesOfGivenUser(token).contains(facultyId))) {
+        // check whether the user actually can make this request
+        if (!this.privilegeVerificationService.verifyAccountOfCorrectFaculty(headers, facultyId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
-            return ResponseEntity.ok(this.schedulerInformationAccessingService
+            return ResponseEntity.ok(FacultyDatedResourcesResponseModel
                             .convertToResponseModels(this.schedulerInformationAccessingService
                             .getReservedResourcesPerFacultyPerDay()));
         } else if (date != null && facultyId == null) {
@@ -329,7 +323,7 @@ public class ClusterController {
             }
 
             // for given date, for all faculties
-            return ResponseEntity.ok(this.schedulerInformationAccessingService
+            return ResponseEntity.ok(FacultyDatedResourcesResponseModel
                     .convertToResponseModels(this.schedulerInformationAccessingService
                             .getReservedResourcesPerFacultyForGivenDay(date)));
         } else if (date == null && facultyId != null) {
@@ -338,7 +332,7 @@ public class ClusterController {
             }
 
             // for given faculty, for all dates
-            return ResponseEntity.ok(this.schedulerInformationAccessingService
+            return ResponseEntity.ok(FacultyDatedResourcesResponseModel
                     .convertToResponseModels(this.schedulerInformationAccessingService
                             .getReservedResourcesPerDayForGivenFaculty(facultyId)));
         } else {
@@ -348,7 +342,7 @@ public class ClusterController {
             }
 
             // for given faculty, for given date
-            return ResponseEntity.ok(this.schedulerInformationAccessingService
+            return ResponseEntity.ok(FacultyDatedResourcesResponseModel
                     .convertToResponseModels(this.schedulerInformationAccessingService
                             .getReservedResourcesForGivenDayForGivenFaculty(date, facultyId)));
         }
