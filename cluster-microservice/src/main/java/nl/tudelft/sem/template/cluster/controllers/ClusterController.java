@@ -12,7 +12,11 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
+import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
+import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
@@ -41,6 +45,7 @@ public class ClusterController {
     private final transient NodeContributionService nodeContributionService;
     private final transient DataProcessingService dataProcessingService;
     private final transient PrivilegeVerificationService privilegeVerificationService;
+    private final transient NodeRemovalService nodeRemovalService;
 
     private final transient DateProvider dateProvider;
 
@@ -53,13 +58,15 @@ public class ClusterController {
     public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              DataProcessingService dataProcessingService,
-                             PrivilegeVerificationService privilegeVerificationService) {
+                             PrivilegeVerificationService privilegeVerificationService,
+                             NodeRemovalService nodeRemovalService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
         this.dataProcessingService = dataProcessingService;
         this.privilegeVerificationService = privilegeVerificationService;
+        this.nodeRemovalService = nodeRemovalService;
     }
 
     /**
@@ -382,5 +389,36 @@ public class ClusterController {
                     .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
         }
     }
+
+    /**
+     * This method deletes the node given by the url provided by the user. Since the
+     * node can only be removed on the next day after the request, we do a post mapping
+     * and add the node to be removed to a list stored in the NodeRemovalService. Once
+     * we hit midnight, the nodes contained in that list will be removed. This method
+     * will be the only removal method available to users that are not sysadmins.
+     *
+     * @param url the url of the node to be removed
+     * @return a string saying whether the removal was successfully scheduled. If not,
+     *          returns a string saying what went wrong
+     */
+    @PostMapping(value = "/nodes/delete/user/{url}")
+    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
+        if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
+            return ResponseEntity.badRequest().body("Could not find the node to be deleted."
+                + " Check if the url provided is correct.");
+        } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
+            .equals(authManager.getNetId())) {
+            return ResponseEntity.badRequest().body("You cannot remove nodes that"
+                + " other users have contributed to the cluster.");
+        }
+
+        this.nodeRemovalService
+            .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
+
+        return ResponseEntity.ok("Your node will be removed at midnight.");
+    }
+
+
+    // free resources per day for given faculty
 
 }
