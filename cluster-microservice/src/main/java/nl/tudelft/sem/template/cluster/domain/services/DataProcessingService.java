@@ -267,6 +267,7 @@ public class DataProcessingService {
      * @return the list of FacultyDatedResourcesResponseModels containing available resources for each faculty for each
      * date from tomorrow until last in schedule, inclusive.
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public List<FacultyDatedResourcesResponseModel> getAvailableResourcesForAllFacultiesForAllDays() {
         var faculties = this.getAllFaculties();
         var latestDate = this.findLatestDateWithReservedResources();

@@ -105,6 +105,7 @@ public class PrivilegeVerificationService {
      *
      * @return whether the user is allowed to make th request.
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public boolean verifyAccountCorrectPrivilegesForDayAndFaculty(HttpHeaders requestHeaders, String requestedFaculty,
                                                                   LocalDate requestedDate) {
         var userToken = requestHeaders.get("authorization").get(0).replace("Bearer ", "");
