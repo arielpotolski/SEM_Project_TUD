@@ -12,11 +12,8 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
-import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
-import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
-import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
@@ -133,6 +130,7 @@ public class ClusterController {
 
         if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
             this.nodeContributionService.addNodeToCluster(n);
+            return ResponseEntity.ok(n.hasEnoughCpu());
         }
         return ResponseEntity.badRequest().body(n.hasEnoughCpu());
     }

@@ -244,7 +244,7 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        result2.andExpect(status().isOk());
+        result2.andExpect(status().isBadRequest());
         String response2 = result2.andReturn().getResponse().getContentAsString();
         assertThat(response2).isEqualTo("Failed to add node. A node with this url already exists.");
 
@@ -268,7 +268,7 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        result4.andExpect(status().isOk());
+        result4.andExpect(status().isBadRequest());
         String response4 = result4.andReturn().getResponse().getContentAsString();
         assertThat(response4).isEqualTo("The amount of CPU resources should be at least as much as the amount "
                 + "of GPU resources.");
@@ -281,7 +281,7 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        result5.andExpect(status().isOk());
+        result5.andExpect(status().isBadRequest());
         String response5 = result5.andReturn().getResponse().getContentAsString();
         assertThat(response5).isEqualTo("The amount of CPU resources should be at least as much as the amount of GPU"
                 + " resources and at least as much as the amount of memory resources.");
@@ -294,7 +294,7 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        result6.andExpect(status().isOk());
+        result6.andExpect(status().isBadRequest());
         String response6 = result6.andReturn().getResponse().getContentAsString();
         assertThat(response6).isEqualTo("None of the resources can be negative.");
 
@@ -306,7 +306,7 @@ public class ClusterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
-        result7.andExpect(status().isOk());
+        result7.andExpect(status().isBadRequest());
         String response7 = result7.andReturn().getResponse().getContentAsString();
         assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
                 + " of memory resources.");
