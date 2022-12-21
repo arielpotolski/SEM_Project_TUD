@@ -1,16 +1,14 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * This class provides a service for contributing new nodes to the cluster. It uses the NodeAssignmentStrategy first to

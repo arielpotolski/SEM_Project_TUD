@@ -28,6 +28,13 @@ public class PrivilegeVerificationService {
     private final transient RestTemplate restTemplate;
     private final transient DateProvider dateProvider;
 
+    /**
+     * Creates this service object.
+     *
+     * @param authManager the auth manager to get user data from.
+     * @param restTemplateBuilder the rest template builder for sending HTTP requests.
+     * @param dateProvider the date provider for current day and tomorrow.
+     */
     @Autowired
     public PrivilegeVerificationService(AuthManager authManager, RestTemplateBuilder restTemplateBuilder,
                                         DateProvider dateProvider) {

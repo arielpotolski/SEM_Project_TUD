@@ -1,12 +1,11 @@
 package nl.tudelft.sem.template.cluster.models;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
