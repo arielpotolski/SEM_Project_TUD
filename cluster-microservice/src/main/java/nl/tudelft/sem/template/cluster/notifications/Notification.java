@@ -1,7 +1,9 @@
 package nl.tudelft.sem.template.cluster.notifications;
 
+import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 
+@Getter
 public class Notification {
 
     private String date;
