@@ -136,6 +136,34 @@ public class ClusterController {
     }
 
     /**
+     * This method deletes the node given by the url provided by the user. Since the
+     * node can only be removed on the next day after the request, we do a post mapping
+     * and add the node to be removed to a list stored in the NodeRemovalService. Once
+     * we hit midnight, the nodes contained in that list will be removed. This method
+     * will be the only removal method available to users that are not sysadmins.
+     *
+     * @param url the url of the node to be removed
+     * @return a string saying whether the removal was successfully scheduled. If not,
+     *          returns a string saying what went wrong
+     */
+    @PostMapping(value = "/nodes/delete/user/{url}")
+    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
+        if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
+            return ResponseEntity.badRequest().body("Could not find the node to be deleted."
+                    + " Check if the url provided is correct.");
+        } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
+                .equals(authManager.getNetId())) {
+            return ResponseEntity.badRequest().body("You cannot remove nodes that"
+                    + " other users have contributed to the cluster.");
+        }
+
+        this.nodeRemovalService
+                .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
+
+        return ResponseEntity.ok("Your node will be removed at midnight.");
+    }
+
+    /**
      * Delete all nodes or specified node, if url provided.
      *
      * @param request the url by which the node will be found and deleted, if provided.
@@ -387,36 +415,5 @@ public class ClusterController {
                     .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
         }
     }
-
-    /**
-     * This method deletes the node given by the url provided by the user. Since the
-     * node can only be removed on the next day after the request, we do a post mapping
-     * and add the node to be removed to a list stored in the NodeRemovalService. Once
-     * we hit midnight, the nodes contained in that list will be removed. This method
-     * will be the only removal method available to users that are not sysadmins.
-     *
-     * @param url the url of the node to be removed
-     * @return a string saying whether the removal was successfully scheduled. If not,
-     *          returns a string saying what went wrong
-     */
-    @PostMapping(value = "/nodes/delete/user/{url}")
-    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
-        if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
-            return ResponseEntity.badRequest().body("Could not find the node to be deleted."
-                + " Check if the url provided is correct.");
-        } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
-            .equals(authManager.getNetId())) {
-            return ResponseEntity.badRequest().body("You cannot remove nodes that"
-                + " other users have contributed to the cluster.");
-        }
-
-        this.nodeRemovalService
-            .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
-
-        return ResponseEntity.ok("Your node will be removed at midnight.");
-    }
-
-
-    // free resources per day for given faculty
 
 }
