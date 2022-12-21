@@ -17,46 +17,26 @@ import org.springframework.stereotype.Service;
 public class JobSchedulingService {
 
     /**
-     * The schedule repository to save scheduled jobs into.
-     */
-    private final transient JobScheduleRepository jobScheduleRepo;
-
-    /**
-     * The node repository containing all the cluster's nodes.
-     */
-    private final transient NodeRepository nodeRepo;
-
-    /**
      * Provides access to information related to the resources.
      */
-    private final transient SchedulerInformationAccessingService resourceInfo;
-
+    private final transient DataProcessingService resourceInfo;
 
     /**
      * Current strategy of scheduling jobs.
      */
     private transient JobSchedulingStrategy strategy;
 
-    private final transient DateProvider dateProvider;
-
     /**
      * Creates a new JobSchedulingService object and injects the repository.
      *
-     * @param jobScheduleRepo the JobScheduleRepository that jobs are scheduled in.
-     * @param nodeRepo the NodeRepository that contains all the nodes of the cluster.
+     * @param resourceInfo the service providing access to data.
      */
     @Autowired
-    public JobSchedulingService(JobScheduleRepository jobScheduleRepo, NodeRepository nodeRepo,
-                                SchedulerInformationAccessingService resourceInfo,
-                                DateProvider dateProvider) {
-        this.jobScheduleRepo = jobScheduleRepo;
-        this.nodeRepo = nodeRepo;
+    public JobSchedulingService(DataProcessingService resourceInfo) {
         this.resourceInfo = resourceInfo;
 
         // default strategy: first come, first served; the earliest possible date
         this.strategy = new LeastBusyDateStrategy();
-
-        this.dateProvider = dateProvider;
     }
 
     /**
@@ -68,17 +48,7 @@ public class JobSchedulingService {
         this.strategy = strategy;
     }
 
-    /**
-     * Queries the schedule for the latest date that occurs.
-     *
-     * @return the latest date in the schedule.
-     */
-    public LocalDate findLatestDateWithReservedResources() {
-        var latestDateInSchedule = this.jobScheduleRepo.findMaximumDate();
 
-        // if null, there are no jobs scheduled - thus we can go only until tomorrow
-        return latestDateInSchedule != null ? latestDateInSchedule : dateProvider.getTomorrow();
-    }
 
     /**
      * Checks whether the job's requested resources are all smaller than the total available for the faculty through
@@ -89,10 +59,10 @@ public class JobSchedulingService {
      * @return boolean indicating whether it is possible, within the foreseeable future, to schedule the job
      */
     public boolean checkIfJobCanBeScheduled(Job job) {
-        if (!this.nodeRepo.existsByFacultyId(job.getFacultyId())) {
+        if (!this.resourceInfo.existsByFacultyId(job.getFacultyId())) {
             return false;
         }
-        var assignedResources = nodeRepo.findTotalResourcesForGivenFaculty(job.getFacultyId());
+        var assignedResources = this.resourceInfo.getAssignedResourcesForGivenFaculty(job.getFacultyId());
         return !(job.getRequiredCpu() > assignedResources.getCpu_Resources())
                 && !(job.getRequiredGpu() > assignedResources.getGpu_Resources())
                 && !(job.getRequiredMemory() > assignedResources.getMemory_Resources());
@@ -107,22 +77,22 @@ public class JobSchedulingService {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
-        var maxDateInSchedule = this.findLatestDateWithReservedResources();
+        var maxDateInSchedule = this.resourceInfo.findLatestDateWithReservedResources();
         if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule)) {
             maxDateInSchedule = job.getPreferredCompletionDate();
         }
-        var availableResourcesPerDay = resourceInfo
+        var availableResourcesPerDay = this.resourceInfo
                 .getAvailableResourcesForGivenFacultyUntilDay(job.getFacultyId(),
                         maxDateInSchedule.plusDays(1));
 
         // use strategy to determine a date to schedule the job for
-        var dateToScheduleJob = strategy.scheduleJobFor(availableResourcesPerDay, job);
+        var dateToScheduleJob = this.strategy.scheduleJobFor(availableResourcesPerDay, job);
 
         // assign scheduled date to job
         job.setScheduledFor(dateToScheduleJob);
 
         // save to schedule
-        jobScheduleRepo.save(job);
+        this.resourceInfo.saveInSchedule(job);
     }
 
 }

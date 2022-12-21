@@ -38,7 +38,7 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
                 try {
                     Thread.sleep(1000);
 
-                    String url = "https://localhost:8082/faculties";
+                    String url = "http://localhost:8082/faculties";
                     List<String> enumValues = List.of(Arrays.toString(AppUser.Faculty.values()));
 
                     ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -48,6 +48,8 @@ public class Runner implements ApplicationListener<ContextRefreshedEvent> {
                     if (Objects.equals(result.getBody(), "ok")) {
                         return;
                     }
+                } catch (org.springframework.web.client.HttpClientErrorException e) {
+                    return;
                 } catch (Exception e) {
                     System.out.println("Cluster service not yet online");
                 }
