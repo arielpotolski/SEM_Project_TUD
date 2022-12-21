@@ -92,7 +92,7 @@ public class JobSchedulingService {
         job.setScheduledFor(dateToScheduleJob);
 
         // save to schedule
-        this.resourceInfo.save(job);
+        this.resourceInfo.saveInSchedule(job);
     }
 
 }

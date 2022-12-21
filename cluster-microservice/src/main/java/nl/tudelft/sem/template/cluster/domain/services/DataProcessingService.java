@@ -144,7 +144,7 @@ public class DataProcessingService {
         return this.jobScheduleRepository.findAll();
     }
 
-    public void save(Job job) {
+    public void saveInSchedule(Job job) {
         this.jobScheduleRepository.save(job);
     }
 
