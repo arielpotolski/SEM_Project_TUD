@@ -1,10 +1,12 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.models.GetFacultyResponseModel;
 import nl.tudelft.sem.template.cluster.models.TokenRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +26,14 @@ public class PrivilegeVerificationService {
 
     private final transient AuthManager authManager;
     private final transient RestTemplate restTemplate;
+    private final transient DateProvider dateProvider;
 
     @Autowired
-    public PrivilegeVerificationService(AuthManager authManager, RestTemplateBuilder restTemplateBuilder) {
+    public PrivilegeVerificationService(AuthManager authManager, RestTemplateBuilder restTemplateBuilder,
+                                        DateProvider dateProvider) {
         this.authManager = authManager;
         this.restTemplate = restTemplateBuilder.build();
+        this.dateProvider = dateProvider;
     }
 
     /**
@@ -81,6 +86,35 @@ public class PrivilegeVerificationService {
 
         return adminPermissions || (requestedFaculty != null && this.getFacultiesOfGivenUser(userToken)
                 .contains(requestedFaculty));
+    }
+
+    /**
+     * Verifies whether a user can access the available resource information for the specified faculty and day. Null
+     * faculty or day signify that the user is attempting to see the resources for all faculties/days, respectively.
+     *
+     * @param requestHeaders the headers of the HTTP request sent by the user.
+     * @param requestedFaculty the faculty that the user is requesting resource information for.
+     * @param requestedDate the date that the user is requesting resource information for.
+     *
+     * @return whether the user is allowed to make th request.
+     */
+    public boolean verifyAccountCorrectPrivilegesForDayAndFaculty(HttpHeaders requestHeaders, String requestedFaculty,
+                                                                  LocalDate requestedDate) {
+        var userToken = requestHeaders.get("authorization").get(0).replace("Bearer ", "");
+        var role = this.authManager.getRole();
+        switch (role) {
+            case "SYSADMIN":
+                return true;
+            case "FACULTY":
+                return (requestedFaculty != null
+                        && this.getFacultiesOfGivenUser(userToken).contains(requestedFaculty));
+            default:
+                return (requestedFaculty != null
+                        && this.getFacultiesOfGivenUser(userToken).contains(requestedFaculty)
+                        && requestedDate != null
+                        && this.dateProvider.getTomorrow().isEqual(requestedDate));
+        }
+
     }
 
 }

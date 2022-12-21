@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources;
 
 @Data
@@ -32,6 +33,22 @@ public class FacultyDatedResourcesResponseModel {
         return rawData.stream().map(x -> new FacultyDatedResourcesResponseModel(x.getScheduled_Date(),
                         x.getFaculty_Id(), x.getCpu_Resources(),
                         x.getGpu_Resources(), x.getMemory_Resources()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Converts the input from AvailableResourcesForDate into response models to be returned through HTTP.
+     *
+     * @param rawData the data to convert.
+     * @param facultyId the faculty for which the models are generated.
+     *
+     * @return converted data as a list.
+     */
+    public static List<FacultyDatedResourcesResponseModel> convertToResponseModelsWithSeparateFaculty(
+            List<AvailableResourcesForDate> rawData, String facultyId) {
+        return rawData.stream().map(x -> new FacultyDatedResourcesResponseModel(x.getDate(),
+                        facultyId, x.getAvailableCpu(),
+                        x.getAvailableGpu(), x.getAvailableMemory()))
                 .collect(Collectors.toList());
     }
 }

@@ -90,7 +90,7 @@ public class RequestAllocationService {
     public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
 
         try {
-            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "/" + facultyName;
+            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "&" + facultyName;
 
             // headers?
             ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);

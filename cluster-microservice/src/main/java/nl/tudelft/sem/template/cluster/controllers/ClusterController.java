@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
@@ -13,10 +12,7 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
-import nl.tudelft.sem.template.cluster.domain.services.NodeInformationAccessingService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
-import nl.tudelft.sem.template.cluster.domain.services.SchedulerInformationAccessingService;
-import nl.tudelft.sem.template.cluster.models.DatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
@@ -43,8 +39,6 @@ public class ClusterController {
 
     private final transient JobSchedulingService scheduling;
     private final transient NodeContributionService nodeContributionService;
-    private final transient NodeInformationAccessingService nodeInformationAccessingService;
-    private final transient SchedulerInformationAccessingService schedulerInformationAccessingService;
     private final transient DataProcessingService dataProcessingService;
     private final transient PrivilegeVerificationService privilegeVerificationService;
 
@@ -58,16 +52,12 @@ public class ClusterController {
     @Autowired
     public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
-                             NodeInformationAccessingService nodeInformationAccessingService,
-                             SchedulerInformationAccessingService schedulerInformationAccessingService,
                              DataProcessingService dataProcessingService,
                              PrivilegeVerificationService privilegeVerificationService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
-        this.nodeInformationAccessingService = nodeInformationAccessingService;
-        this.schedulerInformationAccessingService = schedulerInformationAccessingService;
         this.dataProcessingService = dataProcessingService;
         this.privilegeVerificationService = privilegeVerificationService;
     }
@@ -86,11 +76,11 @@ public class ClusterController {
         String url = request.getRequestURI().replaceFirst("/nodes", "");
         String slashCheck = "/";
         if (url.isEmpty() || url.equals(slashCheck)) {
-            var rawNodes = this.nodeInformationAccessingService.getAllNodes();
+            var rawNodes = this.dataProcessingService.getAllNodes();
             return ResponseEntity.ok(NodeResponseModel.convertAllNodesToResponseModels(rawNodes));
-        } else if (this.nodeInformationAccessingService.existsByUrl(url)) {
+        } else if (this.dataProcessingService.existsByUrl(url)) {
             return ResponseEntity.ok(NodeResponseModel
-                    .convertAllNodesToResponseModels(List.of(this.nodeInformationAccessingService.getByUrl(url))));
+                    .convertAllNodesToResponseModels(List.of(this.dataProcessingService.getByUrl(url))));
         } else {
             return ResponseEntity.badRequest().build();
         }
@@ -107,7 +97,7 @@ public class ClusterController {
     @PostMapping(path = {"/nodes/add"})
     public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
         // Check if central cores have been installed by User Service
-        if (this.nodeInformationAccessingService.getNumberOfNodesInRepository() == 0) {
+        if (this.dataProcessingService.getNumberOfNodesInRepository() == 0) {
             // Central cores not installed - faculties unknown. All nodes will be assigned to the
             // Board of Examiners until faculties become known.
             Node core =  new NodeBuilder()
@@ -121,7 +111,7 @@ public class ClusterController {
             this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
         }
 
-        if (this.nodeInformationAccessingService.existsByUrl(node.getUrl())) {
+        if (this.dataProcessingService.existsByUrl(node.getUrl())) {
             return ResponseEntity.badRequest().body("Failed to add node. A node with this url already exists.");
         }
         String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
@@ -153,13 +143,13 @@ public class ClusterController {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
         String slashCheck = "/";
         if (url.isEmpty() || url.equals(slashCheck)) {
-            this.nodeInformationAccessingService.deleteAllNodes();
+            this.dataProcessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
 
-        if (this.nodeInformationAccessingService.existsByUrl(url)) {
-            Node node = this.nodeInformationAccessingService.getByUrl(url);
-            this.nodeInformationAccessingService.deleteNode(node);
+        if (this.dataProcessingService.existsByUrl(url)) {
+            Node node = this.dataProcessingService.getByUrl(url);
+            this.dataProcessingService.deleteNode(node);
             return ResponseEntity.ok("The node has been successfully deleted");
         } else {
             return ResponseEntity.ok("Could not find the node to be deleted."
@@ -179,7 +169,7 @@ public class ClusterController {
     @PostMapping("/faculties")
     public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
         for (String faculty : faculties) {
-            if (this.nodeInformationAccessingService.existsByFacultyId(faculty)) {
+            if (this.dataProcessingService.existsByFacultyId(faculty)) {
                 continue;
             }
             Node core =  new NodeBuilder()
@@ -203,7 +193,7 @@ public class ClusterController {
     @GetMapping("/schedule")
     @PreAuthorize("hasRole('SYSADMIN')")
     public List<Job> getSchedule() {
-        return this.schedulerInformationAccessingService.getAllJobsFromSchedule();
+        return this.dataProcessingService.getAllJobsFromSchedule();
     }
 
     /**
@@ -274,11 +264,11 @@ public class ClusterController {
         }
 
         if (facultyId == null) {
-            var rawResources = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
+            var rawResources = this.dataProcessingService.getAssignedResourcesPerFaculty();
             return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
-        } else if (this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
-            var rawResources = List.of(this.nodeInformationAccessingService
+        } else if (this.dataProcessingService.existsByFacultyId(facultyId)) {
+            var rawResources = List.of(this.dataProcessingService
                     .getAssignedResourcesForGivenFaculty(facultyId));
             return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
@@ -288,16 +278,13 @@ public class ClusterController {
     }
 
     /**
-     * Gets and returns the total reserved resources per day per faculty. Uses TotalResourcesInterface to encapsulate
-     * different return types: DatedTotalResources, returned when grouping by date; FacultyTotalResources, returned when
-     * grouping by facultyId; and FacultyDatedTotalResources, returned when not grouping and when only looking for
-     * resources reserved for a specific faculty and date.
+     * Gets and returns the total reserved resources per day per faculty.
      *
      * @param rawDate the date on which to look for reserved resources, in String format.
      * @param facultyId the facultyId to find reserved resources of.
      *
-     * @return response entity containing a list of Spring Projection Interfaces containing the reserved resources
-     * in the three categories, as well as the date, the facultyId, or both.
+     * @return response entity containing a list of response models containing the reserved resources
+     * in the three categories, as well as the date and the facultyId.
      */
     @GetMapping(value = {"/resources/reserved", "/resources/reserved/{date}&{facultyId}",
         "/resources/reserved/{date}&", "/resources/reserved/&{facultyId}", "resources/reserved/&"})
@@ -315,67 +302,89 @@ public class ClusterController {
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                            .convertToResponseModels(this.schedulerInformationAccessingService
+                            .convertToResponseModels(this.dataProcessingService
                             .getReservedResourcesPerFacultyPerDay()));
         } else if (date != null && facultyId == null) {
-            if (!this.schedulerInformationAccessingService.existsByScheduledFor(date)) {
+            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given date, for all faculties
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.dataProcessingService
                             .getReservedResourcesPerFacultyForGivenDay(date)));
         } else if (date == null && facultyId != null) {
-            if (!this.schedulerInformationAccessingService.existsByFacultyId(facultyId)) {
+            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for all dates
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.dataProcessingService
                             .getReservedResourcesPerDayForGivenFaculty(facultyId)));
         } else {
-            if (!this.schedulerInformationAccessingService.existsByScheduledFor(date)
-                || !this.schedulerInformationAccessingService.existsByFacultyId(facultyId)) {
+            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)
+                || !this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for given date
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.schedulerInformationAccessingService
+                    .convertToResponseModels(this.dataProcessingService
                             .getReservedResourcesForGivenDayForGivenFaculty(date, facultyId)));
         }
     }
 
     /**
-     * Gets and returns the available resources for the given faculty between tomorrow and the given date, inclusive.
+     * Gets and returns the total available resources per day per faculty. U
      *
-     * @param rawDate the String form of the date until which to calculate available resources.
-     * @param facultyId the facultyId of the faculty to calculate available resources for.
+     * @param rawDate the date on which to look for available resources, in String format.
+     * @param facultyId the facultyId to find available resources of.
      *
-     * @return response entity containing a list of available resources per day from tomorrow until given.
+     * @return response entity containing a list of response models containing the available resources
+     * in the three categories, as well as the date and the facultyId.
      */
-    @GetMapping(value = "/resources/available/{date}/{facultyId}")
-    public ResponseEntity<List<DatedResourcesResponseModel>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
-            @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
-        // anti-corruption
-        try {
-            LocalDate.parse(rawDate);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().build();
-        }
-        LocalDate date = LocalDate.parse(rawDate);
-        if (date.isBefore(this.dateProvider.getTomorrow())
-                || !this.nodeInformationAccessingService.existsByFacultyId(facultyId)) {
-            return ResponseEntity.badRequest().build();
+    @GetMapping(value = {"/resources/available", "/resources/available/{date}&{facultyId}",
+            "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
+    public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getAvailableResourcesPerFacultyPerDay(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable(value = "date", required = false) String rawDate,
+            @PathVariable(value = "facultyId", required = false) String facultyId) {
+        LocalDate date = rawDate != null ? LocalDate.parse(rawDate) : null;
+        if (!this.privilegeVerificationService.verifyAccountCorrectPrivilegesForDayAndFaculty(headers, facultyId,
+                date)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // return - change this later when refactoring
-        var rawResources = this.schedulerInformationAccessingService
-                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date);
-        return ResponseEntity.ok(this.schedulerInformationAccessingService
-                .convertAvailableResourcesForDateToResponseModels(rawResources));
+        // functionality
+        if (date == null && facultyId == null) {
+            // for all dates, for all faculties
+            return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForAllDays());
+        } else if (date != null && facultyId == null) {
+            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // for given date, for all faculties
+            return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForGivenDay(date));
+        } else if (date == null && facultyId != null) {
+            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // for given faculty, for all dates
+            return ResponseEntity.ok(this.dataProcessingService
+                    .getAvailableResourcesForGivenFacultyForAllDays(facultyId));
+        } else {
+            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)
+                    || !this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // for given faculty, for given date
+            return ResponseEntity.ok(this.dataProcessingService
+                    .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
+        }
     }
 
 }

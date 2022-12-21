@@ -21,13 +21,13 @@ public class NodeContributionService {
 
     private transient NodeAssignmentStrategy strategy;
 
-    private final transient NodeInformationAccessingService nodeInformationAccessingService;
+    private final transient DataProcessingService dataProcessingService;
 
 
     @Autowired
-    public NodeContributionService(NodeInformationAccessingService nodeInformationService,
+    public NodeContributionService(DataProcessingService dataProcessingService,
                                    NumberProvider numberProvider) {
-        this.nodeInformationAccessingService = nodeInformationService;
+        this.dataProcessingService = dataProcessingService;
         this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
     }
 
@@ -47,7 +47,7 @@ public class NodeContributionService {
      */
     private void assignNodeToFaculty(Node node) {
         // pick faculty using strategy
-        List<FacultyTotalResources> list = this.nodeInformationAccessingService.getAssignedResourcesPerFaculty();
+        List<FacultyTotalResources> list = this.dataProcessingService.getAssignedResourcesPerFaculty();
         List<FacultyResourcesResponseModel> testableList = FacultyResourcesResponseModel
                 .convertAllFacultyTotalResourcesToResponseModels(list);
         String chosenId = strategy.pickFacultyToAssignNodeTo(testableList);
@@ -62,7 +62,7 @@ public class NodeContributionService {
      * @param node the node to be added.
      */
     public void addNodeAssignedToSpecificFacultyToCluster(Node node) {
-        this.nodeInformationAccessingService.save(node);
+        this.dataProcessingService.save(node);
     }
 
     /**
@@ -75,7 +75,7 @@ public class NodeContributionService {
         this.assignNodeToFaculty(node);
 
         // persist to repository
-        this.nodeInformationAccessingService.save(node);
+        this.dataProcessingService.save(node);
     }
 
 
