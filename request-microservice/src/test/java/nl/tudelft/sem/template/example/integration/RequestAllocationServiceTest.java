@@ -4,7 +4,6 @@ package nl.tudelft.sem.template.example.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -13,16 +12,12 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
@@ -31,27 +26,20 @@ import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
 import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
-import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
-
-
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -153,7 +141,6 @@ public class RequestAllocationServiceTest {
         assertThat(reservedResources).isEqualTo(List.of(resources).stream()
                 .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
                 x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList()));
-
     }
 
     @Test
@@ -238,7 +225,6 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
 
         assertThat(b).isFalse();
-
     }
 
     @Test
@@ -259,7 +245,6 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
 
         assertThat(b).isTrue();
-
     }
 
     @Test
@@ -280,7 +265,6 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
 
         assertThat(b).isTrue();
-
     }
 
 }
