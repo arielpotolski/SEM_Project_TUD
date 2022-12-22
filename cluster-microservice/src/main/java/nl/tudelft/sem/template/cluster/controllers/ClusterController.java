@@ -12,7 +12,6 @@ import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
-import nl.tudelft.sem.template.cluster.domain.services.NodeRemovalService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
@@ -42,7 +41,6 @@ public class ClusterController {
     private final transient NodeContributionService nodeContributionService;
     private final transient DataProcessingService dataProcessingService;
     private final transient PrivilegeVerificationService privilegeVerificationService;
-    private final transient NodeRemovalService nodeRemovalService;
 
     private final transient DateProvider dateProvider;
 
@@ -55,15 +53,13 @@ public class ClusterController {
     public ClusterController(AuthManager authManager, JobSchedulingService scheduling,
                              NodeContributionService nodeContributionService, DateProvider dateProvider,
                              DataProcessingService dataProcessingService,
-                             PrivilegeVerificationService privilegeVerificationService,
-                             NodeRemovalService nodeRemovalService) {
+                             PrivilegeVerificationService privilegeVerificationService) {
         this.authManager = authManager;
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
         this.dataProcessingService = dataProcessingService;
         this.privilegeVerificationService = privilegeVerificationService;
-        this.nodeRemovalService = nodeRemovalService;
     }
 
     /**
@@ -148,17 +144,17 @@ public class ClusterController {
      */
     @PostMapping(value = "/nodes/delete/user/{url}")
     public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
-        if (!this.nodeRemovalService.getRepo().existsByUrl(url)) {
+        if (!this.nodeContributionService.getRepo().existsByUrl(url)) {
             return ResponseEntity.badRequest().body("Could not find the node to be deleted."
                     + " Check if the url provided is correct.");
-        } else if (!this.nodeRemovalService.getRepo().findByUrl(url).getUserNetId()
+        } else if (!this.nodeContributionService.getRepo().findByUrl(url).getUserNetId()
                 .equals(authManager.getNetId())) {
             return ResponseEntity.badRequest().body("You cannot remove nodes that"
                     + " other users have contributed to the cluster.");
         }
 
-        this.nodeRemovalService
-                .addNodeToBeRemoved(this.nodeRemovalService.getRepo().findByUrl(url));
+        this.nodeContributionService
+                .addNodeToBeRemoved(this.nodeContributionService.getRepo().findByUrl(url));
 
         return ResponseEntity.ok("Your node will be removed at midnight.");
     }
@@ -378,7 +374,7 @@ public class ClusterController {
      * in the three categories, as well as the date and the facultyId.
      */
     @GetMapping(value = {"/resources/available", "/resources/available/{date}&{facultyId}",
-            "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
+        "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
     public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getAvailableResourcesPerFacultyPerDay(
             @RequestHeader HttpHeaders headers,
             @PathVariable(value = "date", required = false) String rawDate,
