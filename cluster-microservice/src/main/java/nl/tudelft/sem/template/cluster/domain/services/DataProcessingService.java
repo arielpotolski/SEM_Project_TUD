@@ -104,10 +104,16 @@ public class DataProcessingService {
      *
      * @return the total assigned resources for this facultyId, as well as the facultyId.
      */
-    public FacultyTotalResources getAssignedResourcesForGivenFaculty(String facultyId) {
-        return getAssignedResourcesPerFaculty().stream()
+    public FacultyTotalResources getAssignedResourcesForGivenFaculty(String facultyId)
+        throws IllegalArgumentException {
+
+        if (getAllFaculties().contains(facultyId)) {
+            return getAssignedResourcesPerFaculty().stream()
                 .filter(x -> x.getFaculty_Id().equals(facultyId))
                 .collect(Collectors.toList()).get(0);
+        } else {
+            throw new IllegalArgumentException("Faculty does not exist.");
+        }
     }
 
     // SCHEDULE/JOB SECTION
@@ -146,6 +152,10 @@ public class DataProcessingService {
 
     public void saveInSchedule(Job job) {
         this.jobScheduleRepository.save(job);
+    }
+
+    public void deleteAllJobsScheduled() {
+        this.jobScheduleRepository.deleteAll();
     }
 
     /**
