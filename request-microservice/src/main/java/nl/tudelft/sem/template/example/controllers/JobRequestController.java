@@ -72,7 +72,7 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");       // may produce NullPointerExcepetion
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");       // may produce NullPointerException
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
@@ -165,7 +165,7 @@ public class JobRequestController {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
         List<String> facultiesOfFacultyUser = requestAllocationService
-                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));   // may produce NullPointerExcepetion
+                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));   // may produce NullPointerException
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))

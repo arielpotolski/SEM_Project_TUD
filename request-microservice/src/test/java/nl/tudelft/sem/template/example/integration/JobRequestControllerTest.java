@@ -213,8 +213,22 @@ public class JobRequestControllerTest {
     }
 
     @Test
-    public void sendRequestWaitingApproval(){}
+    public void sendRequestExactly6Hours(){}
 
+    @Test
+    public void sendRequests559ToMidnight(){}
+
+    @Test
+    public void sendRequestLessThan6H(){}
+
+    @Test
+    public void sendRequestLessThan6HNoResource(){}
+
+    @Test
+    public void sendRequestLessThan6HTomorrowNotPreferred(){}
+
+    @Test
+    public void sendRequestWaitingApproval(){}
 
 
     // Can also add an assert if we change the request in the controller
