@@ -13,4 +13,4 @@ variables:
 bootRun-services:
   stage: execute
   script:
-    gradle authentication-microservice:bootRun cluster-microservice:bootRun request-microservice:bootRun system-tests:bootRun --parallel --max-workers=4 &
+    gradle authentication-microservice:bootRun cluster-microservice:bootRun request-microservice:bootRun system-tests:bootRun --parallel &
