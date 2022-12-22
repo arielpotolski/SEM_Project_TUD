@@ -1,10 +1,7 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
-import java.time.LocalDate;
+import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
-import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import org.springframework.stereotype.Service;
 /**
  * This service handles scheduling a job according to the current strategy.
  */
+@Getter
 @Service
 public class JobSchedulingService {
 
@@ -77,6 +75,9 @@ public class JobSchedulingService {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
+        if (!checkIfJobCanBeScheduled(job)) {
+            return;
+        }
         var maxDateInSchedule = this.resourceInfo.findLatestDateWithReservedResources();
         if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule)) {
             maxDateInSchedule = job.getPreferredCompletionDate();
