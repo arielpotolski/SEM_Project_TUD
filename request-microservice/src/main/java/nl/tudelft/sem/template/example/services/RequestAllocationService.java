@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
+import nl.tudelft.sem.template.example.domain.JobRequestRequestModel;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
@@ -77,6 +78,9 @@ public class RequestAllocationService {
             if (string.equals("")) {
                 return new ArrayList<>();
             }
+
+            // extract
+
 
             return Arrays.stream(string.split(", ")).collect(Collectors.toList());
         } catch (Exception e) {
@@ -164,7 +168,8 @@ public class RequestAllocationService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
 
-            HttpEntity<Request> entity = new HttpEntity<>(request, headers);
+            HttpEntity<JobRequestRequestModel> entity =
+                    new HttpEntity<>(JobRequestRequestModel.convertToRequestModel(request), headers);
             ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
                 return true;

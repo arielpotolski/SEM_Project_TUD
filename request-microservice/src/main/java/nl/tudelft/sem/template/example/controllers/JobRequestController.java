@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -97,13 +98,15 @@ public class JobRequestController {
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
-        if (facultyUserFaculties.contains(request.getFaculty())) {
-            request.setApproved(false);
-            requestRepository.save(request);
-            publishRequest();
+        for (String fac : facultyUserFaculties) {
+            if (fac.contains(request.getFaculty())) {
+                request.setApproved(false);
+                requestRepository.save(request);
+                publishRequest();
 
-            return ResponseEntity.ok()
-                    .body("The request was sent. Now it is to be approved by faculty.");
+                return ResponseEntity.ok()
+                        .body("The request was sent. Now it is to be approved by faculty.");
+            }
         }
 
         return ResponseEntity.ok()
@@ -118,7 +121,7 @@ public class JobRequestController {
      * @return the response entity
      */
     @GetMapping("pendingRequests")
-    @PreAuthorize("hasRole('FACULTY')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
@@ -135,7 +138,7 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
-    @PreAuthorize("hasRole('FACULTY')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)
@@ -148,10 +151,18 @@ public class JobRequestController {
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
-                .filter(x -> facultiesOfFacultyUser.contains(x.getFaculty()))
                 .collect(Collectors.toList());
 
-        for (Request request : requests) {
+        List<Request> toApprove = new ArrayList<>();
+        for (String fac : facultiesOfFacultyUser) {
+            for (Request req : requests) {
+                if (fac.contains(req.getFaculty())) {
+                    toApprove.add(req);
+                }
+            }
+        }
+
+        for (Request request : toApprove) {
             request.setApproved(true);
         }
 
@@ -160,17 +171,16 @@ public class JobRequestController {
         for (Request request : requests) {
             if (requestAllocationService.enoughResourcesForJob(request, token)) {
                 requestAllocationService.sendRequestToCluster(request, token);
-
+            } else {
+                // Users team must open an endpoint for post requests, notifying for declined requests
+                requestAllocationService.sendDeclinedRequestToUserService(request, token);
             }
-
-            // Users team must open an endpoint for post requests, notifying for declined requests
-            requestAllocationService.sendDeclinedRequestToUserService(request, token);
         }
 
         // Deleting approved and sent entities
-        requestRepository.deleteAll(requests);
+        requestRepository.deleteAll(toApprove);
 
-        return ResponseEntity.ok().body(requests);
+        return ResponseEntity.ok().body(toApprove);
 
     }
 
