@@ -9,4 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FacultiesResponseModel {
     private String faculties;
+
+    public String getFaculties() {
+        return faculties;
+    }
+
+    public void setFaculties(String faculties) {
+        this.faculties = faculties;
+    }
 }

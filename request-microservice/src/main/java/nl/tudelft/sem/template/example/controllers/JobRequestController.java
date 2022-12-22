@@ -1,15 +1,14 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
+import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
+import nl.tudelft.sem.template.example.domain.ClockUser;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
@@ -37,20 +36,22 @@ public class JobRequestController {
     private final transient AuthManager authManager;
     private final RequestAllocationService requestAllocationService;
     private final RequestRepository requestRepository;
+    private final ClockUser clockUser;
 
     /**
      * Instantiates a new controller.
-     *
-     * @param authManager              Spring Security component used to authenticate and authorize the user
+     *  @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
+     * @param clockUser
      */
     @Autowired
     public JobRequestController(AuthManager authManager, RequestAllocationService requestAllocationService,
-                                RequestRepository requestRepository) {
+                                RequestRepository requestRepository, ClockUser clockUser) {
         this.authManager = authManager;
         this.requestAllocationService = requestAllocationService;
         this.requestRepository = requestRepository;
+        this.clockUser = clockUser;
     }
 
 
@@ -65,6 +66,9 @@ public class JobRequestController {
     @PostMapping("/sendRequest")
     public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
 
+        Clock clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
+        clockUser.setClock(clock);
+
         //check if the user is from the corresponding faculty
 
         if (request.getFaculty() == null) {
@@ -77,8 +81,8 @@ public class JobRequestController {
 
         LocalDate onlyDate = request.getPreferredDate();
 
-        LocalDateTime d1 = LocalDateTime.now();
-        LocalDate d2 = LocalDate.now().plusDays(1L);
+        LocalDateTime d1 = clockUser.getTimeLDT();
+        LocalDate d2 = clockUser.getTimeLD().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
         int timeLimit = 5;
 
