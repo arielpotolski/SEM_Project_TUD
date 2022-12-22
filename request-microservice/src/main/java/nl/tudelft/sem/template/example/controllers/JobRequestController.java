@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -71,6 +72,10 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");       // may produce NullPointerExcepetion
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
+
         LocalDateTime preferredDate = request.getPreferredDate().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
@@ -82,23 +87,37 @@ public class JobRequestController {
         LocalDateTime d1 = LocalDateTime.now();
         LocalDate d2 = LocalDate.now().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
-        int timeLimit = 5;
+
+        int timeLimit1 = 5;
+        int timeLimit2 = 360;  // 6 hours
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
 
         if (d2.isEqual(onlyDate)) {
             return ResponseEntity.ok()
                     .body("You cannot send requests for the same day.");
+
         } else if (!d2.isEqual(onlyDate)) {
-            if (minutes <= timeLimit) {
+            if (minutes <= timeLimit1) {
                 return ResponseEntity.ok()
                         .body("You cannot send requests 5 min before the following day.");
+
+            } else if (minutes <= timeLimit2){
+                if (requestAllocationService.enoughResourcesForJob(request) && onlyDate.equals(d2)){    //LocalDateTime and LocalDate diff
+
+                    if (facultyUserFaculties.contains(request.getFaculty())) {
+                        request.setApproved(true);                        // Doesn't require approval; First come, first served
+                        requestRepository.save(request);
+                        publishRequest();
+
+                        return ResponseEntity.ok()
+                                .body("The request is automatically forwarded and will be completed if there are sufficient resources");
+                    }
+
+                } else return ResponseEntity.ok()
+                        .body("Request forwarded, but resources are insufficient");
             }
         }
-
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
-
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
@@ -146,7 +165,7 @@ public class JobRequestController {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
         List<String> facultiesOfFacultyUser = requestAllocationService
-                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
+                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));   // may produce NullPointerExcepetion
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
