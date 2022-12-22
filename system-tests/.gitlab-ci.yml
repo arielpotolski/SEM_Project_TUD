@@ -10,7 +10,7 @@ variables:
   # Disable the Gradle daemon to ensure isolated runs of the CI pipeline.
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
-bootRun-services:
+execute-services:
   stage: execute
   script:
     gradle authentication-microservice:bootRun cluster-microservice:bootRun request-microservice:bootRun system-tests:bootRun --parallel &
