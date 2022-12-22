@@ -35,10 +35,9 @@ public class NodeContributionService {
 
     private final transient NodeRepository nodeRepository;
 
-
     /**
      * Instantiates a new NodeContributionService.
-     * 
+     *
      * @param dataProcessingService a dataProcessingService
      * @param numberProvider a numberProvider
      * @param nodeRepository a nodeRepository
