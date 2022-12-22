@@ -55,7 +55,7 @@ public class Paul implements JourneyingUser {
         // we don't expect anything to be in the cluster right now
         if (nodes.isEmpty()) {
             System.out.println("Whoops. Some nodes exist in the cluster where there should be none.");
-            System.exit(1);
+            throw new RuntimeException("Test");
         }
 
         // post the faculties
