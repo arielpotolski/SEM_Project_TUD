@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
@@ -92,6 +93,31 @@ public class UsersTests {
         when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("USER");
     }
 
+    @Test
+    public void registerAdminTest() throws Exception {
+        final NetId testUser = new NetId("admUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+
+        RegistrationRequestModel model = new RegistrationRequestModel();
+        model.setNetId(testUser.toString());
+        model.setPassword(testPassword.toString());
+
+        // Act
+        ResultActions resultActions = mockMvc.perform(post("/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.serialize(model)));
+
+        // Assert
+        resultActions.andExpect(status().isOk());
+
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+
+        assertThat(savedUser.getNetId()).isEqualTo(testUser);
+        assertThat(savedUser.getPassword()).isEqualTo(testHashedPassword);
+        assertThat(savedUser.getRole()).isEqualTo(new Role("SYSADMIN"));
+    }
 
     @Test
     public void register_withValidData_worksCorrectly() throws Exception {
