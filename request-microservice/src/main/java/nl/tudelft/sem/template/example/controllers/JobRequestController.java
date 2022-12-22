@@ -87,7 +87,7 @@ public class JobRequestController {
         int timeLimit1 = 5;
         int timeLimit2 = 360;
 
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");    // may produce NullPointer
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
@@ -112,9 +112,9 @@ public class JobRequestController {
                                 .body("The request is automatically forwarded and will be completed if there are sufficient resources");
                     }
 
-                } else {
+                } else {     // can be split but is sufficient for now
                     return ResponseEntity.ok()
-                            .body("Request forwarded, but resources are insufficient");
+                            .body("Request forwarded, but resources are insufficient or preferred date is not tomorrow");
                 }
             }
         }
@@ -164,7 +164,7 @@ public class JobRequestController {
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
-        String token = headers.get("Authorization").get(0).replace("Bearer ", "");
+        String token = headers.get("Authorization").get(0).replace("Bearer ", "");     // may produce NullPointer
         List<String> facultiesOfFacultyUser = requestAllocationService
                 .getFacultyUserFaculties(token);
 

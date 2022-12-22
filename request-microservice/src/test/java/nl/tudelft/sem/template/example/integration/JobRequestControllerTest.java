@@ -92,30 +92,43 @@ public class JobRequestControllerTest {
     @Test
     public void sendRequestTestInFacultyNull() throws Exception {
 
-        Request request = new Request();
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        //jsonObject.put("faculty", "");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
-
         String response = result.andReturn().getResponse().getContentAsString();
 
         assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
 
     }
 
+    // ??????????????????????????????????????
     @Test
     public void sendRequestForTodayNotApproved() throws Exception {
 
-        LocalDate localDate = LocalDate.now();
-        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
         JSONObject jsonObject = new JSONObject();
-
-        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
 
         jsonObject.put("netId", "test");
         jsonObject.put("name", "test");
@@ -125,24 +138,28 @@ public class JobRequestControllerTest {
         jsonObject.put("gpu", 1.0);
         jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
-        jsonObject.put("faculty", date);
-        jsonObject.put("id", 123L);
+        jsonObject.put("preferredDate", "2022-12-22");
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+        assertThat(response).isEqualTo("You cannot send requests for the same day.");
+
+
     }
 
     @Test
     public void sendRequestTestNotInFaculty() throws Exception {
 
-        String dateString = "2023-12-12";
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -154,89 +171,184 @@ public class JobRequestControllerTest {
         jsonObject.put("gpu", 1.0);
         jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
-        jsonObject.put("preferredDate", dateString);
-        jsonObject.put("id", 123L);
+        jsonObject.put("preferredDate", "2022-12-23");
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("You are not verified to send requests to this faculty");
+        assertThat(response).isEqualTo("You are not assigned to this faculty.");
 
     }
 
+    // Check if same day means preferred date!!!!
     @Test
     public void sendRequestForTodayDate() throws Exception {
 
-        LocalDate localDate = LocalDate.now();
-        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
         JSONObject jsonObject = new JSONObject();
-
-        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
 
         jsonObject.put("netId", "test");
         jsonObject.put("name", "test");
         jsonObject.put("description", "test");
-        jsonObject.put("faculty", "test");
-        jsonObject.put("cpu", 9.0);
-        jsonObject.put("gpu", 5.0);
-        jsonObject.put("memory", 11.0);
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
-        jsonObject.put("faculty", date);
+        jsonObject.put("preferredDate", "2022-12-22");
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
-        // Need to mock the faculty
-        //assertThat(response).isEqualTo("You cannot send requests for the same day.");
+
+        assertThat(response).isEqualTo("You cannot send requests for the same day.");
 
     }
 
     @Test
     public void sendRequest5MinBeforeNextDayTest() throws Exception {
 
-        LocalDate localDate = LocalDate.now();
-        //Date d = new SimpleDateFormat("yyyy-MM-dd").parse(localDate.toString());
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T23:55:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
         JSONObject jsonObject = new JSONObject();
-
-        String date = localDate.getYear() + "-" + localDate.getMonthValue() + "-" + localDate.getDayOfMonth();
 
         jsonObject.put("netId", "test");
         jsonObject.put("name", "test");
         jsonObject.put("description", "test");
-        jsonObject.put("faculty", "test");
-        jsonObject.put("cpu", 9.0);
-        jsonObject.put("gpu", 5.0);
-        jsonObject.put("memory", 11.0);
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
-        jsonObject.put("faculty", date);
+        jsonObject.put("preferredDate", "2022-12-23");
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        // Need to mock the faculty and date 5 min before
-        //assertThat(response).isEqualTo("You cannot send requests 5 min before the following day.");
+        assertThat(response).isEqualTo("You cannot send requests 5 min before the following day.");
 
 
     }
 
     @Test
-    public void sendRequestExactly6Hours() throws Exception {
+    public void sendRequestLessThan5MinBeforeNextDayTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T23:57:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("You cannot send requests 5 min before the following day.");
+
+    }
+
+    @Test
+    public void sendRequest459MinBeforeNextDayTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T23:55:01"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("You cannot send requests 5 min before the following day.");
+    }
+
+    @Test
+    public void sendRequest501MinBeforeNextDayTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T23:54:59"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+    }
+
+    @Test
+    public void sendRequestExactly6HTest() throws Exception {
 
         when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T18:00:00"));
         when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
@@ -268,19 +380,168 @@ public class JobRequestControllerTest {
     }
 
     @Test
-    public void sendRequests559ToMidnight(){}
+    public void sendRequests601HToMidnightTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T17:59:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request was sent. Now it is to be approved by faculty.");
+    }
 
     @Test
-    public void sendRequestLessThan6H(){}
+    public void sendRequests559ToMidnightTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T18:01:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+
+    }
 
     @Test
-    public void sendRequestLessThan6HNoResource(){}
+    public void sendRequestLessThan6HTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T20:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+
+    }
+
+
+    // Mock the resources!!!!
+    @Test
+    public void sendRequestLessThan6HNoResourceTest() throws Exception {
+
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T20:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("Request forwarded, but resources are insufficient or preferred date is not tomorrow");
+
+    }
 
     @Test
-    public void sendRequestLessThan6HTomorrowNotPreferred(){}
+    public void sendRequestLessThan6HTomorrowNotPreferredTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T20:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-25");        // not the day after
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("Request forwarded, but resources are insufficient or preferred date is not tomorrow");
+    }
 
     @Test
-    public void sendRequestWaitingApproval(){}
+    public void sendRequestWaitingApprovalTest(){}
 
 
     // Can also add an assert if we change the request in the controller
@@ -294,6 +555,7 @@ public class JobRequestControllerTest {
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
+
         // test when there are no loaded requests
         assertThat(response).isEqualTo("[]");
 
