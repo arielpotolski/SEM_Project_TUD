@@ -2,19 +2,22 @@ package nl.tudelft.sem.template.cluster.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class FacultyResourcesResponseModel {
-    private String facultyId;
-    private double totalCpu;
-    private double totalGpu;
-    private double totalMemory;
+    private String facultyName;
+    private double resourceCpu;
+    private double resourceGpu;
+    private double resourceMemory;
 
     /**
      * Converts the provided FacultyTotalResources SPI into a response model.
@@ -41,6 +44,27 @@ public class FacultyResourcesResponseModel {
         List<FacultyResourcesResponseModel> models = new ArrayList<>();
         for (FacultyTotalResources resources : rawResources) {
             models.add(FacultyResourcesResponseModel.convertFacultyTotalResourcesToResponseModel(resources));
+        }
+        return models;
+    }
+
+    /**
+     * Converts resources available to a faculty on given date to a faculty with assigned resources because this is
+     * what request wants for some reason.
+     *
+     * @param rawResources the available resources to convert
+     * @param facultyId the facultyId to whom the resources are assigned.
+     *
+     * @return a list of objects that the request service can hopefully read.
+     */
+    public static List<FacultyResourcesResponseModel> convertForRequestService(
+            List<AvailableResourcesForDate> rawResources, String facultyId) {
+        List<FacultyResourcesResponseModel> models = new ArrayList<>();
+        for (AvailableResourcesForDate resources : rawResources) {
+            var model = Stream.of(resources).map(x -> new FacultyResourcesResponseModel(
+                    facultyId, x.getAvailableCpu(), x.getAvailableGpu(), x.getAvailableMemory()
+            )).collect(Collectors.toList()).get(0);
+            models.add(model);
         }
         return models;
     }

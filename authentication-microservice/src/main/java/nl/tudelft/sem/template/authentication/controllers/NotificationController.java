@@ -71,7 +71,7 @@ public class NotificationController {
      * @throws ResponseStatusException when bad request
      */
     @GetMapping("/getNotification")
-    @SuppressWarnings("PMD")
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<String> sendJobNotifications(@RequestBody (required = false) GetNotifactionsRequestModel request) {
         try {
             request.check();
@@ -134,13 +134,5 @@ public class NotificationController {
         }
         return ResponseEntity.ok("Notification is deleted");
     }
-
-
-
-
-
-
-
-
 
 }
