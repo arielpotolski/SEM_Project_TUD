@@ -9,8 +9,13 @@ import lombok.EqualsAndHashCode;
 public class Password {
     private final transient String passwordValue;
 
+    /**
+     * Creates password that is at least 6 and at most 20 chars long.
+     *
+     * @param password string that is the password
+     */
     public Password(String password) {
-        if(password.length() > 20 || password.length() < 6) {
+        if (password.length() > 20 || password.length() < 6) {
             throw new IllegalArgumentException("Length of password is incorrect");
         }
         this.passwordValue = password;
