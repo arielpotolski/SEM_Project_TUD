@@ -135,12 +135,4 @@ public class NotificationController {
         return ResponseEntity.ok("Notification is deleted");
     }
 
-
-
-
-
-
-
-
-
 }

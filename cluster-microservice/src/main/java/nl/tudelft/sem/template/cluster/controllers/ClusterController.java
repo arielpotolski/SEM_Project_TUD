@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ClusterController {
 
     private final transient AuthManager authManager;
@@ -414,6 +416,34 @@ public class ClusterController {
             return ResponseEntity.ok(this.dataProcessingService
                     .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
         }
+    }
+
+    /**
+     * Gets and returns the available resources for the given faculty between tomorrow and the given date, inclusive.
+     *
+     * @param rawDate the String form of the date until which to calculate available resources.
+     * @param facultyId the facultyId of the faculty to calculate available resources for.
+     *
+     * @return response entity containing a list of available resources per day from tomorrow until given.
+     */
+    @GetMapping(value = "/resources/availableUntil/{date}/{facultyId}")
+    public ResponseEntity<List<FacultyResourcesResponseModel>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
+            @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
+        // anti-corruption
+        try {
+            LocalDate.parse(rawDate);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        LocalDate date = LocalDate.parse(rawDate);
+        if (date.isBefore(this.dateProvider.getTomorrow())
+                || !this.dataProcessingService.existsByFacultyId(facultyId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        var rawResources = this.dataProcessingService
+                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date);
+        return ResponseEntity.ok(FacultyResourcesResponseModel
+                .convertForRequestService(rawResources, facultyId));
     }
 
 }

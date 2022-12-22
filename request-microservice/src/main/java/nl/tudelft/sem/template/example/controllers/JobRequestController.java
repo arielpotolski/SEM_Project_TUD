@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -71,13 +72,10 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        LocalDateTime preferredDate = request.getPreferredDate().toInstant()
-                .atZone(ZoneId.systemDefault())
+        LocalDateTime preferredDate = request.getPreferredDate().atStartOfDay(ZoneId.systemDefault())
                 .toLocalDateTime();
 
-        LocalDate onlyDate = request.getPreferredDate().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+        LocalDate onlyDate = request.getPreferredDate();
 
         LocalDateTime d1 = LocalDateTime.now();
         LocalDate d2 = LocalDate.now().plusDays(1L);
@@ -110,7 +108,7 @@ public class JobRequestController {
         }
 
         return ResponseEntity.ok()
-                .body("You are not verified to send requests to this faculty");
+                .body("You are not assigned to this faculty.");
 
     }
 
@@ -121,7 +119,7 @@ public class JobRequestController {
      * @return the response entity
      */
     @GetMapping("pendingRequests")
-    @PreAuthorize("hasRole('FACULTY')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
@@ -138,15 +136,16 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
-    @PreAuthorize("hasRole('FACULTY')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
         List<String> facultiesOfFacultyUser = requestAllocationService
-                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
+                .getFacultyUserFaculties(token);
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
@@ -160,13 +159,12 @@ public class JobRequestController {
         //Implementation of changing the status of respective requests to approved
 
         for (Request request : requests) {
-            if (requestAllocationService.enoughResourcesForJob(request)) {
-                requestAllocationService.sendRequestToCluster(request);
-
+            if (requestAllocationService.enoughResourcesForJob(request, token)) {
+                requestAllocationService.sendRequestToCluster(request, token);
+            } else {
+                // Users team must open an endpoint for post requests, notifying for declined requests
+                requestAllocationService.sendDeclinedRequestToUserService(request, token);
             }
-
-            // Users team must open an endpoint for post requests, notifying for declined requests
-            requestAllocationService.sendDeclinedRequestToUserService(request);
         }
 
         // Deleting approved and sent entities
