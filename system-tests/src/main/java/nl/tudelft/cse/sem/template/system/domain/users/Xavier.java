@@ -6,6 +6,7 @@ public class Xavier implements JourneyingUser {
 
     public static void embarkOnUserJourney() {
         System.out.println("Xavier begins by submitting a multitude of requests...");
+        System.exit(0);
     }
 
 }

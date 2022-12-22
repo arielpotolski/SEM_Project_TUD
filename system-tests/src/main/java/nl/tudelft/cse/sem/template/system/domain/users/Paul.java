@@ -60,7 +60,7 @@ public class Paul implements JourneyingUser {
 
         // post the faculties
         System.out.println("Paul knows that the cluster should receive the existing faculties automatically," +
-                "but doesn't believe that it worked properly. He decides to post the faculties himself.");
+                " but doesn't believe that it worked properly. He decides to post the faculties himself.");
 
         url = "http://localhost:8082/faculties";
         HttpEntity<List<String>> faculties = new HttpEntity<>(List.of("EWI", "IO", "CIVIL"), headers);
