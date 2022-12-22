@@ -22,6 +22,6 @@ public class RoleTest {
         assertThat(role1.equals(role2)).isTrue();
         assertThat(role1.equals(role3)).isFalse();
         assertThat(role1.equals(role4)).isFalse();
-        assertThat(role1.equals(new NetId("test1"))).isFalse();
+        assertThat(role1.equals(new NetId("testUser1"))).isFalse();
     }
 }

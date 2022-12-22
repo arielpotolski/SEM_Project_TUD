@@ -11,6 +11,10 @@ public class NetId {
     private final transient String netIdValue;
 
     public NetId(String netId) {
+
+        if(netId.length() > 20 || netId.length() < 6){
+            throw new IllegalArgumentException("Length of netId is incorrect");
+        }
         this.netIdValue = netId;
     }
 

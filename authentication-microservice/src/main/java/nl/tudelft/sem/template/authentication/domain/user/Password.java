@@ -10,7 +10,9 @@ public class Password {
     private final transient String passwordValue;
 
     public Password(String password) {
-        // Validate input
+        if(password.length() > 20 || password.length() < 6) {
+            throw new IllegalArgumentException("Length of password is incorrect");
+        }
         this.passwordValue = password;
     }
 
