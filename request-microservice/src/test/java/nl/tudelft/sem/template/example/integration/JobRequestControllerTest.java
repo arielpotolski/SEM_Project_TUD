@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
+import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -22,8 +23,10 @@ import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
 import nl.tudelft.sem.template.example.domain.ClockUser;
+import nl.tudelft.sem.template.example.domain.JobRequestRequestModel;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.json.JSONArray;
@@ -65,11 +68,18 @@ public class JobRequestControllerTest {
     @Autowired
     private transient RequestRepository requestRepository;
 
-    @Mock
+    // THIS HAS TO BE AUTOWIRED, NOT MOCKED
+    @Autowired
     private transient RequestAllocationService requestAllocationService;
 
     @Mock
     private transient ClockUser clockUser;
+
+    // WE HAVE TO USE THE SAME IN THE TEST AND IN THE ACTUAL CLASS
+    private final transient RestTemplate restTemplate = new RestTemplate();
+
+    // FOR CLIENT HTTP TESTING
+    private transient MockRestServiceServer server;
 
     /**
      * Setup so we don't need specific token for authentication for testing.
@@ -77,13 +87,19 @@ public class JobRequestControllerTest {
     @BeforeEach
     public void setup() {
 
+        server = MockRestServiceServer.createServer(restTemplate); // bind the server to the template
+        requestAllocationService.setRestTemplate(restTemplate); // set the service to use the same template (!!!!!)
+
+        // when asked for user faculties, requestAllocationService will return EWI and IO
+        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("{\n\"faculties\": \"[EWI, IO]\"}", MediaType.APPLICATION_JSON));
+
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
         when(mockAuthenticationManager.getRole()).thenReturn("FACULTY");
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
-        when(requestAllocationService.getFacultyUserFaculties("MockedToken"))
-                .thenReturn(List.of("EWI", "IO"));
         when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.now());
         when(clockUser.getTimeLD()).thenReturn(LocalDate.now());
 
@@ -95,22 +111,15 @@ public class JobRequestControllerTest {
         when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
         when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("netId", "test");
-        jsonObject.put("name", "test");
-        jsonObject.put("description", "test");
-        //jsonObject.put("faculty", "");
-        jsonObject.put("cpu", 2.0);
-        jsonObject.put("gpu", 1.0);
-        jsonObject.put("memory", 1.0);
-        jsonObject.put("approved", true);
-        jsonObject.put("preferredDate", "2022-12-23");
+        var entity = new Request (
+                "test", "test", "test", "EWI",
+                2.0, 1.0, 1.0, LocalDate.parse("2022-12-23")
+        );
 
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
-                .content(jsonObject.toString())
+                .content(JsonUtil.serialize(entity))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
@@ -121,9 +130,18 @@ public class JobRequestControllerTest {
 
     }
 
-    // ??????????????????????????????????????
     @Test
     public void sendRequestForTodayNotApproved() throws Exception {
+        // for returning
+        var resources = new ResourceResponseModel[] {
+                new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
+        var resourcesString = JsonUtil.serialize(resources);
+
+        // when asked for resources, enough will be available
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-22/AE"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T10:00:00"));
         when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
