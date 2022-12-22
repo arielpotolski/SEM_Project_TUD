@@ -212,7 +212,7 @@ public class RequestAllocationServiceTest {
         String dateString = "2025-12-12";
 
         Request request = new Request(1L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
+                "Cs", 4.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
 
@@ -221,7 +221,25 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void notEnoughResourceForJobTest(){}
+    public void notEnoughCpuResourceForJobTest() throws JsonProcessingException {
+        // reserved resources for 24th of December 2022 for ewi
+        var resources = new ResourceResponseModel[] {
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+        var resourcesString = objectMapper.writeValueAsString(resources);
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        // request
+        Request request = new Request(1L, "test", "name", "desc",
+                "EWI", 2.0, 3.0, 1.0, true, LocalDate.parse("2022-12-25"));
+
+        boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
+
+        assertThat(b).isFalse();
+
+    }
 
     @Test
     public void enoughResourcesForJobTest() {}
