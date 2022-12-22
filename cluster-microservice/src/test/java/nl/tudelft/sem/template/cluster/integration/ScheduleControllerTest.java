@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.cluster.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,6 +19,7 @@ import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
+import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
 import nl.tudelft.sem.template.cluster.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -255,13 +258,28 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    public void sendInvalidRequestTest() throws Exception {
-        model.setRequiredCpu(0.0);
+    public void sendInvalidRequestTestLessCpuThanGpu() throws Exception {
+        this.model.setRequiredGpu(3.0);
         String json = JsonUtil.serialize(model);
         ResultActions result = mockMvc.perform(post("/request")
                 .accept(MediaType.APPLICATION_JSON).content(json)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The requested job cannot require more GPU or memory than CPU.");
+    }
+
+    @Test
+    public void sendInvalidRequestTestLessCpuThanMemory() throws Exception {
+        this.model.setRequiredMemory(3.0);
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+            .accept(MediaType.APPLICATION_JSON).content(json)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
 
         // Assert
         result.andExpect(status().isBadRequest());
@@ -313,6 +331,15 @@ public class ScheduleControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("Successfully scheduled job.");
     }
+
+    /*@Test
+    public void unauthorizedGetResourcesAssignedToAll() throws Exception {
+        PrivilegeVerificationService privilegeVerificationService =
+            mock(PrivilegeVerificationService.class);
+        when(privilegeVerificationService.verifyAccountCorrectPrivilegesForDayAndFaculty())
+
+        result.andExpect(status().isForbidden());
+    }*/
 
     @Test
     public void getResourcesAssignedToAllEmptyTest() throws Exception {

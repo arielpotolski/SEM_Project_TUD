@@ -264,8 +264,21 @@ public class NodeControllerTest {
     }
 
     @Test
-    public void deleteAllNodesTest() throws Exception {
+    public void deleteAllNodesTestEmptyUrl() throws Exception {
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("All nodes have been deleted from the cluster.");
+        assertThat(nodeRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    public void deleteAllNodesTestSlashUrl() throws Exception {
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/")
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .header("Authorization", "Bearer MockedToken"));
