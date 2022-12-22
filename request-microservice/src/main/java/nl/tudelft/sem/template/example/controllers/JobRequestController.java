@@ -84,7 +84,11 @@ public class JobRequestController {
         LocalDateTime d1 = clockUser.getTimeLDT();
         LocalDate d2 = clockUser.getTimeLD().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
-        int timeLimit = 5;
+        int timeLimit1 = 5;
+        int timeLimit2 = 360;
+
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
 
@@ -92,15 +96,33 @@ public class JobRequestController {
             return ResponseEntity.ok()
                     .body("You cannot send requests for the same day.");
         } else if (!d2.isEqual(onlyDate)) {
-            if (minutes <= timeLimit) {
+            if (minutes <= timeLimit1) {
                 return ResponseEntity.ok()
                         .body("You cannot send requests 5 min before the following day.");
+
+            } else if (minutes <= timeLimit2) {
+                if (requestAllocationService.enoughResourcesForJob(request, token) && onlyDate.equals(d2)) {    //LocalDateTime and LocalDate diff
+
+                    if (facultyUserFaculties.contains(request.getFaculty())) {
+                        request.setApproved(true);                        // Doesn't require approval; First come, first served
+                        requestRepository.save(request);
+                        publishRequest();
+
+                        return ResponseEntity.ok()
+                                .body("The request is automatically forwarded and will be completed if there are sufficient resources");
+                    }
+
+                } else {
+                    return ResponseEntity.ok()
+                            .body("Request forwarded, but resources are insufficient");
+                }
+
             }
         }
 
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
 
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
+
+
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);

@@ -13,11 +13,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
+import nl.tudelft.sem.template.example.domain.ClockUser;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
@@ -64,6 +66,9 @@ public class JobRequestControllerTest {
     @Mock
     private transient RequestAllocationService requestAllocationService;
 
+    @Mock
+    private transient ClockUser clockUser;
+
     /**
      * Setup so we don't need specific token for authentication for testing.
      */
@@ -77,6 +82,8 @@ public class JobRequestControllerTest {
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
         when(requestAllocationService.getFacultyUserFaculties("MockedToken"))
                 .thenReturn(List.of("EWI", "IO"));
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.now());
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.now());
 
     }
 
