@@ -252,13 +252,13 @@ public class JobRequestControllerTest {
         String dateString = "2025-12-12";
 
         Request req1 = new Request(1L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
+                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         Request req2 = new Request(2L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
+                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         Request req3 = new Request(3L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
+                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         List<Request> requests = new ArrayList<>();
         requests.add(req1);
@@ -272,13 +272,7 @@ public class JobRequestControllerTest {
 
         server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
-
-        //RequestRepository requestRepository = mock(RequestRepository.class);
-        //RequestAllocationService requestAllocationService = mock(RequestAllocationService.class);
-        //when(requestRepository.findAll()).thenReturn(requests);
-
-        //when(requestAllocationService.getFacultyUserFaculties("")).thenReturn(List.of("Cs"));
+                .andRespond(withSuccess("EWI", MediaType.APPLICATION_JSON));
 
 
         Long[] ids = {1L, 2L, 3L};
