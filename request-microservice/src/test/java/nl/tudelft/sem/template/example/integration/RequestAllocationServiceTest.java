@@ -29,6 +29,7 @@ import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -108,10 +109,7 @@ public class RequestAllocationServiceTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> {
-            requestAllocationService.getFacultyUserFaculties("");
-        }).isInstanceOf(AssertionError.class);
-
+        assertThat(requestAllocationService.getFacultyUserFaculties("")).isEqualTo(new ArrayList<>());
     }
 
     @Test
