@@ -559,7 +559,35 @@ public class JobRequestControllerTest {
     }
 
     @Test
-    public void sendRequestWaitingApprovalTest(){}
+    public void sendRequestWaitingApprovalTest() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T15:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "EWI");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", false);                    // triggers waiting for approval
+        jsonObject.put("preferredDate", "2022-12-25");        // not the day after
+
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request was sent. Now it is to be approved by faculty.");
+    }
 
 
     // Can also add an assert if we change the request in the controller
@@ -624,11 +652,7 @@ public class JobRequestControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("[]");
 
-
-
     }
-
-
 
 }
 
