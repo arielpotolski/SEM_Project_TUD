@@ -72,6 +72,19 @@ public class Request {
         this.preferredDate = preferredDate;
     }
 
+    public Request(String netId, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory, LocalDate preferredDate){
+
+        this.netId = netId;
+        this.name = name;
+        this.description = description;
+        this.faculty = faculty;
+        this.cpu = cpu;
+        this.gpu = gpu;
+        this.memory = memory;
+        this.preferredDate = preferredDate;
+    }
+
     /**
      * Instantiates a new Request.
      */
