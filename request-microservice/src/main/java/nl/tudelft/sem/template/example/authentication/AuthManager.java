@@ -1,7 +1,10 @@
 package nl.tudelft.sem.template.example.authentication;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 /**
  * Authentication Manager.
@@ -15,5 +18,16 @@ public class AuthManager {
      */
     public String getNetId() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    /**
+     * Interfaces with spring security to get the role of the user in the current context.
+     *
+     * @return the role of the user.
+     */
+    public String getRole() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","))
+                .replaceFirst("ROLE_", "");
     }
 }

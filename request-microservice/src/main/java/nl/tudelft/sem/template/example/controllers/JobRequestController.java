@@ -143,7 +143,7 @@ public class JobRequestController {
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+        String token = headers.get("Authorization").get(0).replace("Bearer ", "");
         List<String> facultiesOfFacultyUser = requestAllocationService
                 .getFacultyUserFaculties(token);
 

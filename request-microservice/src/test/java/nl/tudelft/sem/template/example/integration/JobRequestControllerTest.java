@@ -22,6 +22,7 @@ import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,9 +72,10 @@ public class JobRequestControllerTest {
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
-        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
+        when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("test");
+        when(mockAuthenticationManager.getRole()).thenReturn("FACULTY");
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
-        when(requestAllocationService.getFacultyUserFaculties("Bearer MockedToken"))
+        when(requestAllocationService.getFacultyUserFaculties("MockedToken"))
                 .thenReturn(List.of("EWI", "IO"));
 
     }
@@ -251,13 +253,13 @@ public class JobRequestControllerTest {
 
         String dateString = "2025-12-12";
 
-        Request req1 = new Request(1L, "test", "name", "desc",
+        Request req1 = new Request(1L, "test", "test", "desc",
                 "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
-        Request req2 = new Request(2L, "test", "name", "desc",
+        Request req2 = new Request(2L, "test", "test", "desc",
                 "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
-        Request req3 = new Request(3L, "test", "name", "desc",
+        Request req3 = new Request(3L, "test", "test", "desc",
                 "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         List<Request> requests = new ArrayList<>();
@@ -272,7 +274,7 @@ public class JobRequestControllerTest {
 
         server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess("EWI", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess("[EWI]", MediaType.APPLICATION_JSON));
 
 
         Long[] ids = {1L, 2L, 3L};
