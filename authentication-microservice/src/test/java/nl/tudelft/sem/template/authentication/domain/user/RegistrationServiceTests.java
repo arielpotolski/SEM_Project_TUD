@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.authentication.domain.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
@@ -69,6 +70,53 @@ public class RegistrationServiceTests {
     }
 
     @Test
+    public void changePasswordThrowsException() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        assertThrows(NetIdNotFoundException.class, () -> registrationService.changePassword(testUser, testPassword));
+    }
+
+    @Test
+    public void createAdminTest() throws Exception {
+        final NetId testUser = new NetId("admUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+
+
+        // Act
+        registrationService.registerUser(testUser, testPassword);
+
+        // Assert
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+
+        assertThat(savedUser.getNetId()).isEqualTo(testUser);
+        assertThat(savedUser.getPassword()).isEqualTo(testHashedPassword);
+        assertThat(savedUser.getRole()).isEqualTo(new Role("SYSADMIN"));
+    }
+
+    @Test
+    public void createFacultyUserTest() throws Exception {
+        final NetId testUser = new NetId("facUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+
+
+        // Act
+        registrationService.registerUser(testUser, testPassword);
+
+        // Assert
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+
+        assertThat(savedUser.getNetId()).isEqualTo(testUser);
+        assertThat(savedUser.getPassword()).isEqualTo(testHashedPassword);
+        assertThat(savedUser.getRole()).isEqualTo(new Role("FACULTY"));
+    }
+
+
+
+    @Test
     public void createUser_withExistingUser_throwsException() {
         // Arrange
         final NetId testUser = new NetId("SomeUser");
@@ -106,6 +154,22 @@ public class RegistrationServiceTests {
         assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)).isTrue();
         assertThat(savedUser.getFaculties().size()).isEqualTo(1);
 
+    }
+
+    @Test
+    public void assignFaculty_twice() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        registrationService.registerUser(testUser, testPassword);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
+        registrationService.applyFacultyUser(testUser, AppUser.Faculty.EWI);
+        //check
+        AppUser savedUser = userRepository.findByNetId(testUser).orElseThrow();
+        //asserts
+        assertThat(savedUser.getFaculties().contains(AppUser.Faculty.EWI)).isTrue();
+        assertThat(savedUser.getFaculties().size()).isEqualTo(1);
     }
 
     @Test
@@ -159,6 +223,42 @@ public class RegistrationServiceTests {
 
         assertThatExceptionOfType(NetIdNotFoundException.class)
                 .isThrownBy(action);
+    }
+
+    @Test
+    public void changePasswordTest() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final Password newPassword = new Password("new");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        final HashedPassword newHashedPassword = new HashedPassword("Hash");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        when(mockPasswordEncoder.hash(newPassword)).thenReturn(newHashedPassword);
+        registrationService.registerUser(testUser, testPassword);
+        registrationService.changePassword(testUser, newPassword);
+        AppUser savedUser1 = userRepository.findByNetId(testUser).orElseThrow();
+        assertThat(savedUser1.getPassword()).isEqualTo(newHashedPassword);
+
+    }
+
+    @Test
+    public void equalsTestCorrect() throws Exception {
+        final NetId testUser = new NetId("SomeUser");
+        final Password testPassword = new Password("password123");
+        final Password newPassword = new Password("new");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        final HashedPassword newHashedPassword = new HashedPassword("Hash");
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        registrationService.registerUser(testUser, testPassword);
+        AppUser savedUser1 = userRepository.findByNetId(testUser).orElseThrow();
+        AppUser savedUser2 = userRepository.findByNetId(testUser).orElseThrow();
+        AppUser savedUser3 = null;
+        assertThat(savedUser1.equals(savedUser1)).isTrue();
+        assertThat(savedUser1.equals(savedUser2)).isTrue();
+        assertThat(savedUser1.equals(savedUser3)).isFalse();
+        assertThat(savedUser1.equals(testUser)).isFalse();
+
+
     }
 
 
