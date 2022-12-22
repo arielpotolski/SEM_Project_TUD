@@ -190,15 +190,17 @@ public class RequestAllocationServiceTest {
 
     @Test
     public void sendDeclinedRequestToUserService() throws ParseException {
-
+        server.expect(once(), requestTo("http://localhost:8081/notification"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
         String dateString = "2025-12-12";
 
         Request request = new Request(1L, "test", "name", "desc",
                 "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
-        boolean b = requestAllocationService.sendDeclinedRequestToUserService(request);
+        boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
 
-        assertThat(b).isFalse();
+        assertThat(b).isTrue();
 
     }
 

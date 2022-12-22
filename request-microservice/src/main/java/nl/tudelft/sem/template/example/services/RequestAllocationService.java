@@ -169,8 +169,6 @@ public class RequestAllocationService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
 
-            // TODO: does this work?
-
             HttpEntity<Request> entity = new HttpEntity<>(request, headers);
             ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
@@ -191,11 +189,11 @@ public class RequestAllocationService {
      *
      * @param request the request
      */
-    public boolean sendDeclinedRequestToUserService(Request request) {
+    public boolean sendDeclinedRequestToUserService(Request request, String token) {
 
 
         try {
-            String url = "https://localhost:8081/notification";
+            String url = "http://localhost:8081/notification";
 
             JSONObject json = new JSONObject();
             json.put("date", request.getPreferredDate());
@@ -204,8 +202,12 @@ public class RequestAllocationService {
             json.put("message", request.getDescription());
             json.put("netId", request.getNetId());
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            HttpEntity<JSONObject> entity = new HttpEntity<>(json, headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
                 return true;
             }

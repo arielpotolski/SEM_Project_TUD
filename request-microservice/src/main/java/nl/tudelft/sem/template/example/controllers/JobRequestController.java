@@ -164,7 +164,7 @@ public class JobRequestController {
             }
 
             // Users team must open an endpoint for post requests, notifying for declined requests
-            requestAllocationService.sendDeclinedRequestToUserService(request);
+            requestAllocationService.sendDeclinedRequestToUserService(request, token);
         }
 
         // Deleting approved and sent entities
