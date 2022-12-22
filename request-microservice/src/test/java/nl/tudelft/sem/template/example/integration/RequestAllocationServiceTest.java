@@ -128,8 +128,8 @@ public class RequestAllocationServiceTest {
     @Test
     public void getReservedResourceTest() throws JsonProcessingException {
         var resources = new ResourceResponseModel[] {
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = objectMapper.writeValueAsString(resources);
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-24/EWI"))
                 .andExpect(method(HttpMethod.GET))
@@ -211,8 +211,8 @@ public class RequestAllocationServiceTest {
     public void notEnoughCpuResourceForJobTest() throws JsonProcessingException {
         // reserved resources for 24th of December 2022 for ewi
         var resources = new ResourceResponseModel[] {
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = objectMapper.writeValueAsString(resources);
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
                 .andExpect(method(HttpMethod.GET))
@@ -231,8 +231,8 @@ public class RequestAllocationServiceTest {
     public void notEnoughGpuResourceForJobTest() throws JsonProcessingException {
         // reserved resources for 24th of December 2022 for ewi
         var resources = new ResourceResponseModel[] {
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 3.0, 3.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 3.0, 3.0, 2.0)};
         var resourcesString = objectMapper.writeValueAsString(resources);
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
                 .andExpect(method(HttpMethod.GET))
@@ -251,8 +251,8 @@ public class RequestAllocationServiceTest {
     public void notEnoughMemoryResourceForJobTest() throws JsonProcessingException {
         // reserved resources for 24th of December 2022 for ewi
         var resources = new ResourceResponseModel[] {
-                new ResourceResponseModel("EWI", 3.0, 2.0, 1.0),
-                new ResourceResponseModel("EWI", 2.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 1.0),
+            new ResourceResponseModel("EWI", 2.0, 1.0, 2.0)};
         var resourcesString = objectMapper.writeValueAsString(resources);
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
                 .andExpect(method(HttpMethod.GET))
