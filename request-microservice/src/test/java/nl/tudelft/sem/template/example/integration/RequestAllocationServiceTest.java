@@ -157,10 +157,26 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void sendRequestToClusterTest() throws JsonProcessingException, ParseException {
-        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+    public void sendRequestToClusterTest1() throws JsonProcessingException, ParseException {
+        server.expect(once(), requestTo("http://localhost:8082/request"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("true", MediaType.APPLICATION_JSON));
+
+        String dateString = "2025-12-12";
+
+        Request request = new Request(1L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, true, LocalDate.parse(dateString));
+
+        boolean b = requestAllocationService.sendRequestToCluster(request, "token");
+
+        assertThat(b).isTrue();
+    }
+
+    @Test
+    public void sendRequestToClusterTest2() throws JsonProcessingException, ParseException {
+        server.expect(once(), requestTo("http://localhost:8082/request"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         String dateString = "2025-12-12";
 
