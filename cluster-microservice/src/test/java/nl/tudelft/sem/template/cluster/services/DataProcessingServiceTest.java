@@ -242,16 +242,13 @@ public class DataProcessingServiceTest {
 
     @Test
     public void doesntExistInScheduleForGivenDate() {
-        LocalDate date = LocalDate.of(2022, 12, 24);
+        LocalDate date = LocalDate.of(2022, 12, 10);
         assertThat(this.dataProcessingService.existsInScheduleByScheduledFor(date)).isFalse();
     }
 
     @Test
     public void existInScheduleForGivenDate() {
         this.dataProcessingService.saveInSchedule(job1);
-
-        //System.out.println(this.dataProcessingService
-        // .getJobRepository().findByFacultyId("EWI").get(0).getScheduledFor());
 
         LocalDate date = LocalDate.of(2022, 12, 14);
         assertThat(this.dataProcessingService.existsInScheduleByScheduledFor(date)).isTrue();
@@ -449,7 +446,7 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getAvailableResourcesForAllFacultiesForAllDaysFilledSchedule() {
-        LocalDate startDate = LocalDate.of(2022, 12, 23);
+        LocalDate startDate = this.dateProvider.getTomorrow();
         this.dateProvider = mock(DateProvider.class);
         when(this.dateProvider.getTomorrow()).thenReturn(startDate);
 
@@ -528,7 +525,7 @@ public class DataProcessingServiceTest {
         this.node1.setGpuResources(10);
         this.dataProcessingService.save(this.node1);
 
-        LocalDate lookupDate = LocalDate.of(2022, 12, 23);
+        LocalDate lookupDate = this.dateProvider.getTomorrow();
 
         this.job1.setScheduledFor(lookupDate);
         this.dataProcessingService.saveInSchedule(this.job1);
@@ -553,7 +550,7 @@ public class DataProcessingServiceTest {
         this.node1.setGpuResources(10);
         this.dataProcessingService.save(this.node1);
 
-        LocalDate lookupDate = LocalDate.of(2023, 1, 26);
+        LocalDate lookupDate = this.dateProvider.getTomorrow();
 
         this.job1.setScheduledFor(lookupDate);
         this.dataProcessingService.saveInSchedule(this.job1);
