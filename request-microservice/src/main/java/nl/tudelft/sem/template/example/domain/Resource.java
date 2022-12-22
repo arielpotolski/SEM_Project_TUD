@@ -1,8 +1,11 @@
 package nl.tudelft.sem.template.example.domain;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * The type Resource.
  */
+@EqualsAndHashCode
 public class Resource {
 
     private String facultyName;

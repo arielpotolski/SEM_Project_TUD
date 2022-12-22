@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -41,7 +41,7 @@ public class Request {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @NonNull
-    private Date preferredDate;
+    private LocalDate preferredDate;
 
     /**
      * Instantiates a new Request.
@@ -59,7 +59,7 @@ public class Request {
      */
     public Request(Long id, String netId, String name, String description, String faculty,
                    Double cpu, Double gpu, Double memory,
-                   boolean approved, Date preferredDate) {
+                   boolean approved, LocalDate preferredDate) {
         this.id = id;
         this.netId = netId;
         this.name = name;
@@ -210,7 +210,7 @@ public class Request {
      *
      * @return the preferred date
      */
-    public Date getPreferredDate() {
+    public LocalDate getPreferredDate() {
         return preferredDate;
     }
 
@@ -219,7 +219,7 @@ public class Request {
      *
      * @param preferredDate the preferred date
      */
-    public void setPreferredDate(Date preferredDate) {
+    public void setPreferredDate(LocalDate preferredDate) {
         this.preferredDate = preferredDate;
     }
 

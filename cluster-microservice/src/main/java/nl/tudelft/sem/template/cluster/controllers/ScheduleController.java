@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.cluster.controllers;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
@@ -239,7 +240,7 @@ public class ScheduleController {
      * in the three categories, as well as the date and the facultyId.
      */
     @GetMapping(value = {"/resources/available", "/resources/available/{date}&{facultyId}",
-        "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
+            "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
     public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getAvailableResourcesPerFacultyPerDay(
             @RequestHeader HttpHeaders headers,
             @PathVariable(value = "date", required = false) String rawDate,
@@ -275,6 +276,34 @@ public class ScheduleController {
             return ResponseEntity.ok(this.dataProcessingService
                     .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
         }
+    }
+
+    /**
+     * Gets and returns the available resources for the given faculty between tomorrow and the given date, inclusive.
+     *
+     * @param rawDate the String form of the date until which to calculate available resources.
+     * @param facultyId the facultyId of the faculty to calculate available resources for.
+     *
+     * @return response entity containing a list of available resources per day from tomorrow until given.
+     */
+    @GetMapping(value = "/resources/availableUntil/{date}/{facultyId}")
+    public ResponseEntity<List<FacultyResourcesResponseModel>> getAvailableResourcesForGivenFacultyBeforeGivenDate(
+            @PathVariable("date") String rawDate, @PathVariable("facultyId") String facultyId) {
+        // anti-corruption
+        try {
+            LocalDate.parse(rawDate);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        LocalDate date = LocalDate.parse(rawDate);
+        if (date.isBefore(this.dateProvider.getTomorrow())
+                || !this.dataProcessingService.existsByFacultyId(facultyId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        var rawResources = this.dataProcessingService
+                .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date);
+        return ResponseEntity.ok(FacultyResourcesResponseModel
+                .convertForRequestService(rawResources, facultyId));
     }
 
 }

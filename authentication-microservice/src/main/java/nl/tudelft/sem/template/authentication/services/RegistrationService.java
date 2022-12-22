@@ -79,7 +79,7 @@ public class RegistrationService {
      * @throws Exception if the user does not exist
      */
     public void changePassword(NetId netId, Password password)throws  Exception {
-        if (!checkNetIdIsUnique(netId)) {
+        if (userRepository.existsByNetId(netId)) {
             HashedPassword hashedPassword = passwordHashingService.hash(password);
             AppUser user = userRepository.findByNetId(netId).get();
             user.changePassword(hashedPassword);
@@ -87,7 +87,6 @@ public class RegistrationService {
             userRepository.save(user);
             return;
         }
-        //Needs to change (make a new exception)
         throw new NetIdNotFoundException(netId);
     }
 
