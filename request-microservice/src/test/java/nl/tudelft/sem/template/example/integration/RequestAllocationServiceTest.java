@@ -15,16 +15,21 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.controllers.JobRequestController;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.domain.Resource;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
+import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,6 +80,9 @@ public class RequestAllocationServiceTest {
     private final transient RestTemplate restTemplate = new RestTemplate();
 
     private transient MockRestServiceServer server;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
 
     /**
@@ -128,18 +136,19 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void getReservedResourceTest() {
+    public void getReservedResourceTest() throws JsonProcessingException {
+        var resources = new Resource[] {
+                new Resource("EWI", 3.0, 2.0, 2.0),
+                new Resource("EWI", 1.0, 1.0, 2.0)};
+        var resourcesString = objectMapper.writeValueAsString(resources);
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-24/EWI"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
-        RestTemplate restTemplate = new RestTemplate();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+        List<Resource> reservedResources = requestAllocationService
+                .getReservedResource("EWI", LocalDate.parse("2022-12-24"), "");
 
-        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess("Cs", MediaType.APPLICATION_JSON));
-
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
-
-        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+        assertThat(reservedResources).isEqualTo(new ArrayList<>());
 
     }
 
@@ -147,12 +156,11 @@ public class RequestAllocationServiceTest {
     public void sendRequestToClusterTest() throws JsonProcessingException, ParseException {
 
         String dateString = "2025-12-12";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Request request = new Request(1L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
-        boolean b = requestAllocationService.sendRequestToCluster(request);
+        boolean b = requestAllocationService.sendRequestToCluster(request, "token");
 
         assertThat(b).isFalse();
     }
@@ -161,10 +169,9 @@ public class RequestAllocationServiceTest {
     public void sendDeclinedRequestToUserService() throws ParseException {
 
         String dateString = "2025-12-12";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Request request = new Request(1L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request);
 

@@ -71,13 +71,10 @@ public class JobRequestController {
                     .body("You are not verified to send requests to this faculty");
         }
 
-        LocalDateTime preferredDate = request.getPreferredDate().toInstant()
-                .atZone(ZoneId.systemDefault())
+        LocalDateTime preferredDate = request.getPreferredDate().atStartOfDay(ZoneId.systemDefault())
                 .toLocalDateTime();
 
-        LocalDate onlyDate = request.getPreferredDate().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
+        LocalDate onlyDate = request.getPreferredDate();
 
         LocalDateTime d1 = LocalDateTime.now();
         LocalDate d2 = LocalDate.now().plusDays(1L);

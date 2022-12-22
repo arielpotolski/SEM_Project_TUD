@@ -3,6 +3,9 @@ package nl.tudelft.sem.template.example.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -94,19 +97,22 @@ public class RequestAllocationService {
      * @param preferredDate the preferred date
      * @return the list
      */
-    public List<Resource> getReservedResource(String facultyName, Date preferredDate, String token) {
+    public List<Resource> getReservedResource(String facultyName, LocalDate preferredDate, String token) {
 
         try {
-            String url = "http://localhost:8082/resources/availableUntil" + preferredDate.toString() + "/" + facultyName;
+            String url = "http://localhost:8082/resources/availableUntil/"
+                    + preferredDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    + "/" + facultyName;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
 
             HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
-            ResponseEntity<AvailableResources> result = restTemplate.exchange(url, HttpMethod.GET,
-                    entity, AvailableResources.class);
-            return Objects.requireNonNull(result.getBody()).getResourceList();
+            var result = restTemplate.exchange(url, HttpMethod.GET,
+                    entity, Resource[].class);
+            var listOfResources = new AvailableResources(List.of(result.getBody()));
+            return Objects.requireNonNull(listOfResources).getResourceList();
 
         } catch (Exception e) {
             System.out.println("error with post " + e);

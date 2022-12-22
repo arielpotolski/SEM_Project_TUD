@@ -129,10 +129,9 @@ public class JobRequestControllerTest {
     public void sendRequestTestNotInFaculty() throws Exception {
 
         String dateString = "2023-12-12";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Request request = new Request(123L, "Test", "Test", "Test", "AE",
-                2.0, 1.0, 1.0, true, simpleDateFormat.parse(dateString));
+                2.0, 1.0, 1.0, true, LocalDate.parse(dateString));
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
@@ -238,16 +237,15 @@ public class JobRequestControllerTest {
     public void sendApprovalsTest() throws Exception {
 
         String dateString = "2025-12-12";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Request req1 = new Request(1L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         Request req2 = new Request(2L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         Request req3 = new Request(3L, "test", "name", "desc",
-                "Cs", 2.0, 3.0, 1.0, false, simpleDateFormat.parse(dateString));
+                "Cs", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
 
         List<Request> requests = new ArrayList<>();
         requests.add(req1);
