@@ -242,6 +242,48 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
+    public void notEnoughGpuResourceForJobTest() throws JsonProcessingException {
+        // reserved resources for 24th of December 2022 for ewi
+        var resources = new ResourceResponseModel[] {
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 3.0, 3.0, 2.0)};
+        var resourcesString = objectMapper.writeValueAsString(resources);
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        // request
+        Request request = new Request(1L, "test", "name", "desc",
+                "EWI", 2.0, 2.0, 1.0, true, LocalDate.parse("2022-12-25"));
+
+        boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
+
+        assertThat(b).isTrue();
+
+    }
+
+    @Test
+    public void notEnoughMemoryResourceForJobTest() throws JsonProcessingException {
+        // reserved resources for 24th of December 2022 for ewi
+        var resources = new ResourceResponseModel[] {
+                new ResourceResponseModel("EWI", 3.0, 2.0, 1.0),
+                new ResourceResponseModel("EWI", 2.0, 1.0, 2.0)};
+        var resourcesString = objectMapper.writeValueAsString(resources);
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        // request
+        Request request = new Request(1L, "test", "name", "desc",
+                "EWI", 2.0, 1.0, 2.0, true, LocalDate.parse("2022-12-25"));
+
+        boolean b = requestAllocationService.enoughResourcesForJob(request, "token");
+
+        assertThat(b).isTrue();
+
+    }
+
+    @Test
     public void enoughResourcesForJobTest() {}
 
 }
