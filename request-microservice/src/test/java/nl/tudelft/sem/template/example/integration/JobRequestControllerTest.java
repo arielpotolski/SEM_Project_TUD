@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
@@ -234,7 +236,35 @@ public class JobRequestControllerTest {
     }
 
     @Test
-    public void sendRequestExactly6Hours(){}
+    public void sendRequestExactly6Hours() throws Exception {
+
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22 18:00:00"));
+        when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "AE");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", "2022-12-23");
+        jsonObject.put("id", 123L);
+
+        ResultActions result = mockMvc.perform(post("/job/sendRequest")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+
+    }
 
     @Test
     public void sendRequests559ToMidnight(){}

@@ -43,7 +43,7 @@ public class JobRequestController {
      *  @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
-     * @param clockUser
+     * @param clockUser                clock that can be configurable
      */
     @Autowired
     public JobRequestController(AuthManager authManager, RequestAllocationService requestAllocationService,
@@ -78,12 +78,12 @@ public class JobRequestController {
 
         LocalDateTime preferredDate = request.getPreferredDate().atStartOfDay(ZoneId.systemDefault())
                 .toLocalDateTime();
-
         LocalDate onlyDate = request.getPreferredDate();
 
         LocalDateTime d1 = clockUser.getTimeLDT();
         LocalDate d2 = clockUser.getTimeLD().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
+
         int timeLimit1 = 5;
         int timeLimit2 = 360;
 
@@ -116,13 +116,8 @@ public class JobRequestController {
                     return ResponseEntity.ok()
                             .body("Request forwarded, but resources are insufficient");
                 }
-
             }
         }
-
-
-
-
 
         if (facultyUserFaculties.contains(request.getFaculty())) {
             request.setApproved(false);
