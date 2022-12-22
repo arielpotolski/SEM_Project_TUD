@@ -95,7 +95,7 @@ public class RequestAllocationServiceTest {
         // Test without prior loading from the user microservice
         server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess("EWI", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess("{\n\"faculties\": \"[EWI]\"}", MediaType.APPLICATION_JSON));
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
 
