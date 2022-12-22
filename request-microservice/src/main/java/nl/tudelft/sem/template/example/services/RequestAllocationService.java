@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -28,9 +30,10 @@ import org.springframework.web.client.RestTemplate;
  * The Request service initiates communication with other microservices and exchanges information.
  */
 @Service
+@Getter
 public class RequestAllocationService {
 
-    private final RestTemplate restTemplate;
+    private RestTemplate restTemplate;
     private final RequestRepository requestRepository;
 
     /**
@@ -45,6 +48,9 @@ public class RequestAllocationService {
         this.requestRepository = requestRepository;
     }
 
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     /**
      * This method is responsible for getting the associated faculties with the user who made the request.
@@ -102,24 +108,6 @@ public class RequestAllocationService {
 
         return new ArrayList<>();
 
-    }
-
-    /**
-     * Gets rest template.
-     *
-     * @return the rest template
-     */
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
-
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
     }
 
     /**
