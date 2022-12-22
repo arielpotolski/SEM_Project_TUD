@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ClusterController {
 
     private final transient AuthManager authManager;

@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -1,19 +1,14 @@
 package nl.tudelft.sem.template.example.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
@@ -193,7 +188,6 @@ public class RequestAllocationService {
 
 
         try {
-            String url = "http://localhost:8081/notification";
 
             JSONObject json = new JSONObject();
             json.put("date", request.getPreferredDate());
@@ -205,6 +199,8 @@ public class RequestAllocationService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
+
+            String url = "http://localhost:8081/notification";
 
             HttpEntity<JSONObject> entity = new HttpEntity<>(json, headers);
             ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
