@@ -12,7 +12,9 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
+import nl.tudelft.sem.template.example.domain.FacultiesResponseModel;
 import nl.tudelft.sem.template.example.domain.JobRequestRequestModel;
+import nl.tudelft.sem.template.example.domain.NotificationRequestModel;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
@@ -70,9 +72,11 @@ public class RequestAllocationService {
             headers.setBearerAuth(token);
 
             HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
-            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<FacultiesResponseModel> result = restTemplate
+                    .postForEntity(url, entity, FacultiesResponseModel.class);
 
-            String string = result.getBody();
+            String string = result.getBody().getFaculties()
+                    .replace("[", "").replace("]", "");
 
             assert string != null;
             if (string.equals("")) {
@@ -194,12 +198,10 @@ public class RequestAllocationService {
 
         try {
 
-            JSONObject json = new JSONObject();
-            json.put("date", request.getPreferredDate());
-            json.put("type", "REQUEST");
-            json.put("state", "REJECTED");
-            json.put("message", request.getDescription());
-            json.put("netId", request.getNetId());
+            var model = new NotificationRequestModel(
+                    request.getPreferredDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "REQUEST", "REJECTED",
+                    request.getDescription(), request.getNetId());
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -207,7 +209,7 @@ public class RequestAllocationService {
 
             String url = "http://localhost:8081/notification";
 
-            HttpEntity<JSONObject> entity = new HttpEntity<>(json, headers);
+            HttpEntity<NotificationRequestModel> entity = new HttpEntity<>(model, headers);
             ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
                 return true;

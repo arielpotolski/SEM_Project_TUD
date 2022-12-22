@@ -98,19 +98,17 @@ public class JobRequestController {
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
 
-        for (String fac : facultyUserFaculties) {
-            if (fac.contains(request.getFaculty())) {
-                request.setApproved(false);
-                requestRepository.save(request);
-                publishRequest();
+        if (facultyUserFaculties.contains(request.getFaculty())) {
+            request.setApproved(false);
+            requestRepository.save(request);
+            publishRequest();
 
-                return ResponseEntity.ok()
-                        .body("The request was sent. Now it is to be approved by faculty.");
-            }
+            return ResponseEntity.ok()
+                    .body("The request was sent. Now it is to be approved by faculty.");
         }
 
         return ResponseEntity.ok()
-                .body("You are not verified to send requests to this faculty");
+                .body("You are not assigned to this faculty.");
 
     }
 
@@ -151,18 +149,10 @@ public class JobRequestController {
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
+                .filter(x -> facultiesOfFacultyUser.contains(x.getFaculty()))
                 .collect(Collectors.toList());
 
-        List<Request> toApprove = new ArrayList<>();
-        for (String fac : facultiesOfFacultyUser) {
-            for (Request req : requests) {
-                if (fac.contains(req.getFaculty())) {
-                    toApprove.add(req);
-                }
-            }
-        }
-
-        for (Request request : toApprove) {
+        for (Request request : requests) {
             request.setApproved(true);
         }
 
@@ -178,9 +168,9 @@ public class JobRequestController {
         }
 
         // Deleting approved and sent entities
-        requestRepository.deleteAll(toApprove);
+        requestRepository.deleteAll(requests);
 
-        return ResponseEntity.ok().body(toApprove);
+        return ResponseEntity.ok().body(requests);
 
     }
 
