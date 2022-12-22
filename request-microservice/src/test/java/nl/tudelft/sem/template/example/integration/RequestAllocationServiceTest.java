@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.template.example.TokenRequestModel;
@@ -28,6 +29,7 @@ import nl.tudelft.sem.template.example.controllers.JobRequestController;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
+import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,9 +139,9 @@ public class RequestAllocationServiceTest {
 
     @Test
     public void getReservedResourceTest() throws JsonProcessingException {
-        var resources = new Resource[] {
-                new Resource("EWI", 3.0, 2.0, 2.0),
-                new Resource("EWI", 1.0, 1.0, 2.0)};
+        var resources = new ResourceResponseModel[] {
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = objectMapper.writeValueAsString(resources);
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-24/EWI"))
                 .andExpect(method(HttpMethod.GET))
@@ -148,7 +150,9 @@ public class RequestAllocationServiceTest {
         List<Resource> reservedResources = requestAllocationService
                 .getReservedResource("EWI", LocalDate.parse("2022-12-24"), "");
 
-        assertThat(reservedResources).isEqualTo(new ArrayList<>());
+        assertThat(reservedResources).isEqualTo(List.of(resources).stream()
+                .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
+                x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList()));
 
     }
 

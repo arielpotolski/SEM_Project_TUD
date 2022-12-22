@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
@@ -19,6 +20,7 @@ import nl.tudelft.sem.template.example.domain.AvailableResources;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
+import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -110,9 +112,13 @@ public class RequestAllocationService {
 
             HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
             var result = restTemplate.exchange(url, HttpMethod.GET,
-                    entity, Resource[].class);
-            var listOfResources = new AvailableResources(List.of(result.getBody()));
-            return Objects.requireNonNull(listOfResources).getResourceList();
+                    entity, ResourceResponseModel[].class);
+            var listOfResources = Stream.of(result.getBody())
+                    .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
+                            x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList());
+
+            var availableResources = new AvailableResources(listOfResources);
+            return Objects.requireNonNull(availableResources).getResourceList();
 
         } catch (Exception e) {
             System.out.println("error with post " + e);
