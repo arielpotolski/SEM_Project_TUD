@@ -283,7 +283,4 @@ public class RequestAllocationServiceTest {
 
     }
 
-    @Test
-    public void enoughResourcesForJobTest() {}
-
 }

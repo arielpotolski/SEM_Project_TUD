@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,7 +60,7 @@ public class JobRequestControllerTest {
     @Autowired
     private transient RequestRepository requestRepository;
 
-    @Autowired
+    @Mock
     private transient RequestAllocationService requestAllocationService;
 
     /**
@@ -72,6 +73,8 @@ public class JobRequestControllerTest {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
+        when(requestAllocationService.getFacultyUserFaculties("Bearer MockedToken"))
+                .thenReturn(List.of("EWI", "IO"));
 
     }
 
@@ -130,11 +133,21 @@ public class JobRequestControllerTest {
 
         String dateString = "2023-12-12";
 
-        Request request = new Request(123L, "Test", "Test", "Test", "AE",
-                2.0, 1.0, 1.0, true, LocalDate.parse(dateString));
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("netId", "test");
+        jsonObject.put("name", "test");
+        jsonObject.put("description", "test");
+        jsonObject.put("faculty", "AE");
+        jsonObject.put("cpu", 2.0);
+        jsonObject.put("gpu", 1.0);
+        jsonObject.put("memory", 1.0);
+        jsonObject.put("approved", true);
+        jsonObject.put("preferredDate", dateString);
+        jsonObject.put("id", 123L);
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(request))
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
