@@ -14,4 +14,5 @@ execute-services:
   stage: execute
   script:
     - gradle authentication-microservice:bootRun cluster-microservice:bootRun request-microservice:bootRun --parallel &
+    - sleep 10
     - gradle system-tests:bootRun
