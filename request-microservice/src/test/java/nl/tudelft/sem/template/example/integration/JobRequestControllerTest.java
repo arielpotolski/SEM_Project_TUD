@@ -238,7 +238,7 @@ public class JobRequestControllerTest {
     @Test
     public void sendRequestExactly6Hours() throws Exception {
 
-        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22 18:00:00"));
+        when(clockUser.getTimeLDT()).thenReturn(LocalDateTime.parse("2022-12-22T18:00:00"));
         when(clockUser.getTimeLD()).thenReturn(LocalDate.parse("2022-12-22"));
 
         JSONObject jsonObject = new JSONObject();
@@ -246,16 +246,17 @@ public class JobRequestControllerTest {
         jsonObject.put("netId", "test");
         jsonObject.put("name", "test");
         jsonObject.put("description", "test");
-        jsonObject.put("faculty", "AE");
+        jsonObject.put("faculty", "EWI");
         jsonObject.put("cpu", 2.0);
         jsonObject.put("gpu", 1.0);
         jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-23");
-        jsonObject.put("id", 123L);
+
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(jsonObject))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(jsonObject.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
 
