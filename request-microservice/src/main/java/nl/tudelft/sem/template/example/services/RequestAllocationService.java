@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -93,13 +94,18 @@ public class RequestAllocationService {
      * @param preferredDate the preferred date
      * @return the list
      */
-    public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
+    public List<Resource> getReservedResource(String facultyName, Date preferredDate, String token) {
 
         try {
-            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "&" + facultyName;
+            String url = "http://localhost:8082/resources/availableUntil" + preferredDate.toString() + "/" + facultyName;
 
-            // headers?
-            ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+
+            HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
+            ResponseEntity<AvailableResources> result = restTemplate.exchange(url, HttpMethod.GET,
+                    entity, AvailableResources.class);
             return Objects.requireNonNull(result.getBody()).getResourceList();
 
         } catch (Exception e) {
@@ -116,9 +122,9 @@ public class RequestAllocationService {
      * @param request the request
      * @return the boolean
      */
-    public boolean enoughResourcesForJob(Request request) {
+    public boolean enoughResourcesForJob(Request request, String token) {
 
-        List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate());
+        List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate(), token);
 
         for (int i = 0; i < resources.size(); i++) {
             Resource currentResource = resources.get(i);
@@ -143,18 +149,18 @@ public class RequestAllocationService {
      * @param request the request
      * @throws JsonProcessingException the json processing exception
      */
-    public boolean sendRequestToCluster(Request request) throws JsonProcessingException {
+    public boolean sendRequestToCluster(Request request, String token) throws JsonProcessingException {
 
         try {
             String url = "https://localhost:8082/request";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
+            headers.setBearerAuth(token);
 
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(request);
-            System.out.println(json);
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            // TODO: does this work?
+
+            HttpEntity<Request> entity = new HttpEntity<>(request, headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
                 return true;
             }

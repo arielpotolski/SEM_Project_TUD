@@ -145,8 +145,9 @@ public class JobRequestController {
             throws JsonProcessingException {
         //I require a file with the ids of all approved requests, check if the sender is with a faculty profile
 
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
         List<String> facultiesOfFacultyUser = requestAllocationService
-                .getFacultyUserFaculties(headers.get("authorization").get(0).replace("Bearer ", ""));
+                .getFacultyUserFaculties(token);
 
         List<Request> requests = requestRepository.findAll().stream()
                 .filter(x -> Utils.idIsContained(approvalInformation.getIds(), x.getId()))
@@ -160,8 +161,8 @@ public class JobRequestController {
         //Implementation of changing the status of respective requests to approved
 
         for (Request request : requests) {
-            if (requestAllocationService.enoughResourcesForJob(request)) {
-                requestAllocationService.sendRequestToCluster(request);
+            if (requestAllocationService.enoughResourcesForJob(request, token)) {
+                requestAllocationService.sendRequestToCluster(request, token);
 
             }
 
