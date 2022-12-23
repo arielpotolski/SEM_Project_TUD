@@ -7,6 +7,7 @@ import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
+import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
@@ -16,6 +17,7 @@ import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,8 @@ public class ScheduleController {
 
     private final transient DateProvider dateProvider;
 
+    private final transient ApplicationEventPublisher applicationEventPublisher;
+
     /**
      * Instantiates a new controller.
      */
@@ -45,12 +49,14 @@ public class ScheduleController {
     public ScheduleController(JobSchedulingService scheduling,
                               NodeContributionService nodeContributionService, DateProvider dateProvider,
                               DataProcessingService dataProcessingService,
-                              PrivilegeVerificationService privilegeVerificationService) {
+                              PrivilegeVerificationService privilegeVerificationService,
+                              ApplicationEventPublisher applicationEventPublisher) {
         this.scheduling = scheduling;
         this.nodeContributionService = nodeContributionService;
         this.dateProvider = dateProvider;
         this.dataProcessingService = dataProcessingService;
         this.privilegeVerificationService = privilegeVerificationService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -106,7 +112,11 @@ public class ScheduleController {
         }
 
         // schedule job
-        this.scheduling.scheduleJob(job);
+        var scheduledFor = this.scheduling.scheduleJob(job);
+        applicationEventPublisher.publishEvent(
+                new NotificationEvent(this, scheduledFor.toString(), "JOB",
+                        "SCHEDULED", "Your job has been scheduled by the cluster!", job.getUserNetId()
+                ));
 
         // return
         return ResponseEntity.ok("Successfully scheduled job.");

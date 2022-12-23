@@ -135,18 +135,6 @@ public class JobSchedulingServiceTest {
     }
 
     @Test
-    public void scheduleJobTestFails() {
-        this.node1.setGpuResources(1);
-        this.node1.setMemoryResources(1);
-        this.node1.setCpuResources(1);
-        this.jobSchedulingService.getDataProcessingService().save(this.node1);
-
-        this.jobSchedulingService.scheduleJob(this.job1);
-        assertThat(this.jobSchedulingService.getDataProcessingService()
-            .existsInScheduleByFacultyId(this.job1.getFacultyId())).isFalse();
-    }
-
-    @Test
     public void multipleJobsScheduledSuccessfully() {
         this.node1.setGpuResources(10);
         this.node1.setMemoryResources(10);
