@@ -40,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -91,7 +92,63 @@ public class UsersTests {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken("MockedToken")).thenReturn("SomeUser");
         when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("USER");
+        when(mockJwtTokenVerifier.getRoleFromToken("SYSADMINToken")).thenReturn("SYSADMIN");
     }
+
+    @Test
+    public void changePassword() throws Exception {
+        final NetId testAdmin = new NetId("admUser");
+        final NetId testUser = new NetId("testUser");
+        final Password testPassword = new Password("password123");
+        final Password newPassword = new Password("newPassword");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        final HashedPassword newTestHashedPassword = new HashedPassword("newHashed");
+
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        when(mockPasswordEncoder.hash(newPassword)).thenReturn(newTestHashedPassword);
+        registrationService.registerUser(testAdmin, testPassword);
+        registrationService.registerUser(testUser, testPassword);
+
+        RegistrationRequestModel model = new RegistrationRequestModel();
+        model.setNetId("testUser");
+        model.setPassword(newPassword.toString());
+
+        ResultActions resultActions = mockMvc.perform(post("/change")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer SYSADMINToken")
+                .content(JsonUtil.serialize(model)));
+        resultActions.andExpect(status().isOk());
+        assertThat(userRepository.findByNetId(testUser).orElseThrow().getPassword().equals(newTestHashedPassword)).isTrue();
+    }
+
+
+    @Test
+    public void changePasswordNonAdmin() throws Exception {
+        final NetId testUser = new NetId("testUser");
+        final Password testPassword = new Password("password123");
+        final Password newPassword = new Password("newPassword");
+        final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
+        final HashedPassword newTestHashedPassword = new HashedPassword("newHashed");
+
+        when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
+        when(mockPasswordEncoder.hash(newPassword)).thenReturn(newTestHashedPassword);
+
+
+        registrationService.registerUser(testUser,testPassword);
+
+        RegistrationRequestModel model = new RegistrationRequestModel();
+        model.setNetId(testUser.toString());
+        model.setPassword(newPassword.toString());
+
+        ResultActions resultActions = mockMvc.perform(post("/change")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken")
+                .content(JsonUtil.serialize(model)));
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(userRepository.findByNetId(testUser).orElseThrow().getPassword().equals(newTestHashedPassword)).isFalse();
+    }
+
+
 
     @Test
     public void registerAdminTest() throws Exception {

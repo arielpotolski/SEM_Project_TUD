@@ -151,4 +151,8 @@ public class RegistrationService {
     public boolean checkNetIdIsUnique(NetId netId) {
         return !userRepository.existsByNetId(netId);
     }
+
+    public Role getRoleFromUser(NetId netId) {
+        return userRepository.findByNetId(netId).orElseThrow().getRole();
+    }
 }

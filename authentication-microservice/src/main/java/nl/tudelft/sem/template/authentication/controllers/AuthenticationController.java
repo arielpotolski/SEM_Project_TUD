@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.authentication.controllers;
 
 import nl.tudelft.sem.template.authentication.authentication.JwtTokenGenerator;
 import nl.tudelft.sem.template.authentication.authentication.JwtUserDetailsService;
+import nl.tudelft.sem.template.authentication.authtemp.AuthManager;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.Role;
@@ -38,6 +39,10 @@ public class AuthenticationController {
 
     private final transient RoleControlService roleControlService;
 
+    private final transient AuthManager authManager;
+
+
+
     /**
      * Instantiates a new UsersController.
      *
@@ -51,12 +56,13 @@ public class AuthenticationController {
                                     JwtTokenGenerator jwtTokenGenerator,
                                     JwtUserDetailsService jwtUserDetailsService,
                                     RegistrationService registrationService,
-                                    RoleControlService roleControlService) {
+                                    RoleControlService roleControlService, AuthManager authManager) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenGenerator = jwtTokenGenerator;
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.registrationService = registrationService;
         this.roleControlService = roleControlService;
+        this.authManager = authManager;
     }
 
     /**
@@ -122,9 +128,14 @@ public class AuthenticationController {
     @PostMapping("/change")
     public  ResponseEntity<String> change(@RequestBody RegistrationRequestModel request) throws ResponseStatusException {
         try {
-            NetId netId = new NetId(request.getNetId());
-            Password password = new Password(request.getPassword());
-            registrationService.changePassword(netId, password);
+            if(request.getNetId().equals(authManager.getNetId()) || registrationService.getRoleFromUser(new NetId(authManager.getNetId())).equals(new Role("SYSADMIN"))){
+                NetId netId = new NetId(request.getNetId());
+                Password password = new Password(request.getPassword());
+                registrationService.changePassword(netId, password);
+            } else {
+                throw new IllegalArgumentException("You cannot change someone else's password");
+            }
+
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
