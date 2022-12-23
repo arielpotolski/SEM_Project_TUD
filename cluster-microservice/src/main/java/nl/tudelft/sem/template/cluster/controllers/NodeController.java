@@ -74,12 +74,11 @@ public class NodeController {
      * @return A string saying if the node was added. In case of failure, it returns a
      * 			string saying why is it failing
      */
-    @PostMapping(path = {"/nodes/add"})
-    public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
-        // Check if central cores have been installed by User Service
+    @PostMapping(path = {"/nodes/add", "/nodes/add/{facultyId}"})
+    public ResponseEntity<String> addNode(@RequestBody NodeRequestModel node,
+                                          @PathVariable(value = "facultyId", required = false) String facultyId) {
         if (this.dataProcessingService.getNumberOfNodesInRepository() == 0) {
-            // Central cores not installed - faculties unknown. All nodes will be assigned to the
-            // Board of Examiners until faculties become known.
+            // Unknown faculties. All nodes will be assigned to the Board of Examiners until faculties become known.
             Node core =  new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
                 .setNodeGpuResourceCapacityTo(0.0)
@@ -94,21 +93,34 @@ public class NodeController {
         if (this.dataProcessingService.existsByUrl(node.getUrl())) {
             return ResponseEntity.badRequest().body("Failed to add node. A node with this url already exists.");
         }
+
         String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Node n = new NodeBuilder()
-            .setNodeCpuResourceCapacityTo(node.getCpuResources())
-            .setNodeGpuResourceCapacityTo(node.getGpuResources())
-            .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
-            .withNodeName(node.getName())
-            .foundAtUrl(node.getUrl())
-            .byUserWithNetId(netId)
-            .constructNodeInstance();
+                .setNodeCpuResourceCapacityTo(node.getCpuResources())
+                .setNodeGpuResourceCapacityTo(node.getGpuResources())
+                .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
+                .withNodeName(node.getName())
+                .foundAtUrl(node.getUrl())
+                .byUserWithNetId(netId)
+                .constructNodeInstance();
 
-        if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
-            this.nodeContributionService.addNodeToCluster(n);
-            return ResponseEntity.ok(n.hasEnoughCpu());
+        // no preassigned faculty
+        if (facultyId == null) {
+            if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
+                this.nodeContributionService.addNodeToCluster(n);
+                return ResponseEntity.ok(n.hasEnoughCpu());
+            }
+            return ResponseEntity.badRequest().body(n.hasEnoughCpu());
+        } else if (this.dataProcessingService.existsByFacultyId(facultyId)) {
+            if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
+                n.setFacultyId(facultyId);
+                this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(n);
+                return ResponseEntity.ok(n.hasEnoughCpu());
+            }
+            return ResponseEntity.badRequest().body(n.hasEnoughCpu());
+        } else {
+            return ResponseEntity.badRequest().body("Unfortunately, this faculty does not exist in the cluster.");
         }
-        return ResponseEntity.badRequest().body(n.hasEnoughCpu());
     }
 
     /**
