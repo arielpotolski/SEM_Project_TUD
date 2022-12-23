@@ -22,7 +22,7 @@ public class NotificationsTest {
     public void equalsTest() throws ParseException {
         Notification notification1 = new Notification(State.ACCEPTED, new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 .parse("2022-02-02"), "mes", Type.JOB, "TestUser", LocalDate.of(2022, 2, 1));
-        Notification notification2 = new Notification(State.DELAYED, new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        Notification notification2 = new Notification(State.RESCHEDULED, new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 .parse("2022-02-02"), "mes", Type.JOB, "TestUser", LocalDate.of(2022, 2, 1));
         Notification notification3 = new Notification(State.ACCEPTED, new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
                 .parse("2022-02-01"), "mes", Type.JOB, "TestUser", LocalDate.of(2022, 2, 1));
