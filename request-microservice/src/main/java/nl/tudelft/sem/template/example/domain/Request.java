@@ -76,6 +76,18 @@ public class Request {
         this.preferredDate = preferredDate;
     }
 
+    /**
+     * Instantiates a request with no id.
+     *
+     * @param netId         the net id
+     * @param name          the name
+     * @param description   the description
+     * @param faculty       the faculty
+     * @param cpu           the cpu
+     * @param gpu           the gpu
+     * @param memory        the memory
+     * @param preferredDate the preferred date
+     */
     public Request(String netId, String name, String description, String faculty,
                    Double cpu, Double gpu, Double memory, LocalDate preferredDate) {
 

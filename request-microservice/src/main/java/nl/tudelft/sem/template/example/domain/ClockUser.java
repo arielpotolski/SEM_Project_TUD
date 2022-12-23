@@ -1,9 +1,12 @@
 package nl.tudelft.sem.template.example.domain;
 
-
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import org.springframework.stereotype.Component;
-
-import java.time.*;
 
 @Component
 public class ClockUser implements DateProvider {
@@ -26,11 +29,11 @@ public class ClockUser implements DateProvider {
         this.clock = clock;
     }
 
-    public LocalDateTime getTimeLDT() {
+    public LocalDateTime getTimeLdt() {
         return LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC);
     }
 
-    public LocalDate getTimeLD() {
+    public LocalDate getTimeLd() {
         return LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC);
     }
 

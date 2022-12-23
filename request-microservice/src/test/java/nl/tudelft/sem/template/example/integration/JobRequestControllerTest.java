@@ -2,7 +2,7 @@ package nl.tudelft.sem.template.example.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -11,9 +11,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
-import nl.tudelft.sem.template.example.domain.*;
+import nl.tudelft.sem.template.example.domain.ClockUser;
+import nl.tudelft.sem.template.example.domain.DateProvider;
+import nl.tudelft.sem.template.example.domain.Request;
+import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.json.JSONObject;
@@ -33,11 +41,6 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -128,8 +131,8 @@ public class JobRequestControllerTest {
     public void sendRequestForTodayNotApproved() throws Exception {
         // for returning
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -172,8 +175,8 @@ public class JobRequestControllerTest {
     public void sendRequestTestNotInFaculty() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -257,8 +260,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -302,8 +305,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -347,8 +350,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -391,8 +394,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -421,16 +424,16 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded " +
-                "and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded "
+                + "and will be completed if there are sufficient resources");
     }
 
     @Test
-    public void sendRequestExactly6HTest() throws Exception {
+    public void sendRequestExactly6hTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -465,13 +468,13 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded" +
-                " and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded"
+                + " and will be completed if there are sufficient resources");
 
     }
 
     @Test
-    public void sendRequests601HToMidnightTest() throws Exception {
+    public void sendRequests601hToMidnightTest() throws Exception {
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T17:59:00.00Z"),
@@ -514,8 +517,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -544,13 +547,13 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded " +
-                "and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded "
+                + "and will be completed if there are sufficient resources");
 
     }
 
     @Test
-    public void sendRequestLessThan6HTest() throws Exception {
+    public void sendRequestLessThan6hTest() throws Exception {
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
@@ -559,8 +562,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -590,18 +593,18 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded " +
-                "and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded "
+                + "and will be completed if there are sufficient resources");
 
     }
 
 
     @Test
-    public void sendRequestLessThan6HNoResourceTest() throws Exception {
+    public void sendRequestLessThan6hNoResourceTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -635,16 +638,17 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded and "
+            + "will be completed if there are sufficient resources");
 
     }
 
     @Test
-    public void sendRequestLessThan6HTomorrowNotPreferredTest() throws Exception {
+    public void sendRequestLessThan6hTomorrowNotPreferredTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
@@ -679,16 +683,16 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("Request forwarded, " +
-                "but resources are insufficient or preferred date is not tomorrow");
+        assertThat(response).isEqualTo("Request forwarded, "
+                + "but resources are insufficient or preferred date is not tomorrow");
     }
 
     @Test
     public void sendRequestWaitingApprovalTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available

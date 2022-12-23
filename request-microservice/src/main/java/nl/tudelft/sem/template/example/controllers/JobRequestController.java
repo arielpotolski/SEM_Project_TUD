@@ -1,15 +1,17 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
-import nl.tudelft.sem.template.example.domain.*;
+import nl.tudelft.sem.template.example.domain.ApprovalInformation;
+import nl.tudelft.sem.template.example.domain.ClockUser;
+import nl.tudelft.sem.template.example.domain.Request;
+import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import nl.tudelft.sem.template.example.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ public class JobRequestController {
 
     /**
      * Instantiates a new controller.
+     *
      * @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
@@ -74,8 +77,8 @@ public class JobRequestController {
                 .toLocalDateTime();
         LocalDate onlyDate = request.getPreferredDate();
 
-        LocalDateTime d1 = clockUser.getTimeLDT();
-        LocalDate d2 = clockUser.getTimeLD().plusDays(1L);
+        LocalDateTime d1 = clockUser.getTimeLdt();
+        LocalDate d2 = clockUser.getTimeLd().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
 
         int timeLimit1 = 5;
@@ -86,10 +89,10 @@ public class JobRequestController {
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
 
-        if (clockUser.getTimeLD().isEqual(onlyDate)) {
+        if (clockUser.getTimeLd().isEqual(onlyDate)) {
             return ResponseEntity.ok()
                     .body("You cannot send requests for the same day.");
-        } else if (!clockUser.getTimeLD().isEqual(onlyDate)) {
+        } else if (!clockUser.getTimeLd().isEqual(onlyDate)) {
             if (minutes <= timeLimit1) {
                 return ResponseEntity.ok()
                         .body("You cannot send requests 5 min before the following day.");
@@ -103,14 +106,14 @@ public class JobRequestController {
                         publishRequest();
 
                         return ResponseEntity.ok()
-                                .body("The request is automatically forwarded " +
-                                        "and will be completed if there are sufficient resources");
+                                .body("The request is automatically forwarded "
+                                        + "and will be completed if there are sufficient resources");
                     }
 
                 } else {     // can be split but is sufficient for now
                     return ResponseEntity.ok()
-                            .body("Request forwarded, " +
-                                    "but resources are insufficient or preferred date is not tomorrow");
+                            .body("Request forwarded, "
+                                    + "but resources are insufficient or preferred date is not tomorrow");
                 }
             }
         }
