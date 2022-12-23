@@ -375,16 +375,12 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getAvailableResourcesForGivenFacultyUntilDayFilledSchedule() {
-        this.dateProvider = mock(DateProvider.class);
-
-        when(this.dateProvider.getTomorrow()).thenReturn(LocalDate.of(2022, 12, 23));
-
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
         this.dataProcessingService.save(this.node1);
 
-        LocalDate startDate = LocalDate.of(2022, 12, 24);
+        LocalDate startDate = dateProvider.getTomorrow().plusDays(1);
 
         this.job1.setScheduledFor(startDate);
         this.job2.setScheduledFor(startDate);
@@ -398,7 +394,7 @@ public class DataProcessingServiceTest {
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
 
-        LocalDate endDate = LocalDate.of(2022, 12, 25);
+        LocalDate endDate = dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
             this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("EWI", endDate);
@@ -410,16 +406,12 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getAvailableResourcesForGivenFacultyUntilDayEmptySchedule() {
-        this.dateProvider = mock(DateProvider.class);
-
-        when(this.dateProvider.getTomorrow()).thenReturn(LocalDate.of(2022, 12, 23));
-
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
         this.dataProcessingService.save(this.node3);
 
-        LocalDate startDate = LocalDate.of(2022, 12, 24);
+        LocalDate startDate = dateProvider.getTomorrow().plusDays(1);
 
         this.job3.setScheduledFor(startDate);
         this.job4.setScheduledFor(startDate);
@@ -428,7 +420,7 @@ public class DataProcessingServiceTest {
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
 
-        LocalDate endDate = LocalDate.of(2022, 12, 25);
+        LocalDate endDate = dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
             this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("AE", endDate);
