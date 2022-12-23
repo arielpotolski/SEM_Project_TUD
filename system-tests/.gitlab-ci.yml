@@ -16,3 +16,4 @@ execute-services:
     - gradle authentication-microservice:bootRun cluster-microservice:bootRun request-microservice:bootRun --parallel &
     - sleep 60
     - gradle system-tests:bootRun
+    - exit 0
