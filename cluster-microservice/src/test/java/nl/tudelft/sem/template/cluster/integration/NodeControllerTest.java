@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
@@ -261,6 +263,65 @@ public class NodeControllerTest {
         String response7 = result7.andReturn().getResponse().getContentAsString();
         assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
             + " of memory resources.");
+    }
+
+    @Test
+    public void addNodesWithFacultyTestNoSuchFaculty() throws Exception {
+        // change node1
+        node1.setCpuResources(3.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/EWI")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Unfortunately, this faculty does not exist in the cluster.");
+    }
+
+    @Test
+    public void addNodesWithFacultyTestBadCpu() throws Exception {
+        nodeRepository.save(node2);
+
+        // change node1
+        node1.setCpuResources(0.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The amount of CPU resources should be at least as much as the amount"
+                + " of memory resources.");
+    }
+
+    @Test
+    public void addNodesWithFacultyTest() throws Exception {
+        nodeRepository.save(node2);
+
+        // change node1
+        node1.setCpuResources(2.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node has been successfully added.");
     }
 
     @Test
