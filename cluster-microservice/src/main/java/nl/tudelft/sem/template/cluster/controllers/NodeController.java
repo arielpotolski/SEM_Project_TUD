@@ -158,12 +158,18 @@ public class NodeController {
      * we hit midnight, the nodes contained in that list will be removed. This method
      * will be the only removal method available to users that are not sysadmins.
      *
-     * @param url the url of the node to be removed
+     * @param request the url to look for the node at (if given).
+     *
      * @return a string saying whether the removal was successfully scheduled. If not,
      *          returns a string saying what went wrong
      */
-    @PostMapping(value = "/nodes/delete/user/{url}")
-    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
+    @PostMapping(value = "/nodes/delete/user/**")
+    public ResponseEntity<String> scheduleNodeRemoval(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes/delete/user", "");
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
+            return ResponseEntity.badRequest().body("Wrong url provided.");
+        }
         if (!this.nodeContributionService.getRepo().existsByUrl(url)) {
             return ResponseEntity.badRequest().body("Could not find the node to be deleted."
                 + " Check if the url provided is correct.");

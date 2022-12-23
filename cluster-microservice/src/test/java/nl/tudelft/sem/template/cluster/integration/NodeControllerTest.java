@@ -466,7 +466,7 @@ public class NodeControllerTest {
 
     @Test
     public void scheduleNodeRemovalUserNotOwnerTest() throws Exception {
-        this.node1.setUrl("a");
+        this.node1.setUrl("/a");
         this.nodeRepository.save(node1);
 
         ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
@@ -491,7 +491,7 @@ public class NodeControllerTest {
      */
     @Test
     public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception {
-        this.node1.setUrl("a");
+        this.node1.setUrl("/a");
         this.nodeRepository.save(node1);
 
         when(this.mockAuthenticationManager.getNetId()).thenReturn(this.node1.getUserNetId());
