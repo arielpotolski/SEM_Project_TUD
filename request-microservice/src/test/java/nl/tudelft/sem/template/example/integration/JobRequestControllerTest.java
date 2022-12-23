@@ -97,9 +97,9 @@ public class JobRequestControllerTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("{\n\"faculties\": \"[EWI, IO]\"}", MediaType.APPLICATION_JSON));
 
-        server.expect(manyTimes(), requestTo("http://localhost:8081/notification"))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+//        server.expect(manyTimes(), requestTo("http://localhost:8081/notification"))
+//                .andExpect(method(HttpMethod.POST))
+//                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
