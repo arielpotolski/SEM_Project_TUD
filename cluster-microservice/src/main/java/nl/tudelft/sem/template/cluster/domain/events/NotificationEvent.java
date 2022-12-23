@@ -9,11 +9,12 @@ import org.springframework.context.ApplicationEvent;
 @Setter
 public class NotificationEvent extends ApplicationEvent {
 
-    private String date;
-    private String type;
-    private String state;
-    private String message;
-    private String netId;
+    public static final long serialVersionUID = -213769420;
+    private final String date;
+    private final String type;
+    private final String state;
+    private final String message;
+    private final String netId;
 
     /**
      * Initializes a new Notification event.
