@@ -110,7 +110,11 @@ public class JobRequestController {
                                         + "and will be completed if there are sufficient resources");
                     }
 
-                } else {     // can be split but is sufficient for now
+                } else {
+                    request.setApproved(false);
+                    requestRepository.save(request);
+                    publishRequest();
+
                     return ResponseEntity.ok()
                             .body("Request forwarded, "
                                     + "but resources are insufficient or preferred date is not tomorrow");
