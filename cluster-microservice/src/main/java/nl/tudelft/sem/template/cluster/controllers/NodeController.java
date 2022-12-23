@@ -122,6 +122,10 @@ public class NodeController {
             return ResponseEntity.badRequest().body("Failed to add node. A node with this url already exists.");
         }
 
+        if (!node.getUrl().startsWith("/")) {
+            return ResponseEntity.badRequest().body("Your node contains an invalid URL. Should start with a \"/\"");
+        }
+
         String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Node n = new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(node.getCpuResources())
