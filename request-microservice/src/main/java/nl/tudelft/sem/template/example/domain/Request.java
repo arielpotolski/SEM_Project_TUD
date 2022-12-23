@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,15 +24,19 @@ public class Request {
 
     @NonNull
     private String name;
+
     @NonNull
     private String description;
+
     @NonNull
     private String faculty;
 
     @NonNull
     private Double cpu;
+
     @NonNull
     private Double gpu;
+
     @NonNull
     private Double memory;
 
@@ -41,7 +45,7 @@ public class Request {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @NonNull
-    private Date preferredDate;
+    private LocalDate preferredDate;
 
     /**
      * Instantiates a new Request.
@@ -59,8 +63,60 @@ public class Request {
      */
     public Request(Long id, String netId, String name, String description, String faculty,
                    Double cpu, Double gpu, Double memory,
-                   boolean approved, Date preferredDate) {
+                   boolean approved, LocalDate preferredDate) {
         this.id = id;
+        this.netId = netId;
+        this.name = name;
+        this.description = description;
+        this.faculty = faculty;
+        this.cpu = cpu;
+        this.gpu = gpu;
+        this.memory = memory;
+        this.approved = approved;
+        this.preferredDate = preferredDate;
+    }
+
+    /**
+     * Instantiates a request with no id.
+     *
+     * @param netId         the net id
+     * @param name          the name
+     * @param description   the description
+     * @param faculty       the faculty
+     * @param cpu           the cpu
+     * @param gpu           the gpu
+     * @param memory        the memory
+     * @param preferredDate the preferred date
+     */
+    public Request(String netId, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory, LocalDate preferredDate) {
+
+        this.netId = netId;
+        this.name = name;
+        this.description = description;
+        this.faculty = faculty;
+        this.cpu = cpu;
+        this.gpu = gpu;
+        this.memory = memory;
+        this.preferredDate = preferredDate;
+    }
+
+    /**
+     * Instantiates a new Request.
+     *
+     * @param netId         the net id
+     * @param name          the name
+     * @param description   the description
+     * @param faculty       the faculty
+     * @param cpu           the cpu
+     * @param gpu           the gpu
+     * @param memory        the memory
+     * @param approved      the approved
+     * @param preferredDate the preferred date
+     */
+    public Request(String netId, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory,
+                   boolean approved, LocalDate preferredDate) {
         this.netId = netId;
         this.name = name;
         this.description = description;
@@ -210,7 +266,7 @@ public class Request {
      *
      * @return the preferred date
      */
-    public Date getPreferredDate() {
+    public LocalDate getPreferredDate() {
         return preferredDate;
     }
 
@@ -219,7 +275,7 @@ public class Request {
      *
      * @param preferredDate the preferred date
      */
-    public void setPreferredDate(Date preferredDate) {
+    public void setPreferredDate(LocalDate preferredDate) {
         this.preferredDate = preferredDate;
     }
 

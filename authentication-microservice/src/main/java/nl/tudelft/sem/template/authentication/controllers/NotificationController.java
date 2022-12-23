@@ -18,6 +18,7 @@ import nl.tudelft.sem.template.authentication.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,6 +54,7 @@ public class NotificationController {
      * @throws ResponseStatusException when the request fails
      */
     @PostMapping("/notification")
+    @PreAuthorize("hasAnyRole('FACULTY', 'SYSADMIN', 'SYSTEM')")
     public ResponseEntity<String> receiveJobNotification(
             @RequestBody NotificationRequestModel data) {
         try {
@@ -71,7 +73,7 @@ public class NotificationController {
      * @throws ResponseStatusException when bad request
      */
     @GetMapping("/getNotification")
-    @SuppressWarnings("PMD")
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<String> sendJobNotifications(@RequestBody (required = false) GetNotifactionsRequestModel request) {
         try {
             request.check();
@@ -134,13 +136,5 @@ public class NotificationController {
         }
         return ResponseEntity.ok("Notification is deleted");
     }
-
-
-
-
-
-
-
-
 
 }

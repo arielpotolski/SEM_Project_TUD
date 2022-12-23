@@ -49,6 +49,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.6.1'
+
 
 
 	// Local test database (in-memory)
@@ -61,6 +63,7 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
 	testImplementation('org.assertj:assertj-core:3.23.1')
+	testImplementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 test {
