@@ -1,19 +1,27 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
+
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
  * This service handles scheduling a job according to the current strategy.
  */
 @Service
+@EnableAsync
+@EnableScheduling
 public class JobSchedulingService {
 
     /**
@@ -27,13 +35,23 @@ public class JobSchedulingService {
     private transient JobSchedulingStrategy strategy;
 
     /**
+     * The provider for dates.
+     */
+    private final transient DateProvider dateProvider;
+
+    private final transient ApplicationEventPublisher publisher;
+
+    /**
      * Creates a new JobSchedulingService object and injects the repository.
      *
      * @param resourceInfo the service providing access to data.
      */
     @Autowired
-    public JobSchedulingService(DataProcessingService resourceInfo) {
+    public JobSchedulingService(DataProcessingService resourceInfo, DateProvider dateProvider,
+                                ApplicationEventPublisher publisher) {
         this.resourceInfo = resourceInfo;
+        this.dateProvider = dateProvider;
+        this.publisher = publisher;
 
         // default strategy: first come, first served; the earliest possible date
         this.strategy = new LeastBusyDateStrategy();
@@ -48,7 +66,41 @@ public class JobSchedulingService {
         this.strategy = strategy;
     }
 
+    /**
+     * This method sends notifications every midnight: to all users whose jobs are in the schedule for the previous day,
+     * it sends a FINISHED notification, while those that are scheduled for today get a STARTED notification.
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    @Async
+    public void sendNotificationsOfStartedAndCompletedJobs() {
+        // get all jobs for yesterday
+        var jobsCompleted = this.resourceInfo.getAllJobsFromSchedule().stream()
+                .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate().minusDays(1)))
+                .collect(Collectors.toList());
 
+        // send notifications of completion
+        for (Job completed : jobsCompleted) {
+            publisher.publishEvent(new NotificationEvent(
+                    this, dateProvider.getCurrentDate().minusDays(1).toString(),
+                    "JOB", "COMPLETED", "The job you requested has been completed!",
+                    completed.getUserNetId()
+            ));
+        }
+
+        // get all jobs for today
+        var jobsStarted = this.resourceInfo.getAllJobsFromSchedule().stream()
+                .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate()))
+                .collect(Collectors.toList());
+
+        // send notifications of commencement
+        for (Job started : jobsStarted) {
+            publisher.publishEvent(new NotificationEvent(
+                    this, dateProvider.getCurrentDate().toString(),
+                    "JOB", "STARTED", "The job you requested has been started!",
+                    started.getUserNetId()
+            ));
+        }
+    }
 
     /**
      * Checks whether the job's requested resources are all smaller than the total available for the faculty through
@@ -72,8 +124,10 @@ public class JobSchedulingService {
      * Uses the current scheduling strategy to schedule the given job. Persists the scheduled job in the repository.
      *
      * @param job the job to be scheduled.
+     *
+     * @return the date the job is scheduled for.
      */
-    public void scheduleJob(Job job) {
+    public LocalDate scheduleJob(Job job) {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
@@ -93,6 +147,8 @@ public class JobSchedulingService {
 
         // save to schedule
         this.resourceInfo.saveInSchedule(job);
+
+        return dateToScheduleJob;
     }
 
 }

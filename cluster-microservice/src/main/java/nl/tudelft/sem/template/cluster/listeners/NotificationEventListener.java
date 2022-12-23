@@ -19,8 +19,6 @@ public class NotificationEventListener implements ApplicationListener<Notificati
 
     @Override
     public void onApplicationEvent(NotificationEvent notificationEvent) {
-								// added a token just so Intellij would stop complaining.
-								// This will change when actual authorization is pushed here.
-        this.notificationManagerService.sendNotification(notificationEvent.toNotification(), "a");
+        this.notificationManagerService.sendNotification(notificationEvent.toNotification());
     }
 }
