@@ -49,6 +49,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.6.1'
+
 
 
 	// Local test database (in-memory)

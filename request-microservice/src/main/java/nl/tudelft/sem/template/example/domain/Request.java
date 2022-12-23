@@ -24,15 +24,19 @@ public class Request {
 
     @NonNull
     private String name;
+
     @NonNull
     private String description;
+
     @NonNull
     private String faculty;
 
     @NonNull
     private Double cpu;
+
     @NonNull
     private Double gpu;
+
     @NonNull
     private Double memory;
 
@@ -61,6 +65,58 @@ public class Request {
                    Double cpu, Double gpu, Double memory,
                    boolean approved, LocalDate preferredDate) {
         this.id = id;
+        this.netId = netId;
+        this.name = name;
+        this.description = description;
+        this.faculty = faculty;
+        this.cpu = cpu;
+        this.gpu = gpu;
+        this.memory = memory;
+        this.approved = approved;
+        this.preferredDate = preferredDate;
+    }
+
+    /**
+     * Instantiates a request with no id.
+     *
+     * @param netId         the net id
+     * @param name          the name
+     * @param description   the description
+     * @param faculty       the faculty
+     * @param cpu           the cpu
+     * @param gpu           the gpu
+     * @param memory        the memory
+     * @param preferredDate the preferred date
+     */
+    public Request(String netId, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory, LocalDate preferredDate) {
+
+        this.netId = netId;
+        this.name = name;
+        this.description = description;
+        this.faculty = faculty;
+        this.cpu = cpu;
+        this.gpu = gpu;
+        this.memory = memory;
+        this.preferredDate = preferredDate;
+    }
+
+    /**
+     * Instantiates a new Request.
+     *
+     * @param netId         the net id
+     * @param name          the name
+     * @param description   the description
+     * @param faculty       the faculty
+     * @param cpu           the cpu
+     * @param gpu           the gpu
+     * @param memory        the memory
+     * @param approved      the approved
+     * @param preferredDate the preferred date
+     */
+    public Request(String netId, String name, String description, String faculty,
+                   Double cpu, Double gpu, Double memory,
+                   boolean approved, LocalDate preferredDate) {
         this.netId = netId;
         this.name = name;
         this.description = description;
