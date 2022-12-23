@@ -226,7 +226,7 @@ public class NodeControllerTest {
         // change node1
         node1.setCpuResources(3.0);
         node1.setMemoryResources(1.0);
-        node1.setUrl("hippity");
+        node1.setUrl("/hippity");
         node1.setFacultyId(null);
 
         // add first node, check that Board of Examiners also added
@@ -242,7 +242,7 @@ public class NodeControllerTest {
         assertThat(nodeRepository.count()).isEqualTo(2);
         assertThat(nodeRepository.existsByFacultyId("Board of Examiners")).isTrue();
 
-        Node found = nodeRepository.findByUrl("hippity");
+        Node found = nodeRepository.findByUrl("/hippity");
         assertThat(found).isNotNull();
 
         // add node with existing url
@@ -268,7 +268,7 @@ public class NodeControllerTest {
 
         // try to add invalid node
         node3.setGpuResources(1.0);
-        node3.setUrl("a");
+        node3.setUrl("/a");
 
         ResultActions result4 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -281,7 +281,7 @@ public class NodeControllerTest {
             + "of GPU resources.");
 
         node3.setMemoryResources(2.0);
-        node3.setUrl("aa");
+        node3.setUrl("/aa");
 
         ResultActions result5 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -294,7 +294,7 @@ public class NodeControllerTest {
             + " resources and at least as much as the amount of memory resources.");
 
         node3.setCpuResources(-1.0);
-        node3.setUrl("aaa");
+        node3.setUrl("/aaa");
 
         ResultActions result6 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -306,7 +306,7 @@ public class NodeControllerTest {
         assertThat(response6).isEqualTo("None of the resources can be negative.");
 
         node3.setCpuResources(1.5);
-        node3.setUrl("aaaa");
+        node3.setUrl("/aaaa");
 
         ResultActions result7 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -320,11 +320,29 @@ public class NodeControllerTest {
     }
 
     @Test
-    public void addNodesWithFacultyTestNoSuchFaculty() throws Exception {
+    public void addNodeWithWrongUrl() throws Exception {
         // change node1
         node1.setCpuResources(3.0);
         node1.setMemoryResources(1.0);
         node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node contains an invalid URL. Should start with a \"/\"");
+    }
+
+    @Test
+    public void addNodesWithFacultyTestNoSuchFaculty() throws Exception {
+        // change node1
+        node1.setCpuResources(3.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("/hippity");
         node1.setFacultyId(null);
 
         ResultActions result = mockMvc.perform(post("/nodes/add/EWI")
@@ -344,7 +362,7 @@ public class NodeControllerTest {
         // change node1
         node1.setCpuResources(0.0);
         node1.setMemoryResources(1.0);
-        node1.setUrl("hippity");
+        node1.setUrl("/hippity");
         node1.setFacultyId(null);
 
         ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
@@ -365,7 +383,7 @@ public class NodeControllerTest {
         // change node1
         node1.setCpuResources(2.0);
         node1.setMemoryResources(1.0);
-        node1.setUrl("hippity");
+        node1.setUrl("/hippity");
         node1.setFacultyId(null);
 
         ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
