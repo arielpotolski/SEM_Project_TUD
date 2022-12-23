@@ -2,4 +2,3 @@ include:
   - authentication-microservice/.gitlab-ci.yml
   - cluster-microservice/.gitlab-ci.yml
   - request-microservice/.gitlab-ci.yml
-  - system-tests/.gitlab-ci.yml

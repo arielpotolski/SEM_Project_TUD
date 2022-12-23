@@ -4,7 +4,6 @@ stages:
   - build
   - staticAnalysis
   - test
-  - execute
 
 variables:
   # Disable the Gradle daemon to ensure isolated runs of the CI pipeline.
