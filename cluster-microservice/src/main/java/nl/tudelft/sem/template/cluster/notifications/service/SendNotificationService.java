@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SendNotificationService {
 
-    private final RestTemplate restTemplate;
+    private final transient RestTemplate restTemplate;
 
     /**
      * Instantiates a new sendNotificationService.
@@ -34,6 +34,7 @@ public class SendNotificationService {
      * @param notification the notification to be sent
      * @throws JsonProcessingException when the notification could not be sent
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public void sendNotificationToUser(Notification notification) throws JsonProcessingException {
         try {
             String url = "http://localhost:8081/notification";
