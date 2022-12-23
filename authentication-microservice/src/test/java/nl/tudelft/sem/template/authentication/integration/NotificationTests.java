@@ -67,7 +67,7 @@ public class NotificationTests {
     public void setupNotificationModel() {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken("MockedToken")).thenReturn("goodUser");
-        when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("USER");
+        when(mockJwtTokenVerifier.getRoleFromToken("MockedToken")).thenReturn("ROLE_SYSADMIN");
 
         this.notificationRequestModel = new NotificationRequestModel();
         this.notificationRequestModel.setDate("2003-04-29");

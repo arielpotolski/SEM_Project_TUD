@@ -119,7 +119,7 @@ public class JobRequestController {
      * @return the response entity
      */
     @GetMapping("pendingRequests")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
+    @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<List<Request>> publishRequest() {
         List<Request> requests = requestRepository.findAllByApprovedIs(false);
         return ResponseEntity.status(HttpStatus.OK).body(requests);
@@ -136,7 +136,7 @@ public class JobRequestController {
      * @throws JsonProcessingException the json processing exception
      */
     @PostMapping("sendApprovals")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'FACULTY')")
+    @PreAuthorize("hasRole('FACULTY')")
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<List<Request>> sendApprovals(@RequestHeader HttpHeaders headers,
                                                        @RequestBody ApprovalInformation approvalInformation)

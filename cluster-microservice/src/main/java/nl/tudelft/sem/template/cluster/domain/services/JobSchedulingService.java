@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,9 +8,16 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
+import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,6 +25,9 @@ import org.springframework.stereotype.Service;
  */
 @Getter
 @Service
+@EnableAsync
+@EnableScheduling
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class JobSchedulingService {
 
     /**
@@ -30,12 +41,22 @@ public class JobSchedulingService {
     private transient JobSchedulingStrategy strategy;
 
     /**
+     * The provider for dates.
+     */
+    private final transient DateProvider dateProvider;
+
+    private final transient ApplicationEventPublisher publisher;
+
+    /**
      * Creates a new JobSchedulingService object and injects the repository.
      *
      * @param dataProcessingService the service providing access to data.
      */
     @Autowired
-    public JobSchedulingService(DataProcessingService dataProcessingService) {
+    public JobSchedulingService(DataProcessingService dataProcessingService, DateProvider dateProvider,
+                                ApplicationEventPublisher publisher) {
+        this.dateProvider = dateProvider;
+        this.publisher = publisher;
         this.dataProcessingService = dataProcessingService;
 
         // default strategy: first come, first served; the earliest possible date
@@ -51,7 +72,41 @@ public class JobSchedulingService {
         this.strategy = strategy;
     }
 
+    /**
+     * This method sends notifications every midnight: to all users whose jobs are in the schedule for the previous day,
+     * it sends a FINISHED notification, while those that are scheduled for today get a STARTED notification.
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    @Async
+    public void sendNotificationsOfStartedAndCompletedJobs() {
+        // get all jobs for yesterday
+        var jobsCompleted = this.dataProcessingService.getAllJobsFromSchedule().stream()
+                .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate().minusDays(1)))
+                .collect(Collectors.toList());
 
+        // send notifications of completion
+        for (Job completed : jobsCompleted) {
+            publisher.publishEvent(new NotificationEvent(
+                    this, dateProvider.getCurrentDate().minusDays(1).toString(),
+                    "JOB", "COMPLETED", "The job you requested has been completed!",
+                    completed.getUserNetId()
+            ));
+        }
+
+        // get all jobs for today
+        var jobsStarted = this.dataProcessingService.getAllJobsFromSchedule().stream()
+                .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate()))
+                .collect(Collectors.toList());
+
+        // send notifications of commencement
+        for (Job started : jobsStarted) {
+            publisher.publishEvent(new NotificationEvent(
+                    this, dateProvider.getCurrentDate().toString(),
+                    "JOB", "STARTED", "The job you requested has been started!",
+                    started.getUserNetId()
+            ));
+        }
+    }
 
     /**
      * Checks whether the job's requested resources are all smaller than the total available for the faculty through
@@ -72,18 +127,16 @@ public class JobSchedulingService {
     }
 
     /**
-     * TODO: make this return the date
      * Uses the current scheduling strategy to schedule the given job. Persists the scheduled job in the repository.
      *
      * @param job the job to be scheduled.
+     *
+     * @return the date the job is scheduled for.
      */
-    public void scheduleJob(Job job) {
+    public LocalDate scheduleJob(Job job) {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
-        if (!checkIfJobCanBeScheduled(job)) {
-            return;
-        }
         var maxDateInSchedule = this.dataProcessingService.findLatestDateWithReservedResources();
         if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule)) {
             maxDateInSchedule = job.getPreferredCompletionDate();
@@ -100,6 +153,8 @@ public class JobSchedulingService {
 
         // save to schedule
         this.dataProcessingService.saveInSchedule(job);
+
+        return dateToScheduleJob;
     }
 
     // FOR RESCHEDULING
@@ -179,13 +234,23 @@ public class JobSchedulingService {
         for (Job jobToReschedule : jobsToReschedule) {
             // check if job can ever be scheduled, drop if no
             if (!this.checkIfJobCanBeScheduled(jobToReschedule)) {
-                // TODO: send notification of dropping
+                //send notification of dropping
+                publisher.publishEvent(
+                    new NotificationEvent(this, null, "JOB",
+                        "DROPPED", "Your job has been dropped by the cluster!"
+                        + " We are sorry for the inconvenience.", jobToReschedule.getUserNetId()
+                    ));
                 continue;
             }
 
             // reschedule if yes
             // TODO: send notification of rescheduling
             this.scheduleJob(jobToReschedule);
+            publisher.publishEvent(
+                new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
+                    "SCHEDULED", "Your job has been rescheduled by the cluster!",
+                    jobToReschedule.getUserNetId()
+                ));
         }
     }
 
