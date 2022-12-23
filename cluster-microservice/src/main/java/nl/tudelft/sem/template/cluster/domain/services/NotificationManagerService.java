@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import lombok.Getter;
+import lombok.Setter;
 import nl.tudelft.sem.template.cluster.models.NotificationRequestModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Getter
+@Setter
 public class NotificationManagerService {
 
     private RestTemplate restTemplate;
@@ -23,10 +27,6 @@ public class NotificationManagerService {
     @Autowired
     public NotificationManagerService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
-    }
-
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
     }
 
     /**
