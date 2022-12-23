@@ -24,15 +24,19 @@ public class Request {
 
     @NonNull
     private String name;
+
     @NonNull
     private String description;
+
     @NonNull
     private String faculty;
 
     @NonNull
     private Double cpu;
+
     @NonNull
     private Double gpu;
+
     @NonNull
     private Double memory;
 
@@ -73,7 +77,7 @@ public class Request {
     }
 
     public Request(String netId, String name, String description, String faculty,
-                   Double cpu, Double gpu, Double memory, LocalDate preferredDate){
+                   Double cpu, Double gpu, Double memory, LocalDate preferredDate) {
 
         this.netId = netId;
         this.name = name;

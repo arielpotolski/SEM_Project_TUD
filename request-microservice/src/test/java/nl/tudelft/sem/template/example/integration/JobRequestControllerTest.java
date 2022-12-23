@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
-import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -12,26 +11,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
 import nl.tudelft.sem.template.example.domain.*;
 import nl.tudelft.sem.template.example.integration.utils.JsonUtil;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +33,11 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -90,16 +84,12 @@ public class JobRequestControllerTest {
     public void setup() {
 
         server = MockRestServiceServer.createServer(restTemplate); // bind the server to the template
-        requestAllocationService.setRestTemplate(restTemplate); // set the service to use the same template (!!!!!)
+        requestAllocationService.setRestTemplate(restTemplate);    // set the service to use the same template (!!!!!)
 
         // when asked for user faculties, requestAllocationService will return EWI and IO
         server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("{\n\"faculties\": \"[EWI, IO]\"}", MediaType.APPLICATION_JSON));
-
-//        server.expect(manyTimes(), requestTo("http://localhost:8081/notification"))
-//                .andExpect(method(HttpMethod.POST))
-//                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         when(mockAuthenticationManager.getNetId()).thenReturn("test");
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
@@ -137,7 +127,7 @@ public class JobRequestControllerTest {
     @Test
     public void sendRequestForTodayNotApproved() throws Exception {
         // for returning
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -165,7 +155,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-22");
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())
@@ -182,7 +171,7 @@ public class JobRequestControllerTest {
     @Test
     public void sendRequestTestNotInFaculty() throws Exception {
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -209,7 +198,6 @@ public class JobRequestControllerTest {
         jsonObject.put("memory", 1.0);
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-23");
-
 
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
@@ -246,7 +234,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-22");
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())
@@ -269,7 +256,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -314,7 +301,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -359,7 +346,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -403,7 +390,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -425,7 +412,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-23");
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())
@@ -435,13 +421,14 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded " +
+                "and will be completed if there are sufficient resources");
     }
 
     @Test
     public void sendRequestExactly6HTest() throws Exception {
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -478,13 +465,13 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded" +
+                " and will be completed if there are sufficient resources");
 
     }
 
     @Test
     public void sendRequests601HToMidnightTest() throws Exception {
-
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T17:59:00.00Z"),
@@ -526,7 +513,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -548,7 +535,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-23");
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())
@@ -558,7 +544,8 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded " +
+                "and will be completed if there are sufficient resources");
 
     }
 
@@ -571,7 +558,7 @@ public class JobRequestControllerTest {
 
         clockUser.setClock(clock);
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -603,16 +590,16 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
+        assertThat(response).isEqualTo("The request is automatically forwarded " +
+                "and will be completed if there are sufficient resources");
 
     }
 
 
-    // Mock the resources!!!!
     @Test
     public void sendRequestLessThan6HNoResourceTest() throws Exception {
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -639,7 +626,6 @@ public class JobRequestControllerTest {
         jsonObject.put("approved", true);
         jsonObject.put("preferredDate", "2022-12-23");
 
-
         ResultActions result = mockMvc.perform(post("/job/sendRequest")
                 .accept(MediaType.APPLICATION_JSON)
                 .content(jsonObject.toString())
@@ -649,14 +635,15 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("Request forwarded, but resources are insufficient or preferred date is not tomorrow");
+        assertThat(response).isEqualTo("Request forwarded, " +
+                "but resources are insufficient or preferred date is not tomorrow");
 
     }
 
     @Test
     public void sendRequestLessThan6HTomorrowNotPreferredTest() throws Exception {
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -693,13 +680,14 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("Request forwarded, but resources are insufficient or preferred date is not tomorrow");
+        assertThat(response).isEqualTo("Request forwarded, " +
+                "but resources are insufficient or preferred date is not tomorrow");
     }
 
     @Test
     public void sendRequestWaitingApprovalTest() throws Exception {
 
-        var resources = new ResourceResponseModel[] {
+        var resources = new ResourceResponseModel[]{
                 new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
                 new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
@@ -757,70 +745,6 @@ public class JobRequestControllerTest {
         assertThat(response).isEqualTo("[]");
 
     }
-
-
-//    @Test
-//    public void sendApprovalsTest() throws Exception {
-//
-//        var resources = new ResourceResponseModel[] {
-//                new ResourceResponseModel("EWI", 12.0, 12.0, 12.0),
-//                new ResourceResponseModel("EWI", 12.0, 12.0, 12.0)};
-//        var resourcesString = JsonUtil.serialize(resources);
-//
-//        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
-//                .andExpect(method(HttpMethod.POST))
-//                .andRespond(withSuccess("{\n\"faculties\": \"[EWI, IO]\"}", MediaType.APPLICATION_JSON));
-//
-//
-//        // when asked for resources, enough will be available
-//        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-12/EWI"))
-//                .andExpect(method(HttpMethod.GET))
-//                .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
-//
-//        String dateString = "2022-12-12";
-//
-//        Request req1 = new Request(1L, "test", "test", "desc",
-//                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
-//
-//        Request req2 = new Request(2L, "test", "test", "desc",
-//                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
-//
-//        Request req3 = new Request(3L, "test", "test", "desc",
-//                "EWI", 2.0, 3.0, 1.0, false, LocalDate.parse(dateString));
-//
-//        List<Request> requests = new ArrayList<>();
-//        requests.add(req1);
-//        requests.add(req2);
-//        requests.add(req3);
-//
-//        requestRepository.saveAll(requests);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build();
-//
-////        server.expect(manyTimes(), requestTo("http://localhost:8081/notification"))
-////                .andExpect(method(HttpMethod.POST))
-////                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
-//
-//        server.expect(manyTimes(), requestTo("http://localhost:8081/getUserFaculties"))
-//                .andExpect(method(HttpMethod.POST))
-//                .andRespond(withSuccess("[EWI]", MediaType.APPLICATION_JSON));
-//
-//        Long[] ids = {1L, 2L, 3L};
-//        ApprovalInformation approvalInformation = new ApprovalInformation();
-//        approvalInformation.setIds(ids);
-//
-//        ResultActions result = mockMvc.perform(post("/job/sendApprovals")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .content(JsonUtil.serialize(approvalInformation))
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .header("Authorization", "Bearer MockedToken"));
-//
-//        result.andExpect(status().isOk());
-//        String response = result.andReturn().getResponse().getContentAsString();
-//        assertThat(response).isEqualTo("[]");
-//
-//    }
 
 }
 
