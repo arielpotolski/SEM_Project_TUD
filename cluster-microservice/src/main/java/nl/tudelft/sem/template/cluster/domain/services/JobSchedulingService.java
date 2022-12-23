@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 @EnableAsync
 @EnableScheduling
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class JobSchedulingService {
 
     /**
