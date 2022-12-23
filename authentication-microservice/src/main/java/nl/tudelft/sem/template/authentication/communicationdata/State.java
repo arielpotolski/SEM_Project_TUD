@@ -7,7 +7,7 @@ public enum State {
     SCHEDULED,
     STARTED,
     COMPLETED,
-    DELAYED,
+    RESCHEDULED,
     DROPPED,
     ACCEPTED,
     REJECTED
