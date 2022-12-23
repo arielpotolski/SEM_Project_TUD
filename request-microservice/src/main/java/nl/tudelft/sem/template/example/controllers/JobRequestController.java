@@ -7,10 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
-import nl.tudelft.sem.template.example.domain.ApprovalInformation;
-import nl.tudelft.sem.template.example.domain.ClockUser;
-import nl.tudelft.sem.template.example.domain.Request;
-import nl.tudelft.sem.template.example.domain.RequestRepository;
+import nl.tudelft.sem.template.example.domain.*;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import nl.tudelft.sem.template.example.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,7 @@ public class JobRequestController {
 
     /**
      * Instantiates a new controller.
-     *  @param authManager              Spring Security component used to authenticate and authorize the user
+     * @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
      * @param clockUser                clock that can be configurable
@@ -66,8 +63,10 @@ public class JobRequestController {
     @PostMapping("/sendRequest")
     public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
 
-        Clock clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"));
-        clockUser.setClock(clock);
+//        Clock.fixed(
+//                clock.instant(),
+//                ZoneId.of("UTC"));
+        //clockUser.setClock(clock);
 
         //check if the user is from the corresponding faculty
 
@@ -92,10 +91,10 @@ public class JobRequestController {
 
         long minutes = d1.until(ref, ChronoUnit.MINUTES);
 
-        if (d2.isEqual(onlyDate)) {
+        if (clockUser.getTimeLD().isEqual(onlyDate)) {
             return ResponseEntity.ok()
                     .body("You cannot send requests for the same day.");
-        } else if (!d2.isEqual(onlyDate)) {
+        } else if (!clockUser.getTimeLD().isEqual(onlyDate)) {
             if (minutes <= timeLimit1) {
                 return ResponseEntity.ok()
                         .body("You cannot send requests 5 min before the following day.");
