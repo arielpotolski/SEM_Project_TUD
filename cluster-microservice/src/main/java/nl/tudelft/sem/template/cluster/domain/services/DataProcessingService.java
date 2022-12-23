@@ -14,6 +14,7 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +38,7 @@ public class DataProcessingService {
      * @param jobScheduleRepository the schedule repository to get schedule and available resource information from.
      * @param dateProvider the date provider for current date and tomorrow.
      */
+    @Autowired
     public DataProcessingService(NodeRepository nodeRepository, JobScheduleRepository jobScheduleRepository,
                                  DateProvider dateProvider) {
         this.nodeRepository = nodeRepository;
@@ -152,6 +154,10 @@ public class DataProcessingService {
 
     public void saveInSchedule(Job job) {
         this.jobScheduleRepository.save(job);
+    }
+
+    public void deleteJob(Job job) {
+        this.jobScheduleRepository.delete(job);
     }
 
     public void deleteAllJobsScheduled() {

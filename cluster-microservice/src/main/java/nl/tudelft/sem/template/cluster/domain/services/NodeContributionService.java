@@ -6,11 +6,13 @@ import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -33,22 +35,21 @@ public class NodeContributionService {
 
     private List<Node> nodesToRemove;  // list of nodes to be removed after midnight.
 
-    private final transient NodeRepository nodeRepository;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     /**
      * Instantiates a new NodeContributionService.
      *
      * @param dataProcessingService a dataProcessingService
      * @param numberProvider a numberProvider
-     * @param nodeRepository a nodeRepository
      */
     @Autowired
     public NodeContributionService(DataProcessingService dataProcessingService,
-                                   NumberProvider numberProvider, NodeRepository nodeRepository) {
+                                   NumberProvider numberProvider) {
         this.dataProcessingService = dataProcessingService;
         this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
         this.nodesToRemove = new ArrayList<>();
-        this.nodeRepository = nodeRepository;
     }
 
     /**
@@ -67,15 +68,6 @@ public class NodeContributionService {
      */
     public int numberOfNodesToRemove() {
         return this.nodesToRemove.size();
-    }
-
-    /**
-     * Gets the repository of this service.
-     *
-     * @return the repository of this service
-     */
-    public NodeRepository getRepo() {
-        return this.nodeRepository;
     }
 
     /**
@@ -141,10 +133,15 @@ public class NodeContributionService {
     @Scheduled(cron = "0 0 0 * * *")
     @Async
     public void removeNodesAtMidnight() {
+        var removedNodes = new ArrayList<Node>();
         for (Node node : this.nodesToRemove) {
-            Node n = this.nodeRepository.findByUrl(node.getUrl());
-            this.nodeRepository.delete(n);
+            Node n = this.dataProcessingService.getByUrl(node.getUrl());
+            removedNodes.add(n);
+            this.dataProcessingService.deleteNode(n);
         }
+
+        // all at once
+        publisher.publishEvent(new NodesWereRemovedEvent(this, removedNodes));
 
         this.nodesToRemove = new ArrayList<>();
     }

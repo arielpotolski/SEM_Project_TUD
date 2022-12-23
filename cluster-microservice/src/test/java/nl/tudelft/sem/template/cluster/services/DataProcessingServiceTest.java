@@ -380,7 +380,7 @@ public class DataProcessingServiceTest {
         this.node1.setGpuResources(10);
         this.dataProcessingService.save(this.node1);
 
-        LocalDate startDate = dateProvider.getTomorrow().plusDays(1);
+        LocalDate startDate = this.dateProvider.getTomorrow().plusDays(1);
 
         this.job1.setScheduledFor(startDate);
         this.job2.setScheduledFor(startDate);
@@ -394,7 +394,7 @@ public class DataProcessingServiceTest {
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
 
-        LocalDate endDate = dateProvider.getTomorrow().plusDays(2);
+        LocalDate endDate = this.dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
             this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("EWI", endDate);
@@ -411,7 +411,7 @@ public class DataProcessingServiceTest {
         this.node3.setGpuResources(10);
         this.dataProcessingService.save(this.node3);
 
-        LocalDate startDate = dateProvider.getTomorrow().plusDays(1);
+        LocalDate startDate = this.dateProvider.getTomorrow().plusDays(1);
 
         this.job3.setScheduledFor(startDate);
         this.job4.setScheduledFor(startDate);
@@ -420,7 +420,7 @@ public class DataProcessingServiceTest {
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
 
-        LocalDate endDate = dateProvider.getTomorrow().plusDays(2);
+        LocalDate endDate = this.dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
             this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("AE", endDate);
