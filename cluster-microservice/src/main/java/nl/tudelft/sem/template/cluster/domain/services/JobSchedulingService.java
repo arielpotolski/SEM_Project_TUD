@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;
-
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;

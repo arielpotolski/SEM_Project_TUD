@@ -58,7 +58,8 @@ public class NotificationManagerService {
 
             HttpEntity<NotificationRequestModel> entity = new HttpEntity<>(model, headers);
             ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
-            if (result.getStatusCode().value() == 200) {
+            int okCode = 200;
+            if (result.getStatusCode().value() == okCode) {
                 return true;
             }
         } catch (Exception e) {
