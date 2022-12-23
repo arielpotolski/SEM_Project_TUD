@@ -1,5 +1,9 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
@@ -7,11 +11,6 @@ import nl.tudelft.sem.template.cluster.domain.strategies.JobSchedulingStrategy;
 import nl.tudelft.sem.template.cluster.domain.strategies.LeastBusyDateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This service handles scheduling a job according to the current strategy.
@@ -74,7 +73,6 @@ public class JobSchedulingService {
 
     /**
      * TODO: make this return the date
-     *
      * Uses the current scheduling strategy to schedule the given job. Persists the scheduled job in the repository.
      *
      * @param job the job to be scheduled.
@@ -113,7 +111,6 @@ public class JobSchedulingService {
      * for each such day, jobs are removed and put in a temporary list. Once available resources are non-negative again,
      * the method moves on to other days and then faculties. At the end of these loops, there should no longer be days
      * when more resources are reserved than available.
-     *
      * After that, the method iterates over temp, and for each job
      * checks whether it can ever be scheduled (i.e., if its resource requirement does not exceed its faculty's new
      * total assigned resources after removal of some nodes.) If it cannot, it is dropped and a notification sent to the

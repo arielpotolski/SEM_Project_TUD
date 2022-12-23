@@ -1,13 +1,12 @@
 package nl.tudelft.sem.template.cluster.application.cluster;
 
+import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 /**
  * This event listener is automatically called when node(s) are removed from the cluster either directly by a sysadmin

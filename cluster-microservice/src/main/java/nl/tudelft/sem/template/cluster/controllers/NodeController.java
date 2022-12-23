@@ -161,7 +161,6 @@ public class NodeController {
             this.dataProcessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
-        url = url.replaceFirst("/", "");
 
         if (this.dataProcessingService.existsByUrl(url)) {
             Node node = this.dataProcessingService.getByUrl(url);

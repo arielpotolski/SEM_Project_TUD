@@ -1,11 +1,10 @@
 package nl.tudelft.sem.template.cluster.domain.events;
 
+import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class NodesWereRemovedEventPublisher {
