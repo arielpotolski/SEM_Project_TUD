@@ -95,6 +95,60 @@ public class NodeControllerTest {
     }
 
     @Test
+    public void postFacultiesTest() throws Exception {
+        // Act
+        // Still include Bearer token as AuthFilter itself is not mocked
+        List<String> list = List.of("EWI", "TPM");
+
+        ResultActions result = mockMvc.perform(post("/faculties")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(list))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isOk());
+
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("Successfully acknowledged all existing faculties.");
+
+        // check that nodes exist in database and only those
+        assertThat(nodeRepository.existsByFacultyId("EWI")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("TPM")).isTrue();
+        assertThat(nodeRepository.count()).isEqualTo(2);
+
+        // check that expected nodes have been persisted
+        assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
+        assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
+
+        // check that updates do not overwrite existing faculty cores
+        List<String> newFaculties = List.of("AE", "EWI");
+
+        ResultActions resultNew = mockMvc.perform(post("/faculties")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(newFaculties))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        resultNew.andExpect(status().isOk());
+
+        String responseNew = resultNew.andReturn().getResponse().getContentAsString();
+
+        assertThat(responseNew).isEqualTo("Successfully acknowledged all existing faculties.");
+
+        // check that nodes exist in database and only those
+        assertThat(nodeRepository.existsByFacultyId("EWI")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("TPM")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("AE")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("IO")).isFalse();
+        assertThat(nodeRepository.count()).isEqualTo(3);
+
+        assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
+        assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
+        assertThat(nodeRepository.findByUrl("/AE/central-core")).isEqualTo(node3);
+    }
+
+    @Test
     public void getAllNodesTest() throws Exception {
 
         // Act
