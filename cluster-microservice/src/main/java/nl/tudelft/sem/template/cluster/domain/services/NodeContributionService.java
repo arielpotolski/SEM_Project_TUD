@@ -1,45 +1,149 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Setter;
+import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
+import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
+import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
+import nl.tudelft.sem.template.cluster.domain.strategies.NodeAssignmentStrategy;
+import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * This class provides a service for contributing new nodes to the cluster. It uses the NodeAssignmentService first to
+ * This class provides a service for contributing new nodes to the cluster. It uses the NodeAssignmentStrategy first to
  * give the node an assigned faculty, and then persists in the node repository.
  */
 @Service
+@EnableAsync
+@EnableScheduling
+@Setter
 public class NodeContributionService {
 
-    private final transient NodeRepository repo;
+    private transient NodeAssignmentStrategy strategy;
 
-    private final transient NodeAssignmentService assigning;
+    private final transient DataProcessingService dataProcessingService;
+
+    private List<Node> nodesToRemove;  // list of nodes to be removed after midnight.
 
     @Autowired
-    public NodeContributionService(NodeRepository repo, NodeAssignmentService assigning) {
-        this.repo = repo;
-        this.assigning = assigning;
-    }
+    private ApplicationEventPublisher publisher;
 
-    // node already has assigned facultyId
-    public void addNodeAssignedToSpecificFacultyToCluster(Node node) {
-        this.repo.save(node);
+    /**
+     * Instantiates a new NodeContributionService.
+     *
+     * @param dataProcessingService a dataProcessingService
+     * @param numberProvider a numberProvider
+     */
+    @Autowired
+    public NodeContributionService(DataProcessingService dataProcessingService,
+                                   NumberProvider numberProvider) {
+        this.dataProcessingService = dataProcessingService;
+        this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
+        this.nodesToRemove = new ArrayList<>();
     }
 
     /**
-     * Calls the NodeAssignmentService to assign this node to a faculty and adds it to the cluster (persists in
-     * repository.)
+     * Gets the list of nodes to be removed.
+     *
+     * @return list of nodes to be removed
+     */
+    public List<Node> getNodesToRemove() {
+        return this.nodesToRemove;
+    }
+
+    /**
+     * The number of nodes to be removed at midnight.
+     *
+     * @return the number of nodes to be removed
+     */
+    public int numberOfNodesToRemove() {
+        return this.nodesToRemove.size();
+    }
+
+    /**
+     * Change the strategy by which nodes are assigned to faculties.
+     *
+     * @param strategy the new strategy.
+     */
+    public void changeNodeAssignmentStrategy(NodeAssignmentStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     * Uses the current strategy to pick a faculty to which to assign the given node.
+     *
+     * @param node the node to assign to a faculty.
+     */
+    private void assignNodeToFaculty(Node node) {
+        // pick faculty using strategy
+        List<FacultyTotalResources> list = this.dataProcessingService.getAssignedResourcesPerFaculty();
+        List<FacultyResourcesResponseModel> testableList = FacultyResourcesResponseModel
+                .convertAllFacultyTotalResourcesToResponseModels(list);
+        String chosenId = strategy.pickFacultyToAssignNodeTo(testableList);
+
+        // set facultyId of node
+        node.setFacultyId(chosenId);
+    }
+
+    /**
+     * Adds to the repository a node that already is assigned to a faculty.
+     *
+     * @param node the node to be added.
+     */
+    public void addNodeAssignedToSpecificFacultyToCluster(Node node) {
+        this.dataProcessingService.save(node);
+    }
+
+    /**
+     * Assigns this node to a faculty and adds it to the cluster (persists in repository.)
      *
      * @param node the node to add to the cluster.
      */
     public void addNodeToCluster(Node node) {
         // node is unassigned - assign faculty
-        assigning.assignNodeToFaculty(node);
+        this.assignNodeToFaculty(node);
 
         // persist to repository
-        this.repo.save(node);
+        this.dataProcessingService.save(node);
     }
 
+    /**
+     * Adds a node to the list of nodes to be removed at midnight.
+     *
+     * @param node node to be added to the list
+     */
+    public boolean addNodeToBeRemoved(Node node) {
+        this.nodesToRemove.add(node);
+        return true;
+    }
+
+    /**
+     * This method removes the nodes in the nodesToRemoveList every time it's midnight.
+     */
+    @Scheduled(cron = "0 0 0 * * *")
+    @Async
+    public void removeNodesAtMidnight() {
+        var removedNodes = new ArrayList<Node>();
+        for (Node node : this.nodesToRemove) {
+            Node n = this.dataProcessingService.getByUrl(node.getUrl());
+            removedNodes.add(n);
+            this.dataProcessingService.deleteNode(n);
+        }
+
+        // all at once
+        publisher.publishEvent(new NodesWereRemovedEvent(this, removedNodes));
+
+        this.nodesToRemove = new ArrayList<>();
+    }
 
 }

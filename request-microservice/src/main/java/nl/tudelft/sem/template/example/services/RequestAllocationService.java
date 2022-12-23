@@ -1,24 +1,30 @@
 package nl.tudelft.sem.template.example.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.Getter;
 import nl.tudelft.sem.template.example.TokenRequestModel;
 import nl.tudelft.sem.template.example.domain.AvailableResources;
+import nl.tudelft.sem.template.example.domain.FacultiesResponseModel;
+import nl.tudelft.sem.template.example.domain.JobRequestRequestModel;
+import nl.tudelft.sem.template.example.domain.NotificationRequestModel;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
+import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,9 +34,10 @@ import org.springframework.web.client.RestTemplate;
  * The Request service initiates communication with other microservices and exchanges information.
  */
 @Service
+@Getter
 public class RequestAllocationService {
 
-    private final RestTemplate restTemplate;
+    private RestTemplate restTemplate;
     private final RequestRepository requestRepository;
 
     /**
@@ -45,6 +52,9 @@ public class RequestAllocationService {
         this.requestRepository = requestRepository;
     }
 
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     /**
      * This method is responsible for getting the associated faculties with the user who made the request.
@@ -62,14 +72,19 @@ public class RequestAllocationService {
             headers.setBearerAuth(token);
 
             HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
-            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<FacultiesResponseModel> result = restTemplate
+                    .postForEntity(url, entity, FacultiesResponseModel.class);
 
-            String string = result.getBody();
+            String string = result.getBody().getFaculties()
+                    .replace("[", "").replace("]", "");
 
             assert string != null;
             if (string.equals("")) {
                 return new ArrayList<>();
             }
+
+            // extract
+
 
             return Arrays.stream(string.split(", ")).collect(Collectors.toList());
         } catch (Exception e) {
@@ -87,14 +102,26 @@ public class RequestAllocationService {
      * @param preferredDate the preferred date
      * @return the list
      */
-    public List<Resource> getReservedResource(String facultyName, Date preferredDate) {
+    public List<Resource> getReservedResource(String facultyName, LocalDate preferredDate, String token) {
 
         try {
-            String url = "http://localhost:8082/resources/available" + preferredDate.toString() + "/" + facultyName;
+            String url = "http://localhost:8082/resources/availableUntil/"
+                    + preferredDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    + "/" + facultyName;
 
-            // headers?
-            ResponseEntity<AvailableResources> result = restTemplate.getForEntity(url, AvailableResources.class);
-            return Objects.requireNonNull(result.getBody()).getResourceList();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+
+            HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
+            var result = restTemplate.exchange(url, HttpMethod.GET,
+                    entity, ResourceResponseModel[].class);
+            var listOfResources = Stream.of(result.getBody())
+                    .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
+                            x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList());
+
+            var availableResources = new AvailableResources(listOfResources);
+            return Objects.requireNonNull(availableResources).getResourceList();
 
         } catch (Exception e) {
             System.out.println("error with post " + e);
@@ -105,32 +132,14 @@ public class RequestAllocationService {
     }
 
     /**
-     * Gets rest template.
-     *
-     * @return the rest template
-     */
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
-
-    /**
-     * Gets request repository.
-     *
-     * @return the request repository
-     */
-    public RequestRepository getRequestRepository() {
-        return requestRepository;
-    }
-
-    /**
      * Checks if there are enough computational resources for a given job to be executed.
      *
      * @param request the request
      * @return the boolean
      */
-    public boolean enoughResourcesForJob(Request request) {
+    public boolean enoughResourcesForJob(Request request, String token) {
 
-        List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate());
+        List<Resource> resources = getReservedResource(request.getFaculty(), request.getPreferredDate(), token);
 
         for (int i = 0; i < resources.size(); i++) {
             Resource currentResource = resources.get(i);
@@ -155,24 +164,25 @@ public class RequestAllocationService {
      * @param request the request
      * @throws JsonProcessingException the json processing exception
      */
-    public void sendRequestToCluster(Request request) throws JsonProcessingException {
+    public boolean sendRequestToCluster(Request request, String token) throws JsonProcessingException {
 
         try {
-            String url = "https://localhost:8085/request";
+            String url = "http://localhost:8082/request";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            //List<String> enumValues = Arrays.asList(Arrays.toString(AppUser.Faculty.values()));
+            headers.setBearerAuth(token);
 
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String json = ow.writeValueAsString(request);
-            System.out.println(json);
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            HttpEntity<JobRequestRequestModel> entity =
+                    new HttpEntity<>(JobRequestRequestModel.convertToRequestModel(request), headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post: " + e);
+            return false;
         }
+        return true;
 
 
     }
@@ -183,27 +193,32 @@ public class RequestAllocationService {
      *
      * @param request the request
      */
-    public void sendDeclinedRequestToUserService(Request request) {
+    public boolean sendDeclinedRequestToUserService(Request request, String token) {
 
 
         try {
-            String url = "https://localhost:8081/notification";
 
-            JSONObject json = new JSONObject();
-            json.put("date", request.getPreferredDate());
-            json.put("type", "REQUEST");
-            json.put("state", "REJECTED");
-            json.put("message", request.getDescription());
-            json.put("netId", request.getNetId());
+            var model = new NotificationRequestModel(
+                    request.getPreferredDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    "REQUEST", "REJECTED",
+                    request.getDescription(), request.getNetId());
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
 
-            ResponseEntity<String> result = restTemplate.postForEntity(url, json, String.class);
+            String url = "http://localhost:8081/notification";
+
+            HttpEntity<NotificationRequestModel> entity = new HttpEntity<>(model, headers);
+            ResponseEntity<String> result = restTemplate.postForEntity(url, entity, String.class);
             if (result.getBody().equals("ok")) {
-                return;
+                return true;
             }
         } catch (Exception e) {
             System.out.println("error with post" + e);
+            return false;
         }
+        return true;
 
 
     }

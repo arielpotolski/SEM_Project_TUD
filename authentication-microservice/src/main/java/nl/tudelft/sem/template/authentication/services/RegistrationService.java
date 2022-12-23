@@ -1,11 +1,11 @@
 package nl.tudelft.sem.template.authentication.services;
 
 import java.util.List;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdAlreadyInUseException;
+import nl.tudelft.sem.template.authentication.domain.exceptions.NetIdNotFoundException;
 import nl.tudelft.sem.template.authentication.domain.user.AppUser;
 import nl.tudelft.sem.template.authentication.domain.user.HashedPassword;
 import nl.tudelft.sem.template.authentication.domain.user.NetId;
-import nl.tudelft.sem.template.authentication.domain.user.NetIdAlreadyInUseException;
-import nl.tudelft.sem.template.authentication.domain.user.NetIdNotFoundException;
 import nl.tudelft.sem.template.authentication.domain.user.Password;
 import nl.tudelft.sem.template.authentication.domain.user.Role;
 import nl.tudelft.sem.template.authentication.domain.user.UserRepository;
@@ -79,7 +79,7 @@ public class RegistrationService {
      * @throws Exception if the user does not exist
      */
     public void changePassword(NetId netId, Password password)throws  Exception {
-        if (!checkNetIdIsUnique(netId)) {
+        if (userRepository.existsByNetId(netId)) {
             HashedPassword hashedPassword = passwordHashingService.hash(password);
             AppUser user = userRepository.findByNetId(netId).get();
             user.changePassword(hashedPassword);
@@ -87,7 +87,6 @@ public class RegistrationService {
             userRepository.save(user);
             return;
         }
-        //Needs to change (make a new exception)
         throw new NetIdNotFoundException(netId);
     }
 
