@@ -229,7 +229,7 @@ public class RegistrationServiceTests {
     public void changePasswordTest() throws Exception {
         final NetId testUser = new NetId("SomeUser");
         final Password testPassword = new Password("password123");
-        final Password newPassword = new Password("new");
+        final Password newPassword = new Password("newPassword");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         final HashedPassword newHashedPassword = new HashedPassword("Hash");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
@@ -245,7 +245,7 @@ public class RegistrationServiceTests {
     public void equalsTestCorrect() throws Exception {
         final NetId testUser = new NetId("SomeUser");
         final Password testPassword = new Password("password123");
-        final Password newPassword = new Password("new");
+        final Password newPassword = new Password("newPassword");
         final HashedPassword testHashedPassword = new HashedPassword("hashedTestPassword");
         final HashedPassword newHashedPassword = new HashedPassword("Hash");
         when(mockPasswordEncoder.hash(testPassword)).thenReturn(testHashedPassword);
@@ -257,8 +257,21 @@ public class RegistrationServiceTests {
         assertThat(savedUser1.equals(savedUser2)).isTrue();
         assertThat(savedUser1.equals(savedUser3)).isFalse();
         assertThat(savedUser1.equals(testUser)).isFalse();
+    }
 
+    @Test
+    public void boundaryTestLengthNetId() {
+        assertThrows(IllegalArgumentException.class, () -> new NetId("12345"));
+        assertThrows(IllegalArgumentException.class, () -> new NetId("ThisIsTwentyOneChars!"));
+        assertThat(new NetId("123456").toString().length()).isEqualTo(6);
+        assertThat(new NetId("ThisIsTwentyChars!!!").toString().length()).isEqualTo(20);
+    }
 
+    @Test void boundaryTestLengthPassword() {
+        assertThrows(IllegalArgumentException.class, () -> new Password("12345"));
+        assertThrows(IllegalArgumentException.class, () -> new Password("ThisIsTwentyOneChars!"));
+        assertThat(new Password("123456").toString().length()).isEqualTo(6);
+        assertThat(new Password("ThisIsTwentyChars!!!").toString().length()).isEqualTo(20);
     }
 
 

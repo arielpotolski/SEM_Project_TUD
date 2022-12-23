@@ -33,10 +33,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Tests for the cluster controller.
+ * Tests for the schedule controller.
  */
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -44,7 +43,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles({"test", "mockTokenVerifier", "mockAuthenticationManager"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-public class ClusterControllerTest {
+public class ScheduleControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -141,236 +140,6 @@ public class ClusterControllerTest {
         model.setPreferredCompletionDate(LocalDate.now().plusDays(2));
     }
 
-    @Test
-    public void getAllNodesTest() throws Exception {
-
-        // Act
-        // Still include Bearer token as AuthFilter itself is not mocked
-        ResultActions result = mockMvc.perform(get("/nodes/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("[]"); // empty list
-
-        node1 = new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(2.0)
-                .setNodeGpuResourceCapacityTo(1.0)
-                .setNodeMemoryResourceCapacityTo(1.0)
-                .withNodeName("MyFirstNode")
-                .foundAtUrl("myUrl")
-                .byUserWithNetId("Me")
-                .assignToFacultyWithId("AE").constructNodeInstance();
-        node2.setCpuResources(5.0);
-        node2.setName("FUCK");
-
-        // add some nodes
-        nodeRepository.save(node1);
-        nodeRepository.save(node2);
-
-        // check all returned nodes
-        ResultActions result2 = mockMvc.perform(get("/nodes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result2.andExpect(status().isOk());
-        String response2 = result2.andReturn().getResponse().getContentAsString();
-        assertThat(response2).isEqualTo(JsonUtil.serialize(List.of(node1, node2))); // two elements list
-        nodeRepository.delete(node2);
-
-        // check all returned nodes
-        ResultActions result3 = mockMvc.perform(get("/nodes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result3.andExpect(status().isOk());
-        String response3 = result3.andReturn().getResponse().getContentAsString();
-        assertThat(response3).isEqualTo(JsonUtil.serialize(List.of(node1))); // one element list
-    }
-
-    @Test
-    public void getNodeByUrlTest() throws Exception {
-        ResultActions result = mockMvc.perform(get("/nodes/hackers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isBadRequest());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("");
-
-        nodeRepository.save(node1);
-        nodeRepository.save(node2);
-        nodeRepository.save(node3);
-
-        ResultActions result2 = mockMvc.perform(get("/nodes/TPM/central-core")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result2.andExpect(status().isOk());
-        String response2 = result2.andReturn().getResponse().getContentAsString();
-        assertThat(response2).isEqualTo(JsonUtil.serialize(List.of(node2)));
-    }
-
-    @Test
-    public void addNodesTest() throws Exception {
-        assertThat(nodeRepository.count()).isEqualTo(0); // no nodes
-
-        // change node1
-        node1.setCpuResources(3.0);
-        node1.setMemoryResources(1.0);
-        node1.setUrl("hippity");
-        node1.setFacultyId(null);
-
-        // add first node, check that Board of Examiners also added
-        ResultActions result = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Your node has been successfully added.");
-
-        assertThat(nodeRepository.count()).isEqualTo(2);
-        assertThat(nodeRepository.existsByFacultyId("Board of Examiners")).isTrue();
-
-        Node found = nodeRepository.findByUrl("hippity");
-        assertThat(found).isNotNull();
-
-        // add node with existing url
-        ResultActions result2 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result2.andExpect(status().isBadRequest());
-        String response2 = result2.andReturn().getResponse().getContentAsString();
-        assertThat(response2).isEqualTo("Failed to add node. A node with this url already exists.");
-
-        // add valid node to cluster
-        ResultActions result3 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result3.andExpect(status().isOk());
-        String response3 = result3.andReturn().getResponse().getContentAsString();
-        assertThat(response3).isEqualTo("Your node has been successfully added.");
-        assertThat(nodeRepository.count()).isEqualTo(3);
-
-        // try to add invalid node
-        node3.setGpuResources(1.0);
-        node3.setUrl("a");
-
-        ResultActions result4 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result4.andExpect(status().isBadRequest());
-        String response4 = result4.andReturn().getResponse().getContentAsString();
-        assertThat(response4).isEqualTo("The amount of CPU resources should be at least as much as the amount "
-                + "of GPU resources.");
-
-        node3.setMemoryResources(2.0);
-        node3.setUrl("aa");
-
-        ResultActions result5 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result5.andExpect(status().isBadRequest());
-        String response5 = result5.andReturn().getResponse().getContentAsString();
-        assertThat(response5).isEqualTo("The amount of CPU resources should be at least as much as the amount of GPU"
-                + " resources and at least as much as the amount of memory resources.");
-
-        node3.setCpuResources(-1.0);
-        node3.setUrl("aaa");
-
-        ResultActions result6 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result6.andExpect(status().isBadRequest());
-        String response6 = result6.andReturn().getResponse().getContentAsString();
-        assertThat(response6).isEqualTo("None of the resources can be negative.");
-
-        node3.setCpuResources(1.5);
-        node3.setUrl("aaaa");
-
-        ResultActions result7 = mockMvc.perform(post("/nodes/add")
-                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result7.andExpect(status().isBadRequest());
-        String response7 = result7.andReturn().getResponse().getContentAsString();
-        assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
-                + " of memory resources.");
-    }
-
-    @Test
-    public void deleteAllNodesTest() throws Exception {
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("All nodes have been deleted from the cluster.");
-        assertThat(nodeRepository.count()).isEqualTo(0);
-    }
-
-    @Test
-    public void deleteNodeByUrlTestNoNodes() throws Exception {
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/url")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Could not find the node to be deleted."
-                + " Check if the url provided is correct.");
-        assertThat(nodeRepository.count()).isEqualTo(0);
-    }
-
-    @Test
-    public void deleteNodeByUrlTestWrongUrl() throws Exception {
-        nodeRepository.save(node1);
-        nodeRepository.save(node2);
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/url")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Could not find the node to be deleted."
-                + " Check if the url provided is correct.");
-        assertThat(nodeRepository.count()).isEqualTo(2);
-    }
-
-    @Test
-    public void deleteNodeByUrlTestCorrectUrl() throws Exception {
-        nodeRepository.save(node1);
-        nodeRepository.save(node2);
-        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/nodes/delete/EWI/central-core")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("The node has been successfully deleted");
-        assertThat(nodeRepository.count()).isEqualTo(1);
-    }
-
-    // TODO: split
     @Test
     public void postFacultiesTest() throws Exception {
         // Act
@@ -486,13 +255,28 @@ public class ClusterControllerTest {
     }
 
     @Test
-    public void sendInvalidRequestTest() throws Exception {
-        model.setRequiredCpu(0.0);
+    public void sendInvalidRequestTestLessCpuThanGpu() throws Exception {
+        this.model.setRequiredGpu(3.0);
         String json = JsonUtil.serialize(model);
         ResultActions result = mockMvc.perform(post("/request")
                 .accept(MediaType.APPLICATION_JSON).content(json)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The requested job cannot require more GPU or memory than CPU.");
+    }
+
+    @Test
+    public void sendInvalidRequestTestLessCpuThanMemory() throws Exception {
+        this.model.setRequiredMemory(3.0);
+        String json = JsonUtil.serialize(model);
+        ResultActions result = mockMvc.perform(post("/request")
+            .accept(MediaType.APPLICATION_JSON).content(json)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
 
         // Assert
         result.andExpect(status().isBadRequest());
@@ -545,6 +329,25 @@ public class ClusterControllerTest {
         assertThat(response).isEqualTo("Successfully scheduled job.");
     }
 
+    /*@Test
+    public void unauthorizedGetResourcesAssignedToAll() throws Exception {
+        PrivilegeVerificationService privilegeVerificationService =
+            mock(PrivilegeVerificationService.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth("Token");
+
+        when(privilegeVerificationService.verifyAccountOfCorrectFaculty(
+            headers, "AE")).thenReturn(false);
+
+        ResultActions result = mockMvc.perform(get("/resources/assigned/AE")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Token"));
+
+        result.andExpect(status().isForbidden());
+    }*/
+
     @Test
     public void getResourcesAssignedToAllEmptyTest() throws Exception {
         ResultActions result = mockMvc.perform(get("/resources/assigned")
@@ -554,12 +357,6 @@ public class ClusterControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo("[]");
-    }
-
-    // empty because it needs us to refactor the code to be able to insert a class here
-    @Test
-    public void getResourcesAssignedToAllNonEmptyTest() throws Exception {
-
     }
 
     @Test
@@ -586,13 +383,10 @@ public class ClusterControllerTest {
                 .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
-        String response = result.andReturn().getResponse().getContentAsString();
-        //assertThat(response).isEqualTo(JsonUtil.serialize()); // same as above
     }
 
     @Test
-    public void getResourcesReservedPerFacultyPerDay() throws Exception {
-        // check both url paths
+    public void getResourcesReservedPerFacultyPerDayNoDayNoFacultySpecifiedExist() throws Exception {
         FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
                 LocalDate.of(2022, 12, 14), "EWI",
                 5.0, 1.0, 1.0);
@@ -608,73 +402,219 @@ public class ClusterControllerTest {
     }
 
     @Test
-    public void getResourcesReservedPerFacultyForGivenDay() throws Exception {
-    }
+    public void getResourcesReservedPerFacultyPerDayNoDaySpecifiedExist() throws Exception {
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            LocalDate.of(2022, 12, 14), "EWI",
+            5.0, 1.0, 1.0);
 
-    @Test
-    public void getResourcesReservedForGivenFacultyPerDay() throws Exception {
-    }
-
-    @Test
-    public void getResourcesReservedForGivenFacultyForGivenDay() throws Exception {
-    }
-
-    @Test
-    public void scheduleNodeRemovalNodeNotFoundTest() throws Exception {
-        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/nodes/delete/user/a")
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isBadRequest());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Could not find the node to be deleted."
-            + " Check if the url provided is correct.");
-        assertThat(this.nodeRepository.count()).isEqualTo(0);
-    }
-
-    @Test
-    public void scheduleNodeRemovalUserNotOwnerTest() throws Exception {
-        this.node1.setUrl("a");
-        this.nodeRepository.save(node1);
-
-        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/nodes/delete/user/a")
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer MockedToken"));
-
-        result.andExpect(status().isBadRequest());
-        String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("You cannot remove nodes that"
-            + " other users have contributed to the cluster.");
-        assertThat(this.nodeRepository.count()).isEqualTo(1);
-    }
-
-    /**
-     * Due to the nature of Spring, we could not create a test that tests the removal
-     * of the node from the repo. You can test the correct behaviour manually, through postman.
-     * This tests if the output message to the client was the expected one.
-     *
-     * @throws Exception throws exception if endpoint fails
-     */
-    @Test
-    public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception {
-        this.node1.setUrl("a");
-        this.nodeRepository.save(node1);
-
-        when(this.mockAuthenticationManager.getNetId()).thenReturn(this.node1.getUserNetId());
-
-        ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/nodes/delete/user/a")
-            .accept(MediaType.APPLICATION_JSON)
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/&EWI")
             .contentType(MediaType.APPLICATION_JSON)
             .header("Authorization", "Bearer MockedToken"));
 
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
-        assertThat(response).isEqualTo("Your node will be removed at midnight.");
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayNoDaySpecifiedFails() throws Exception {
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/&AE")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayNoFacultySpecifiedExists() throws Exception {
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            LocalDate.of(2022, 12, 14), "EWI",
+            5.0, 1.0, 1.0);
+
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-14&")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayNoFacultySpecifiedFails() throws Exception {
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-15&")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayFacultyAndDaySpecifiedExists() throws Exception {
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            LocalDate.of(2022, 12, 14), "EWI",
+            5.0, 1.0, 1.0);
+
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-14&EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayFacultyAndDaySpecifiedFailsDate() throws Exception {
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-15&EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayFacultyAndDaySpecifiedFailsFaculty() throws Exception {
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-14&AE")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getResourcesReservedPerFacultyPerDayFacultyAndDaySpecifiedFailsBoth() throws Exception {
+        jobScheduleRepository.save(job);
+        ResultActions result = mockMvc.perform(get("/resources/reserved/2022-12-14&AE")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAvailableResourcesPerFacultyPerDayExists() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            this.dateProvider.getTomorrow(), "EWI",
+            5.0, 1.0, 1.0);
+
+        ResultActions result = mockMvc.perform(get("/resources/available/")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getAvailableResourcesPerFacultyForGivenDayExists() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            LocalDate.of(2022, 12, 12), "EWI",
+            5.0, 1.0, 1.0);
+
+        ResultActions result = mockMvc.perform(get("/resources/available/2022-12-12&")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getAvailableResourcesPerDayForGivenFacultyFails() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+
+        ResultActions result = mockMvc.perform(get("/resources/available/&EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAvailableResourcesPerDayForGivenFacultyExists() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        this.job.setScheduledFor(this.dateProvider.getTomorrow());
+        jobScheduleRepository.save(job);
+
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            this.dateProvider.getTomorrow(), "EWI",
+            0.0, 0.0, 0.0);
+
+        ResultActions result = mockMvc.perform(get("/resources/available/&EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
+    }
+
+    @Test
+    public void getAvailableResourcesForGivenDayForGivenFacultyInvalidFaculty() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        this.job.setScheduledFor(this.dateProvider.getTomorrow());
+        jobScheduleRepository.save(job);
+
+        ResultActions result = mockMvc.perform(get("/resources/available/2022-12-12&A")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void getAvailableResourcesForGivenDayForGivenFacultyExists() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        this.job.setScheduledFor(this.dateProvider.getTomorrow());
+        jobScheduleRepository.save(job);
+
+        FacultyDatedResourcesResponseModel testingModel = new FacultyDatedResourcesResponseModel(
+            LocalDate.of(2022, 12, 14), "EWI",
+            5.0, 1.0, 1.0);
+
+        ResultActions result = mockMvc.perform(get("/resources/available/2022-12-14&EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
     }
 
 }
