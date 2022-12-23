@@ -156,6 +156,10 @@ public class DataProcessingService {
         this.jobScheduleRepository.save(job);
     }
 
+    public void deleteJob(Job job) {
+        this.jobScheduleRepository.delete(job);
+    }
+
     public void deleteAllJobsScheduled() {
         this.jobScheduleRepository.deleteAll();
     }
