@@ -5,11 +5,13 @@ import javax.servlet.http.HttpServletRequest;
 import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
+import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
 import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,9 @@ public class NodeController {
 
     private final transient NodeContributionService nodeContributionService;
     private final transient DataProcessingService dataProcessingService;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     /**
      * Instantiates a new controller.
@@ -124,17 +129,17 @@ public class NodeController {
      */
     @PostMapping(value = "/nodes/delete/user/{url}")
     public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
-        if (!this.nodeContributionService.getRepo().existsByUrl(url)) {
+        if (!this.dataProcessingService.existsByUrl(url)) {
             return ResponseEntity.badRequest().body("Could not find the node to be deleted."
                 + " Check if the url provided is correct.");
-        } else if (!this.nodeContributionService.getRepo().findByUrl(url).getUserNetId()
+        } else if (!this.dataProcessingService.getByUrl(url).getUserNetId()
             .equals(authManager.getNetId())) {
             return ResponseEntity.badRequest().body("You cannot remove nodes that"
                 + " other users have contributed to the cluster.");
         }
 
         this.nodeContributionService
-            .addNodeToBeRemoved(this.nodeContributionService.getRepo().findByUrl(url));
+            .addNodeToBeRemoved(this.dataProcessingService.getByUrl(url));
 
         return ResponseEntity.ok("Your node will be removed at midnight.");
     }
@@ -152,12 +157,15 @@ public class NodeController {
         String url = request.getRequestURI().replaceFirst("/nodes/delete", "");
         String slashCheck = "/";
         if (url.isEmpty() || url.equals(slashCheck)) {
+            publisher.publishEvent(new NodesWereRemovedEvent(this, this.dataProcessingService.getAllNodes()));
             this.dataProcessingService.deleteAllNodes();
             return ResponseEntity.ok("All nodes have been deleted from the cluster.");
         }
+        url = url.replaceFirst("/", "");
 
         if (this.dataProcessingService.existsByUrl(url)) {
             Node node = this.dataProcessingService.getByUrl(url);
+            publisher.publishEvent(new NodesWereRemovedEvent(this, List.of(node)));
             this.dataProcessingService.deleteNode(node);
             return ResponseEntity.ok("The node has been successfully deleted");
         } else {

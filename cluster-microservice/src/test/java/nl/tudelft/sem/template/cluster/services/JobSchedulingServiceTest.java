@@ -32,8 +32,8 @@ public class JobSchedulingServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.jobSchedulingService.getResourceInfo().deleteAllJobsScheduled();
-        this.jobSchedulingService.getResourceInfo().deleteAllNodes();
+        this.jobSchedulingService.getDataProcessingService().deleteAllJobsScheduled();
+        this.jobSchedulingService.getDataProcessingService().deleteAllNodes();
 
         this.node1 = new NodeBuilder()
             .setNodeCpuResourceCapacityTo(0.0)
@@ -80,7 +80,7 @@ public class JobSchedulingServiceTest {
     public void checkIfJobCanBeScheduledNotEnoughCpu() {
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         assertThat(this.jobSchedulingService.checkIfJobCanBeScheduled(this.job1)).isFalse();
     }
@@ -89,7 +89,7 @@ public class JobSchedulingServiceTest {
     public void checkIfJobCanBeScheduledNotEnoughGpu() {
         this.node1.setMemoryResources(10);
         this.node1.setCpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         assertThat(this.jobSchedulingService.checkIfJobCanBeScheduled(this.job1)).isFalse();
     }
@@ -98,7 +98,7 @@ public class JobSchedulingServiceTest {
     public void checkIfJobCanBeScheduledNotEnoughMemory() {
         this.node1.setCpuResources(10);
         this.node1.setGpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         assertThat(this.jobSchedulingService.checkIfJobCanBeScheduled(this.job1)).isFalse();
     }
@@ -108,7 +108,7 @@ public class JobSchedulingServiceTest {
         this.node1.setGpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setCpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         assertThat(this.jobSchedulingService.checkIfJobCanBeScheduled(this.job1)).isTrue();
     }
@@ -118,10 +118,10 @@ public class JobSchedulingServiceTest {
         this.node1.setGpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setCpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         this.jobSchedulingService.scheduleJob(this.job1);
-        assertThat(this.jobSchedulingService.getResourceInfo()
+        assertThat(this.jobSchedulingService.getDataProcessingService()
             .existsInScheduleByFacultyId(this.job1.getFacultyId())).isTrue();
     }
 
@@ -130,10 +130,10 @@ public class JobSchedulingServiceTest {
         this.node1.setGpuResources(1);
         this.node1.setMemoryResources(1);
         this.node1.setCpuResources(1);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         this.jobSchedulingService.scheduleJob(this.job1);
-        assertThat(this.jobSchedulingService.getResourceInfo()
+        assertThat(this.jobSchedulingService.getDataProcessingService()
             .existsInScheduleByFacultyId(this.job1.getFacultyId())).isFalse();
     }
 
@@ -142,16 +142,16 @@ public class JobSchedulingServiceTest {
         this.node1.setGpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setCpuResources(10);
-        this.jobSchedulingService.getResourceInfo().save(this.node1);
+        this.jobSchedulingService.getDataProcessingService().save(this.node1);
 
         this.jobSchedulingService.scheduleJob(this.job1);
-        assertThat(this.jobSchedulingService.getResourceInfo()
+        assertThat(this.jobSchedulingService.getDataProcessingService()
             .existsInScheduleByFacultyId(this.job1.getFacultyId())).isTrue();
 
-        this.jobSchedulingService.getResourceInfo().save(this.node2);
+        this.jobSchedulingService.getDataProcessingService().save(this.node2);
 
         this.jobSchedulingService.scheduleJob(this.job2);
-        assertThat(this.jobSchedulingService.getResourceInfo()
+        assertThat(this.jobSchedulingService.getDataProcessingService()
             .existsInScheduleByFacultyId(this.job2.getFacultyId())).isTrue();
     }
 }

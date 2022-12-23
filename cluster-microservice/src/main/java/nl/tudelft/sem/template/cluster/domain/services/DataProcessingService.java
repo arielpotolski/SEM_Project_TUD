@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import nl.tudelft.sem.template.cluster.domain.HasEvents;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
@@ -12,8 +14,11 @@ import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
+import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 /**
