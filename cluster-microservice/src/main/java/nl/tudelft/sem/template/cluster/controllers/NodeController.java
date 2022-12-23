@@ -48,6 +48,34 @@ public class NodeController {
     }
 
     /**
+     * Sets up the "central cores" of the existing faculties. They are nodes with 0 of each type of resource which
+     * serve as placeholders to ensure that the cluster knows which faculties exist and can, for example, be assigned
+     * nodes. This endpoint should be used by the User service as soon as both it and Cluster are online.
+     *
+     * @param faculties the list of faculties that exist in the User service's database.
+     *
+     * @return message of confirmation that the faculties have been received.
+     */
+    @PostMapping("/faculties")
+    public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
+        for (String faculty : faculties) {
+            if (this.dataProcessingService.existsByFacultyId(faculty)) {
+                continue;
+            }
+            Node core =  new NodeBuilder()
+                    .setNodeCpuResourceCapacityTo(0.0)
+                    .setNodeGpuResourceCapacityTo(0.0)
+                    .setNodeMemoryResourceCapacityTo(0.0)
+                    .withNodeName("FacultyCentralCore")
+                    .foundAtUrl("/" + faculty + "/central-core")
+                    .byUserWithNetId("SYSTEM")
+                    .assignToFacultyWithId(faculty).constructNodeInstance();
+            this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
+        }
+        return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
+    }
+
+    /**
      * Provides an endpoint for accessing nodes directly. This can be either all nodes or a node at specified url.
      *
      * @param request the url to look for the node at (if given).
@@ -79,12 +107,12 @@ public class NodeController {
      * @return A string saying if the node was added. In case of failure, it returns a
      * 			string saying why is it failing
      */
-    @PostMapping(path = {"/nodes/add"})
-    public ResponseEntity<String>  addNode(@RequestBody NodeRequestModel node) {
-        // Check if central cores have been installed by User Service
+    @PostMapping(path = {"/nodes/add", "/nodes/add/{facultyId}"})
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+    public ResponseEntity<String> addNode(@RequestBody NodeRequestModel node,
+                                          @PathVariable(value = "facultyId", required = false) String facultyId) {
         if (this.dataProcessingService.getNumberOfNodesInRepository() == 0) {
-            // Central cores not installed - faculties unknown. All nodes will be assigned to the
-            // Board of Examiners until faculties become known.
+            // Unknown faculties. All nodes will be assigned to the Board of Examiners until faculties become known.
             Node core =  new NodeBuilder()
                 .setNodeCpuResourceCapacityTo(0.0)
                 .setNodeGpuResourceCapacityTo(0.0)
@@ -99,21 +127,38 @@ public class NodeController {
         if (this.dataProcessingService.existsByUrl(node.getUrl())) {
             return ResponseEntity.badRequest().body("Failed to add node. A node with this url already exists.");
         }
+
+        if (!node.getUrl().startsWith("/")) {
+            return ResponseEntity.badRequest().body("Your node contains an invalid URL. Should start with a \"/\"");
+        }
+
         String netId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Node n = new NodeBuilder()
-            .setNodeCpuResourceCapacityTo(node.getCpuResources())
-            .setNodeGpuResourceCapacityTo(node.getGpuResources())
-            .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
-            .withNodeName(node.getName())
-            .foundAtUrl(node.getUrl())
-            .byUserWithNetId(netId)
-            .constructNodeInstance();
+                .setNodeCpuResourceCapacityTo(node.getCpuResources())
+                .setNodeGpuResourceCapacityTo(node.getGpuResources())
+                .setNodeMemoryResourceCapacityTo(node.getMemoryResources())
+                .withNodeName(node.getName())
+                .foundAtUrl(node.getUrl())
+                .byUserWithNetId(netId)
+                .constructNodeInstance();
 
-        if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
-            this.nodeContributionService.addNodeToCluster(n);
-            return ResponseEntity.ok(n.hasEnoughCpu());
+        // no preassigned faculty
+        if (facultyId == null) {
+            if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
+                this.nodeContributionService.addNodeToCluster(n);
+                return ResponseEntity.ok(n.hasEnoughCpu());
+            }
+            return ResponseEntity.badRequest().body(n.hasEnoughCpu());
+        } else if (this.dataProcessingService.existsByFacultyId(facultyId)) {
+            if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
+                n.setFacultyId(facultyId);
+                this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(n);
+                return ResponseEntity.ok(n.hasEnoughCpu());
+            }
+            return ResponseEntity.badRequest().body(n.hasEnoughCpu());
+        } else {
+            return ResponseEntity.badRequest().body("Unfortunately, this faculty does not exist in the cluster.");
         }
-        return ResponseEntity.badRequest().body(n.hasEnoughCpu());
     }
 
     /**
@@ -123,12 +168,19 @@ public class NodeController {
      * we hit midnight, the nodes contained in that list will be removed. This method
      * will be the only removal method available to users that are not sysadmins.
      *
-     * @param url the url of the node to be removed
+     * @param request the url to look for the node at (if given).
+     *
      * @return a string saying whether the removal was successfully scheduled. If not,
      *          returns a string saying what went wrong
      */
-    @PostMapping(value = "/nodes/delete/user/{url}")
-    public ResponseEntity<String> scheduleNodeRemoval(@PathVariable("url") String url) {
+    @PostMapping(value = "/nodes/delete/user/**")
+    public ResponseEntity<String> scheduleNodeRemoval(HttpServletRequest request) {
+        String url = request.getRequestURI().replaceFirst("/nodes/delete/user", "");
+        String slashCheck = "/";
+        if (url.isEmpty() || url.equals(slashCheck)) {
+            return ResponseEntity.badRequest().body("Wrong url provided.");
+        }
+
         if (!this.dataProcessingService.existsByUrl(url)) {
             return ResponseEntity.badRequest().body("Could not find the node to be deleted."
                 + " Check if the url provided is correct.");

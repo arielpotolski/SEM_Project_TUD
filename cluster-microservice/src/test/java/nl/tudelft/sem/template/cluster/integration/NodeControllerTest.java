@@ -93,6 +93,60 @@ public class NodeControllerTest {
     }
 
     @Test
+    public void postFacultiesTest() throws Exception {
+        // Act
+        // Still include Bearer token as AuthFilter itself is not mocked
+        List<String> list = List.of("EWI", "TPM");
+
+        ResultActions result = mockMvc.perform(post("/faculties")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(list))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        result.andExpect(status().isOk());
+
+        String response = result.andReturn().getResponse().getContentAsString();
+
+        assertThat(response).isEqualTo("Successfully acknowledged all existing faculties.");
+
+        // check that nodes exist in database and only those
+        assertThat(nodeRepository.existsByFacultyId("EWI")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("TPM")).isTrue();
+        assertThat(nodeRepository.count()).isEqualTo(2);
+
+        // check that expected nodes have been persisted
+        assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
+        assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
+
+        // check that updates do not overwrite existing faculty cores
+        List<String> newFaculties = List.of("AE", "EWI");
+
+        ResultActions resultNew = mockMvc.perform(post("/faculties")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(newFaculties))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        // Assert
+        resultNew.andExpect(status().isOk());
+
+        String responseNew = resultNew.andReturn().getResponse().getContentAsString();
+
+        assertThat(responseNew).isEqualTo("Successfully acknowledged all existing faculties.");
+
+        // check that nodes exist in database and only those
+        assertThat(nodeRepository.existsByFacultyId("EWI")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("TPM")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("AE")).isTrue();
+        assertThat(nodeRepository.existsByFacultyId("IO")).isFalse();
+        assertThat(nodeRepository.count()).isEqualTo(3);
+
+        assertThat(nodeRepository.findByUrl("/EWI/central-core")).isEqualTo(node1);
+        assertThat(nodeRepository.findByUrl("/TPM/central-core")).isEqualTo(node2);
+        assertThat(nodeRepository.findByUrl("/AE/central-core")).isEqualTo(node3);
+    }
+
+    @Test
     public void getAllNodesTest() throws Exception {
 
         // Act
@@ -170,7 +224,7 @@ public class NodeControllerTest {
         // change node1
         node1.setCpuResources(3.0);
         node1.setMemoryResources(1.0);
-        node1.setUrl("hippity");
+        node1.setUrl("/hippity");
         node1.setFacultyId(null);
 
         // add first node, check that Board of Examiners also added
@@ -186,7 +240,7 @@ public class NodeControllerTest {
         assertThat(nodeRepository.count()).isEqualTo(2);
         assertThat(nodeRepository.existsByFacultyId("Board of Examiners")).isTrue();
 
-        Node found = nodeRepository.findByUrl("hippity");
+        Node found = nodeRepository.findByUrl("/hippity");
         assertThat(found).isNotNull();
 
         // add node with existing url
@@ -212,7 +266,7 @@ public class NodeControllerTest {
 
         // try to add invalid node
         node3.setGpuResources(1.0);
-        node3.setUrl("a");
+        node3.setUrl("/a");
 
         ResultActions result4 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -225,7 +279,7 @@ public class NodeControllerTest {
             + "of GPU resources.");
 
         node3.setMemoryResources(2.0);
-        node3.setUrl("aa");
+        node3.setUrl("/aa");
 
         ResultActions result5 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -238,7 +292,7 @@ public class NodeControllerTest {
             + " resources and at least as much as the amount of memory resources.");
 
         node3.setCpuResources(-1.0);
-        node3.setUrl("aaa");
+        node3.setUrl("/aaa");
 
         ResultActions result6 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -250,7 +304,7 @@ public class NodeControllerTest {
         assertThat(response6).isEqualTo("None of the resources can be negative.");
 
         node3.setCpuResources(1.5);
-        node3.setUrl("aaaa");
+        node3.setUrl("/aaaa");
 
         ResultActions result7 = mockMvc.perform(post("/nodes/add")
             .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node3))
@@ -261,6 +315,83 @@ public class NodeControllerTest {
         String response7 = result7.andReturn().getResponse().getContentAsString();
         assertThat(response7).isEqualTo("The amount of CPU resources should be at least as much as the amount"
             + " of memory resources.");
+    }
+
+    @Test
+    public void addNodeWithWrongUrl() throws Exception {
+        // change node1
+        node1.setCpuResources(3.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node contains an invalid URL. Should start with a \"/\"");
+    }
+
+    @Test
+    public void addNodesWithFacultyTestNoSuchFaculty() throws Exception {
+        // change node1
+        node1.setCpuResources(3.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("/hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/EWI")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Unfortunately, this faculty does not exist in the cluster.");
+    }
+
+    @Test
+    public void addNodesWithFacultyTestBadCpu() throws Exception {
+        nodeRepository.save(node2);
+
+        // change node1
+        node1.setCpuResources(0.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("/hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("The amount of CPU resources should be at least as much as the amount"
+                + " of memory resources.");
+    }
+
+    @Test
+    public void addNodesWithFacultyTest() throws Exception {
+        nodeRepository.save(node2);
+
+        // change node1
+        node1.setCpuResources(2.0);
+        node1.setMemoryResources(1.0);
+        node1.setUrl("/hippity");
+        node1.setFacultyId(null);
+
+        ResultActions result = mockMvc.perform(post("/nodes/add/TPM")
+                .accept(MediaType.APPLICATION_JSON).content(JsonUtil.serialize(node1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isOk());
+        String response = result.andReturn().getResponse().getContentAsString();
+        assertThat(response).isEqualTo("Your node has been successfully added.");
     }
 
     @Test
@@ -351,7 +482,7 @@ public class NodeControllerTest {
 
     @Test
     public void scheduleNodeRemovalUserNotOwnerTest() throws Exception {
-        this.node1.setUrl("a");
+        this.node1.setUrl("/a");
         this.nodeRepository.save(node1);
 
         ResultActions result = this.mockMvc.perform(MockMvcRequestBuilders
@@ -376,7 +507,7 @@ public class NodeControllerTest {
      */
     @Test
     public void scheduleNodeRemovalRemoveOneNodeSuccessfully() throws Exception {
-        this.node1.setUrl("a");
+        this.node1.setUrl("/a");
         this.nodeRepository.save(node1);
 
         when(this.mockAuthenticationManager.getNetId()).thenReturn(this.node1.getUserNetId());

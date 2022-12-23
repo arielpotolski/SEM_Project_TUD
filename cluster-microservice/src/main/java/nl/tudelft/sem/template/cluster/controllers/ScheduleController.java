@@ -60,35 +60,6 @@ public class ScheduleController {
     }
 
     /**
-     * Sets up the "central cores" of the existing faculties. They are nodes with 0 of each type of resource which
-     * serve as placeholders to ensure that the cluster knows which faculties exist and can, for example, be assigned
-     * nodes. This endpoint should be used by the User service as soon as both it and Cluster are online.
-     *
-     * @param faculties the list of faculties that exist in the User service's database.
-     *
-     * @return message of confirmation that the faculties have been received.
-     */
-    @PostMapping("/faculties")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'SYSTEM')")
-    public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
-        for (String faculty : faculties) {
-            if (this.dataProcessingService.existsByFacultyId(faculty)) {
-                continue;
-            }
-            Node core =  new NodeBuilder()
-                    .setNodeCpuResourceCapacityTo(0.0)
-                    .setNodeGpuResourceCapacityTo(0.0)
-                    .setNodeMemoryResourceCapacityTo(0.0)
-                    .withNodeName("FacultyCentralCore")
-                    .foundAtUrl("/" + faculty + "/central-core")
-                    .byUserWithNetId("SYSTEM")
-                    .assignToFacultyWithId(faculty).constructNodeInstance();
-            this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
-        }
-        return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
-    }
-
-    /**
      * Gets and returns all jobs in the schedule.
      *
      * @return list of all jobs in the schedule.
