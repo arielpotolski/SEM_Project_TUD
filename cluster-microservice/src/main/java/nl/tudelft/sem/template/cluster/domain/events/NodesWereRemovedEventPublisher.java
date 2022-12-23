@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class NodesWereRemovedEventPublisher {
 
     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private transient ApplicationEventPublisher applicationEventPublisher;
 
     public void publishCustomEvent(final List<Node> removed) {
         NodesWereRemovedEvent event = new NodesWereRemovedEvent(this, removed);

@@ -119,6 +119,7 @@ public class JobSchedulingService {
      *
      * @param faculties all the faculties who have lost nodes in the removal that triggered the event.
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public void rescheduleJobsForFacultiesWithRemovedNodes(List<String> faculties) {
         // temp
         List<Job> jobsToReschedule = new ArrayList<>();

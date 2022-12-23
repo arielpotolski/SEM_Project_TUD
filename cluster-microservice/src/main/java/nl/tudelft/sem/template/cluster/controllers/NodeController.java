@@ -31,7 +31,7 @@ public class NodeController {
     private final transient DataProcessingService dataProcessingService;
 
     @Autowired
-    private ApplicationEventPublisher publisher;
+    private transient ApplicationEventPublisher publisher;
 
     /**
      * Instantiates a new controller.

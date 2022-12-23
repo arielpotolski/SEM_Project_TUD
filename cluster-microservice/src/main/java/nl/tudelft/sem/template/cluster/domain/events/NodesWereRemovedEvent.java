@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class NodesWereRemovedEvent extends ApplicationEvent {
 
+    public static final long serialVersionUID = 213769420;
     private final List<Node> nodesRemovedFromCluster;
 
     public NodesWereRemovedEvent(Object source, List<Node> nodesRemovedFromCluster) {
