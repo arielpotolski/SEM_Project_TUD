@@ -103,6 +103,7 @@ public class NodeController {
      * 			string saying why is it failing
      */
     @PostMapping(path = {"/nodes/add", "/nodes/add/{facultyId}"})
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     public ResponseEntity<String> addNode(@RequestBody NodeRequestModel node,
                                           @PathVariable(value = "facultyId", required = false) String facultyId) {
         if (this.dataProcessingService.getNumberOfNodesInRepository() == 0) {
