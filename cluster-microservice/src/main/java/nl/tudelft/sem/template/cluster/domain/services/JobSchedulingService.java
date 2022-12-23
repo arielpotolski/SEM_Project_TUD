@@ -248,7 +248,7 @@ public class JobSchedulingService {
             this.scheduleJob(jobToReschedule);
             publisher.publishEvent(
                 new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
-                    "SCHEDULED", "Your job has been rescheduled by the cluster!",
+                    "RESCHEDULED", "Your job has been rescheduled by the cluster!",
                     jobToReschedule.getUserNetId()
                 ));
         }
