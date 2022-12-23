@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationRequestModel {
-	private String date;
-	private String type;
-	private String state;
-	private String message;
-	private String netId;
+    private String date;
+    private String type;
+    private String state;
+    private String message;
+    private String netId;
 }
