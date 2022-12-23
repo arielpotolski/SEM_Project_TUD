@@ -5,6 +5,8 @@ package nl.tudelft.cse.sem.template.system.domain.users;
  */
 public interface JourneyingUser {
 
+    static void setup() {}
+
     static void embarkOnUserJourney() {}
 
 }

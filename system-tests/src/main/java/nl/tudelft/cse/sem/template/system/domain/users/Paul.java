@@ -79,7 +79,7 @@ public class Paul implements JourneyingUser {
 
         // make a mistake, delete all nodes, start again
 
-        // TODO: get mad at the assignment strategy, change it
+        // TODO: get mad at the assignment strategy, change it?
 
         // realize you probably shouldn't add your toaster as a node, delete it by url
 
