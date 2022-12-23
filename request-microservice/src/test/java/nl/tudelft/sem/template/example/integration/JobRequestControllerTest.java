@@ -635,8 +635,7 @@ public class JobRequestControllerTest {
         result.andExpect(status().isOk());
         String response = result.andReturn().getResponse().getContentAsString();
 
-        assertThat(response).isEqualTo("Request forwarded, " +
-                "but resources are insufficient or preferred date is not tomorrow");
+        assertThat(response).isEqualTo("The request is automatically forwarded and will be completed if there are sufficient resources");
 
     }
 
