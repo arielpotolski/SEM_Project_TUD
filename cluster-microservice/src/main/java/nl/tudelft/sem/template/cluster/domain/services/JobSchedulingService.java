@@ -236,7 +236,7 @@ public class JobSchedulingService {
             if (!this.checkIfJobCanBeScheduled(jobToReschedule)) {
                 //send notification of dropping
                 publisher.publishEvent(
-                    new NotificationEvent(this, null, "JOB",
+                    new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
                         "DROPPED", "Your job has been dropped by the cluster!"
                         + " We are sorry for the inconvenience.", jobToReschedule.getUserNetId()
                     ));
@@ -244,11 +244,10 @@ public class JobSchedulingService {
             }
 
             // reschedule if yes
-            // TODO: send notification of rescheduling
             this.scheduleJob(jobToReschedule);
             publisher.publishEvent(
                 new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
-                    "SCHEDULED", "Your job has been rescheduled by the cluster!",
+                    "RESCHEDULED", "Your job has been rescheduled by the cluster!",
                     jobToReschedule.getUserNetId()
                 ));
         }

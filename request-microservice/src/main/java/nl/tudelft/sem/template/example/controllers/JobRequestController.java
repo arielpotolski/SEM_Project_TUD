@@ -66,7 +66,7 @@ public class JobRequestController {
      */
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     @PostMapping("/sendRequest")
-    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) {
+    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) throws JsonProcessingException {
 
         if (request.getFaculty() == null) {
             return ResponseEntity.ok()
@@ -104,6 +104,7 @@ public class JobRequestController {
                         request.setApproved(true);                // Doesn't require approval; First come, first served
                         requestRepository.save(request);
                         publishRequest();
+                        this.requestAllocationService.sendRequestToCluster(request, token);
 
                         return ResponseEntity.ok()
                                 .body("The request is automatically forwarded "
