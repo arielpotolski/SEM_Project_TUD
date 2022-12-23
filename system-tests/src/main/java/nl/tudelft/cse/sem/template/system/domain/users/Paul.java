@@ -1,8 +1,12 @@
 package nl.tudelft.cse.sem.template.system.domain.users;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import nl.tudelft.cse.sem.template.system.models.AuthenticationRequestModel;
 import nl.tudelft.cse.sem.template.system.models.AuthenticationResponseModel;
+import nl.tudelft.cse.sem.template.system.models.NodeRequestModel;
 import nl.tudelft.cse.sem.template.system.models.NodeResponseModel;
 import nl.tudelft.cse.sem.template.system.models.RegistrationRequestModel;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -70,16 +74,34 @@ public class Paul implements JourneyingUser {
             System.exit(1);
         }
 
-
-
         // add some nodes
         System.out.println("Paul starts adding nodes to the cluster to ensure that jobs can actually be scheduled.");
+        url = "http://localhost:8082/nodes/add";
+        HttpEntity<NodeRequestModel> nodeRequest1 =
+                new HttpEntity<>(new NodeRequestModel(4.0, 3.0, 1.0,
+                        "Paul's first", "/paul"), headers);
+        String ackNode1 = restTemplate.postForEntity(url, nodeRequest1, String.class).getBody();
+        HttpEntity<NodeRequestModel> nodeRequest2 =
+                new HttpEntity<>(new NodeRequestModel(6.0, 2.0, 3.0,
+                        "Paul's second", "/paulzz"), headers);
+        String ackNode2 = restTemplate.postForEntity(url, nodeRequest2, String.class).getBody();
+        HttpEntity<NodeRequestModel> nodeRequest3 =
+                new HttpEntity<>(new NodeRequestModel(2.0, 1.0, 0.0,
+                        "Paul's third", "/paul/paul"), headers);
+        String ackNode3 = restTemplate.postForEntity(url, nodeRequest3, String.class).getBody();
 
-
+        // check
+        if (Stream.of(ackNode1, ackNode2, ackNode3).distinct().collect(Collectors.toList()).size() != 1
+            || !ackNode1.equals("Your node has been successfully added.")) {
+            System.out.println("Something went wrong when adding the first batch of nodes.");
+            System.exit(1);
+        }
 
         // make a mistake, delete all nodes, start again
+        System.out.println("Paul realizes he added wrong nodes by accident. Fortunately, as a sysadmin, he can delete" +
+                "all cluster nodes and start over.");
 
-        // TODO: get mad at the assignment strategy, change it?
+
 
         // realize you probably shouldn't add your toaster as a node, delete it by url
 
