@@ -1,10 +1,10 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
@@ -233,13 +233,23 @@ public class JobSchedulingService {
         for (Job jobToReschedule : jobsToReschedule) {
             // check if job can ever be scheduled, drop if no
             if (!this.checkIfJobCanBeScheduled(jobToReschedule)) {
-                // TODO: send notification of dropping
+                //send notification of dropping
+                publisher.publishEvent(
+                    new NotificationEvent(this, null, "JOB",
+                        "DROPPED", "Your job has been dropped by the cluster!"
+                        + " We are sorry for the inconvenience.", jobToReschedule.getUserNetId()
+                    ));
                 continue;
             }
 
             // reschedule if yes
             // TODO: send notification of rescheduling
             this.scheduleJob(jobToReschedule);
+            publisher.publishEvent(
+                new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
+                    "SCHEDULED", "Your job has been rescheduled by the cluster!",
+                    jobToReschedule.getUserNetId()
+                ));
         }
     }
 
