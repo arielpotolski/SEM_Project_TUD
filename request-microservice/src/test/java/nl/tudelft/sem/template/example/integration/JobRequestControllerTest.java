@@ -403,6 +403,10 @@ public class JobRequestControllerTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+
         JSONObject jsonObject = new JSONObject();
 
         jsonObject.put("netId", "test");
@@ -439,6 +443,10 @@ public class JobRequestControllerTest {
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T18:00:00.00Z"),
@@ -526,6 +534,10 @@ public class JobRequestControllerTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+
         JSONObject jsonObject = new JSONObject();
 
         jsonObject.put("netId", "test");
@@ -571,6 +583,10 @@ public class JobRequestControllerTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+
         JSONObject jsonObject = new JSONObject();
 
         jsonObject.put("netId", "test");
@@ -610,6 +626,10 @@ public class JobRequestControllerTest {
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
@@ -654,6 +674,10 @@ public class JobRequestControllerTest {
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
+
+        server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),

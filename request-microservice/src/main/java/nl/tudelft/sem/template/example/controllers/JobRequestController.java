@@ -66,7 +66,8 @@ public class JobRequestController {
      */
     @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     @PostMapping("/sendRequest")
-    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers, @RequestBody Request request) throws JsonProcessingException {
+    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers,
+                                              @RequestBody Request request) throws JsonProcessingException {
 
         if (request.getFaculty() == null) {
             return ResponseEntity.ok()
