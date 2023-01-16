@@ -196,61 +196,89 @@ public class JobSchedulingService {
                             .collect(Collectors.toList());
 
             // this faculty needs no rescheduling - all the jobs are still within available resources
-            if (resourcesForDaysWhereReschedulingNecessary.isEmpty()) {
-                continue;
-            }
-
-            // go over all days with insufficient resources
-            for (AvailableResourcesForDate lackingResources : resourcesForDaysWhereReschedulingNecessary) {
-                // get jobs scheduled for that date and faculty sorted descendingly by total cost
-                var jobsOnProblematicDay = fullSchedule.stream()
-                        .filter(x -> x.getFacultyId().equals(facultyId))
-                        .filter(x -> x.getScheduledFor().equals(lackingResources.getDate()))
-                        .sorted(Comparator.comparingDouble(
-                                (Job x) -> x.getRequiredCpu() + x.getRequiredGpu() + x.getRequiredMemory()
-                        ).reversed())
-                        .collect(Collectors.toList());
-
-                // remove until all available values are non-negative
-                double cpu = lackingResources.getAvailableCpu();
-                double gpu = lackingResources.getAvailableGpu();
-                double memory = lackingResources.getAvailableMemory();
-                while (!jobsOnProblematicDay.isEmpty() && (cpu < 0 || gpu < 0 || memory < 0)) {
-                    var removedJob = jobsOnProblematicDay.remove(0); // the most costly job
-                    this.dataProcessingService.deleteJob(removedJob);
-
-                    // append to temp to reschedule
-                    jobsToReschedule.add(removedJob);
-
-                    // update resources
-                    cpu += removedJob.getRequiredCpu();
-                    gpu += removedJob.getRequiredGpu();
-                    memory += removedJob.getRequiredMemory();
-                }
+            if (!resourcesForDaysWhereReschedulingNecessary.isEmpty()) {
+                // go over all days with insufficient resources
+                jobsToReschedule.addAll(removeScheduledJobs(
+                        fullSchedule, resourcesForDaysWhereReschedulingNecessary, facultyId));
             }
         }
+        rescheduleJobs(jobsToReschedule);
 
-        // go through temp
+
+
+    }
+
+    /**
+     * This is a helper function for rescheduling jobs where nodes were removed,
+     * it removes jobs until there are enough resources.
+     * And gives back a list of the removed jobs.
+     *
+     * @param fullSchedule a schedule of all the jobs that are already scheduled
+     * @param resourcesForDaysWhereReschedulingNecessary A list of the resources for the certain days
+     * @param facultyId the faculty at hand
+     * @return List of jobs that need to be rescheduled
+     */
+    public List<Job> removeScheduledJobs(List<Job> fullSchedule, List<AvailableResourcesForDate>
+            resourcesForDaysWhereReschedulingNecessary, String facultyId) {
+        List<Job> jobsToReschedule = new ArrayList<>();
+        for (AvailableResourcesForDate lackingResources : resourcesForDaysWhereReschedulingNecessary) {
+            // get jobs scheduled for that date and faculty sorted descendingly by total cost
+            var jobsOnProblematicDay = fullSchedule.stream()
+                    .filter(x -> x.getFacultyId().equals(facultyId))
+                    .filter(x -> x.getScheduledFor().equals(lackingResources.getDate()))
+                    .sorted(Comparator.comparingDouble(
+                            (Job x) -> x.getRequiredCpu() + x.getRequiredGpu() + x.getRequiredMemory()
+                    ).reversed())
+                    .collect(Collectors.toList());
+
+            // remove until all available values are non-negative
+            double cpu = lackingResources.getAvailableCpu();
+            double gpu = lackingResources.getAvailableGpu();
+            double memory = lackingResources.getAvailableMemory();
+            while (!jobsOnProblematicDay.isEmpty() && (cpu < 0 || gpu < 0 || memory < 0)) {
+                var removedJob = jobsOnProblematicDay.remove(0); // the most costly job
+                this.dataProcessingService.deleteJob(removedJob);
+
+                // append to temp to reschedule
+                jobsToReschedule.add(removedJob);
+
+                // update resources
+                cpu += removedJob.getRequiredCpu();
+                gpu += removedJob.getRequiredGpu();
+                memory += removedJob.getRequiredMemory();
+            }
+        }
+        return jobsToReschedule;
+    }
+
+    /** This method is a helper function for rescheduling jobs if nodes are removed.
+     * It also sends a notification on the job status.
+     *
+     * @param jobsToReschedule A list of jobs to schedule agian.
+     */
+    public void rescheduleJobs(List<Job> jobsToReschedule) {
+
         for (Job jobToReschedule : jobsToReschedule) {
             // check if job can ever be scheduled, drop if no
             if (!this.checkIfJobCanBeScheduled(jobToReschedule)) {
                 //send notification of dropping
                 publisher.publishEvent(
-                    new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
-                        "DROPPED", "Your job has been dropped by the cluster!"
-                        + " We are sorry for the inconvenience.", jobToReschedule.getUserNetId()
-                    ));
+                        new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
+                                "DROPPED", "Your job has been dropped by the cluster!"
+                                + " We are sorry for the inconvenience.", jobToReschedule.getUserNetId()
+                        ));
                 continue;
             }
 
             // reschedule if yes
             this.scheduleJob(jobToReschedule);
             publisher.publishEvent(
-                new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
-                    "RESCHEDULED", "Your job has been rescheduled by the cluster!",
-                    jobToReschedule.getUserNetId()
-                ));
+                    new NotificationEvent(this, jobToReschedule.getScheduledFor().toString(), "JOB",
+                            "RESCHEDULED", "Your job has been rescheduled by the cluster!",
+                            jobToReschedule.getUserNetId()
+                    ));
         }
     }
+
 
 }
