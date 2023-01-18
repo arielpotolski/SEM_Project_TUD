@@ -49,7 +49,7 @@ import org.springframework.web.client.RestTemplate;
 @DirtiesContext()
 
 @AutoConfigureMockMvc
-public class JobRequestControllerTest {
+public class SendingRequestsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -404,8 +404,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -445,8 +445,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T18:00:00.00Z"),
@@ -535,8 +535,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -584,8 +584,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -628,8 +628,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
@@ -659,7 +659,7 @@ public class JobRequestControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
 
         assertThat(response).isEqualTo("The request is automatically forwarded and "
-            + "will be completed if there are sufficient resources");
+                + "will be completed if there are sufficient resources");
 
     }
 
@@ -676,8 +676,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
