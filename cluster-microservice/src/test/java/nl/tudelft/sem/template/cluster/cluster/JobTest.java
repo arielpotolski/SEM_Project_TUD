@@ -25,6 +25,23 @@ public class JobTest {
     }
 
     @Test
+    public void resourcesRequestedAreNotValidGpu() {
+        this.job.setRequiredGpu(2.1);
+        assertThat(this.job.areResourcesNeededValid()).isFalse();
+    }
+
+    @Test
+    public void resourcesRequestedAreNotValidMemory() {
+        this.job.setRequiredMemory(2.1);
+        assertThat(this.job.areResourcesNeededValid()).isFalse();
+    }
+
+    @Test
+    public void resourcesRequestedAreValid() {
+        assertThat(this.job.areResourcesNeededValid()).isTrue();
+    }
+
+    @Test
     public void equalsNullObjectReturnsFalse() {
         assertThat(this.job.equals(null)).isFalse();
     }
