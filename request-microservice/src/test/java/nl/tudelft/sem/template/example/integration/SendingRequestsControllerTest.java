@@ -49,7 +49,7 @@ import org.springframework.web.client.RestTemplate;
 @DirtiesContext()
 
 @AutoConfigureMockMvc
-public class JobRequestControllerTest {
+public class SendingRequestsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -131,8 +131,8 @@ public class JobRequestControllerTest {
     public void sendRequestForTodayNotApproved() throws Exception {
         // for returning
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -175,8 +175,8 @@ public class JobRequestControllerTest {
     public void sendRequestTestNotInFaculty() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -260,8 +260,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -305,8 +305,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -350,8 +350,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -394,8 +394,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -404,8 +404,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -436,8 +436,8 @@ public class JobRequestControllerTest {
     public void sendRequestExactly6hTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -445,8 +445,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T18:00:00.00Z"),
@@ -525,8 +525,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -535,8 +535,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -574,8 +574,8 @@ public class JobRequestControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -584,8 +584,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         JSONObject jsonObject = new JSONObject();
 
@@ -619,8 +619,8 @@ public class JobRequestControllerTest {
     public void sendRequestLessThan6hNoResourceTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -628,8 +628,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
@@ -659,7 +659,7 @@ public class JobRequestControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
 
         assertThat(response).isEqualTo("The request is automatically forwarded and "
-            + "will be completed if there are sufficient resources");
+                + "will be completed if there are sufficient resources");
 
     }
 
@@ -667,8 +667,8 @@ public class JobRequestControllerTest {
     public void sendRequestLessThan6hTomorrowNotPreferredTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
@@ -676,8 +676,8 @@ public class JobRequestControllerTest {
                 .andRespond(withSuccess(resourcesString, MediaType.APPLICATION_JSON));
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/request"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
 
         Clock clock = Clock.fixed(
                 Instant.parse("2022-12-22T20:00:00.00Z"),
@@ -715,8 +715,8 @@ public class JobRequestControllerTest {
     public void sendRequestWaitingApprovalTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available

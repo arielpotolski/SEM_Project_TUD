@@ -1,15 +1,10 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
-import nl.tudelft.sem.template.example.domain.ClockUser;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
@@ -32,12 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/job")
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
-public class JobRequestController {
+public class ApprovingRequestsController {
 
     private final transient AuthManager authManager;
     private final RequestAllocationService requestAllocationService;
     private final RequestRepository requestRepository;
-    private final ClockUser clockUser;
+
 
     /**
      * Instantiates a new controller.
@@ -45,96 +40,13 @@ public class JobRequestController {
      * @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
-     * @param clockUser                clock that can be configurable
      */
     @Autowired
-    public JobRequestController(AuthManager authManager, RequestAllocationService requestAllocationService,
-                                RequestRepository requestRepository, ClockUser clockUser) {
+    public ApprovingRequestsController(AuthManager authManager, RequestAllocationService requestAllocationService,
+                                       RequestRepository requestRepository) {
         this.authManager = authManager;
         this.requestAllocationService = requestAllocationService;
         this.requestRepository = requestRepository;
-        this.clockUser = clockUser;
-    }
-
-
-    /**
-     * This mapping is responsible for receiving requests from users and processing them afterwards.
-     *
-     * @param headers the headers
-     * @param request the request
-     * @return the response entity
-     */
-    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
-    @PostMapping("/sendRequest")
-    public ResponseEntity<String> sendRequest(@RequestHeader HttpHeaders headers,
-                                              @RequestBody Request request) throws JsonProcessingException {
-
-        if (request.getFaculty() == null) {
-            return ResponseEntity.ok()
-                    .body("You are not verified to send requests to this faculty");
-        }
-
-        LocalDateTime preferredDate = request.getPreferredDate().atStartOfDay(ZoneId.systemDefault())
-                .toLocalDateTime();
-        LocalDate onlyDate = request.getPreferredDate();
-
-        LocalDateTime d1 = clockUser.getTimeLdt();
-        LocalDate d2 = clockUser.getTimeLd().plusDays(1L);
-        LocalDateTime ref = d2.atStartOfDay();
-
-        int timeLimit1 = 5;
-        int timeLimit2 = 360;
-
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
-
-        long minutes = d1.until(ref, ChronoUnit.MINUTES);
-
-        if (clockUser.getTimeLd().isEqual(onlyDate)) {
-            return ResponseEntity.ok()
-                    .body("You cannot send requests for the same day.");
-        } else if (!clockUser.getTimeLd().isEqual(onlyDate)) {
-            if (minutes <= timeLimit1) {
-                return ResponseEntity.ok()
-                        .body("You cannot send requests 5 min before the following day.");
-
-            } else if (minutes <= timeLimit2) {
-                if (requestAllocationService.enoughResourcesForJob(request, token) && onlyDate.equals(d2)) {
-
-                    if (facultyUserFaculties.contains(request.getFaculty())) {
-                        request.setApproved(true);                // Doesn't require approval; First come, first served
-                        requestRepository.save(request);
-                        publishRequest();
-                        this.requestAllocationService.sendRequestToCluster(request, token);
-
-                        return ResponseEntity.ok()
-                                .body("The request is automatically forwarded "
-                                        + "and will be completed if there are sufficient resources");
-                    }
-
-                } else {
-                    request.setApproved(false);
-                    requestRepository.save(request);
-                    publishRequest();
-
-                    return ResponseEntity.ok()
-                            .body("Request forwarded, "
-                                    + "but resources are insufficient or preferred date is not tomorrow");
-                }
-            }
-        }
-
-        if (facultyUserFaculties.contains(request.getFaculty())) {
-            request.setApproved(false);
-            requestRepository.save(request);
-            publishRequest();
-
-            return ResponseEntity.ok()
-                    .body("The request was sent. Now it is to be approved by faculty.");
-        }
-
-        return ResponseEntity.ok()
-                .body("You are not assigned to this faculty.");
 
     }
 
@@ -155,7 +67,7 @@ public class JobRequestController {
      * This endpoint is responsible for accepting the ids of approved requests,
      * and see if the sender is legitimate and from the respective faculty.
      * Afterwards, the requests are sent to the cluster.
-     *
+     *  
      * @param headers             the headers
      * @param approvalInformation the approval information
      * @return                    the response entity

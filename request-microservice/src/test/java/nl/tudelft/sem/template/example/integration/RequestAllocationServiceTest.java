@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.authentication.JwtTokenVerifier;
-import nl.tudelft.sem.template.example.controllers.JobRequestController;
+import nl.tudelft.sem.template.example.controllers.ApprovingRequestsController;
 import nl.tudelft.sem.template.example.domain.Request;
 import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
@@ -29,7 +29,6 @@ import nl.tudelft.sem.template.example.services.RequestAllocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
 public class RequestAllocationServiceTest {
 
     @MockBean
-    private JobRequestController jobRequestController;
+    private ApprovingRequestsController approvingRequestsController;
 
     @Autowired
     private MockMvc mockMvc;
@@ -142,7 +141,7 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void sendRequestToClusterTest1() throws JsonProcessingException, ParseException {
+    public void sendRequestToClusterTest1() throws JsonProcessingException {
         server.expect(once(), requestTo("http://localhost:8082/request"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("true", MediaType.APPLICATION_JSON));
@@ -158,7 +157,7 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void sendRequestToClusterTest2() throws JsonProcessingException, ParseException {
+    public void sendRequestToClusterTest2() throws JsonProcessingException {
         server.expect(once(), requestTo("http://localhost:8082/request"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
@@ -174,7 +173,7 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void sendDeclinedRequestToUserService1() throws ParseException {
+    public void sendDeclinedRequestToUserService1() {
         server.expect(once(), requestTo("http://localhost:8081/notification"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
@@ -190,7 +189,7 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
-    public void sendDeclinedRequestToUserService2() throws ParseException {
+    public void sendDeclinedRequestToUserService2() {
         server.expect(once(), requestTo("http://localhost:8081/notification"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("true", MediaType.APPLICATION_JSON));
