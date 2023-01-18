@@ -178,10 +178,26 @@ public class JobRequestController {
                 .filter(x -> facultiesOfFacultyUser.contains(x.getFaculty()))
                 .collect(Collectors.toList());
 
+        handleRequests(requests, token);
+        return ResponseEntity.ok().body(requests);
+
+    }
+
+
+    /**
+     * Synthesizes and extracts all the request logic from the sendApprovals method.
+     * It is done for better code quality and readability.
+     *
+     * @param requests list of requests
+     * @param token token of the current user
+     * @throws JsonProcessingException the json processing exception
+     */
+    public void handleRequests(List<Request> requests, String token)
+            throws JsonProcessingException {
+
         for (Request request : requests) {
             request.setApproved(true);
         }
-
         //Implementation of changing the status of respective requests to approved
         for (Request request : requests) {
             if (requestAllocationService.enoughResourcesForJob(request, token)) {
@@ -191,12 +207,8 @@ public class JobRequestController {
                 requestAllocationService.sendDeclinedRequestToUserService(request, token);
             }
         }
-
         // Deleting approved and sent entities
         requestRepository.deleteAll(requests);
-
-        return ResponseEntity.ok().body(requests);
-
     }
 
 }
