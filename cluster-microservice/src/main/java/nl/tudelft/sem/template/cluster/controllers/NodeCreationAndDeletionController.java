@@ -35,6 +35,11 @@ public class NodeCreationAndDeletionController {
     @Autowired
     private transient ApplicationEventPublisher publisher;
 
+    /**
+     * Instantiating the controller class.
+     *
+     * @param authManager Spring security manager.
+     */
     @Autowired
     public NodeCreationAndDeletionController(AuthManager authManager,
                           NodeContributionService nodeContributionService,
