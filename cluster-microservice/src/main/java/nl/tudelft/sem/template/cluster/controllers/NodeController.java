@@ -6,8 +6,8 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
-import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeDataProcessingService;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
 import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class NodeController {
     private final transient AuthManager authManager;
 
     private final transient NodeContributionService nodeContributionService;
-    private final transient DataProcessingService dataProcessingService;
+    private final transient NodeDataProcessingService dataProcessingService;
 
     @Autowired
     private transient ApplicationEventPublisher publisher;
@@ -41,7 +41,7 @@ public class NodeController {
     @Autowired
     public NodeController(AuthManager authManager,
                              NodeContributionService nodeContributionService,
-                             DataProcessingService dataProcessingService) {
+                             NodeDataProcessingService dataProcessingService) {
         this.authManager = authManager;
         this.nodeContributionService = nodeContributionService;
         this.dataProcessingService = dataProcessingService;

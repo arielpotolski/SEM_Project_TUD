@@ -33,7 +33,12 @@ public class JobSchedulingService {
     /**
      * Provides access to information related to the resources.
      */
-    private final transient DataProcessingService dataProcessingService;
+    private final transient SchedulingDataProcessingService schedulingDataProcessingService;
+
+    /**
+     * Provides access to information related to the nodes.
+     */
+    private final transient NodeDataProcessingService nodeDataProcessingService;
 
     /**
      * Current strategy of scheduling jobs.
@@ -50,14 +55,16 @@ public class JobSchedulingService {
     /**
      * Creates a new JobSchedulingService object and injects the repository.
      *
-     * @param dataProcessingService the service providing access to data.
+     * @param schedulingDataProcessingService the service providing access to data.
      */
     @Autowired
-    public JobSchedulingService(DataProcessingService dataProcessingService, DateProvider dateProvider,
-                                ApplicationEventPublisher publisher) {
+    public JobSchedulingService(SchedulingDataProcessingService schedulingDataProcessingService, DateProvider dateProvider,
+                                ApplicationEventPublisher publisher,
+                                NodeDataProcessingService nodeDataProcessingService) {
         this.dateProvider = dateProvider;
         this.publisher = publisher;
-        this.dataProcessingService = dataProcessingService;
+        this.schedulingDataProcessingService = schedulingDataProcessingService;
+        this.nodeDataProcessingService = nodeDataProcessingService;
 
         // default strategy: first come, first served; the earliest possible date
         this.strategy = new LeastBusyDateStrategy();
@@ -80,7 +87,7 @@ public class JobSchedulingService {
     @Async
     public void sendNotificationsOfStartedAndCompletedJobs() {
         // get all jobs for yesterday
-        var jobsCompleted = this.dataProcessingService.getAllJobsFromSchedule().stream()
+        var jobsCompleted = this.schedulingDataProcessingService.getAllJobsFromSchedule().stream()
                 .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate().minusDays(1)))
                 .collect(Collectors.toList());
 
@@ -94,7 +101,7 @@ public class JobSchedulingService {
         }
 
         // get all jobs for today
-        var jobsStarted = this.dataProcessingService.getAllJobsFromSchedule().stream()
+        var jobsStarted = this.schedulingDataProcessingService.getAllJobsFromSchedule().stream()
                 .filter(x -> x.getScheduledFor().isEqual(dateProvider.getCurrentDate()))
                 .collect(Collectors.toList());
 
@@ -117,10 +124,10 @@ public class JobSchedulingService {
      * @return boolean indicating whether it is possible, within the foreseeable future, to schedule the job
      */
     public boolean checkIfJobCanBeScheduled(Job job) {
-        if (!this.dataProcessingService.existsByFacultyId(job.getFacultyId())) {
+        if (!this.nodeDataProcessingService.existsByFacultyId(job.getFacultyId())) {
             return false;
         }
-        var assignedResources = this.dataProcessingService.getAssignedResourcesForGivenFaculty(job.getFacultyId());
+        var assignedResources = this.schedulingDataProcessingService.getAssignedResourcesForGivenFaculty(job.getFacultyId());
         return !(job.getRequiredCpu() > assignedResources.getCpu_Resources())
                 && !(job.getRequiredGpu() > assignedResources.getGpu_Resources())
                 && !(job.getRequiredMemory() > assignedResources.getMemory_Resources());
@@ -137,11 +144,11 @@ public class JobSchedulingService {
         // available resources from tomorrow to day after last scheduled job, inclusive
         // this way, since a check whether this job can be scheduled has been passed, the job can always be fit into
         // the schedule
-        var maxDateInSchedule = this.dataProcessingService.findLatestDateWithReservedResources();
+        var maxDateInSchedule = this.schedulingDataProcessingService.findLatestDateWithReservedResources();
         if (job.getPreferredCompletionDate().isAfter(maxDateInSchedule)) {
             maxDateInSchedule = job.getPreferredCompletionDate();
         }
-        var availableResourcesPerDay = this.dataProcessingService
+        var availableResourcesPerDay = this.schedulingDataProcessingService
                 .getAvailableResourcesForGivenFacultyUntilDay(job.getFacultyId(),
                         maxDateInSchedule.plusDays(1));
 
@@ -152,7 +159,7 @@ public class JobSchedulingService {
         job.setScheduledFor(dateToScheduleJob);
 
         // save to schedule
-        this.dataProcessingService.saveInSchedule(job);
+        this.schedulingDataProcessingService.saveInSchedule(job);
 
         return dateToScheduleJob;
     }
@@ -180,16 +187,16 @@ public class JobSchedulingService {
         List<Job> jobsToReschedule = new ArrayList<>();
 
         // accessing repository only once to optimize
-        List<Job> fullSchedule = this.dataProcessingService.getAllJobsFromSchedule();
+        List<Job> fullSchedule = this.schedulingDataProcessingService.getAllJobsFromSchedule();
 
         // available resources for each faculty
         for (String facultyId : faculties) {
             // this list will only contain dates with the resources, when at least one resource's balance is negative.
             // this means that some jobs need to be rescheduled
             var resourcesForDaysWhereReschedulingNecessary =
-                    this.dataProcessingService
+                    this.schedulingDataProcessingService
                             .getAvailableResourcesForGivenFacultyUntilDay(facultyId,
-                                    this.dataProcessingService.findLatestDateWithReservedResources()).stream()
+                                    this.schedulingDataProcessingService.findLatestDateWithReservedResources()).stream()
                             .filter(x -> x.getAvailableCpu() < 0
                                     || x.getAvailableGpu() < 0
                                     || x.getAvailableMemory() < 0)
@@ -217,7 +224,7 @@ public class JobSchedulingService {
                 double memory = lackingResources.getAvailableMemory();
                 while (!jobsOnProblematicDay.isEmpty() && (cpu < 0 || gpu < 0 || memory < 0)) {
                     var removedJob = jobsOnProblematicDay.remove(0); // the most costly job
-                    this.dataProcessingService.deleteJob(removedJob);
+                    this.schedulingDataProcessingService.deleteJob(removedJob);
 
                     // append to temp to reschedule
                     jobsToReschedule.add(removedJob);

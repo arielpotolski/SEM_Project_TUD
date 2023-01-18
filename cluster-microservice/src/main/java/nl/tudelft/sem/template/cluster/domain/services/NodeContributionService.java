@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.Setter;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
-import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.NumberProvider;
 import nl.tudelft.sem.template.cluster.domain.strategies.AssignNodeToRandomFacultyStrategy;
@@ -31,7 +30,9 @@ public class NodeContributionService {
 
     private transient NodeAssignmentStrategy strategy;
 
-    private final transient DataProcessingService dataProcessingService;
+    private final transient NodeDataProcessingService nodeDataProcessingService;
+
+    private final transient SchedulingDataProcessingService schedulingDataProcessingService;
 
     private List<Node> nodesToRemove;  // list of nodes to be removed after midnight.
 
@@ -41,13 +42,15 @@ public class NodeContributionService {
     /**
      * Instantiates a new NodeContributionService.
      *
-     * @param dataProcessingService a dataProcessingService
+     * @param schedulingDataProcessingService a dataProcessingService
      * @param numberProvider a numberProvider
      */
     @Autowired
-    public NodeContributionService(DataProcessingService dataProcessingService,
+    public NodeContributionService(NodeDataProcessingService nodeDataProcessingService,
+                                   SchedulingDataProcessingService schedulingDataProcessingService,
                                    NumberProvider numberProvider) {
-        this.dataProcessingService = dataProcessingService;
+        this.nodeDataProcessingService = nodeDataProcessingService;
+        this.schedulingDataProcessingService = schedulingDataProcessingService;
         this.strategy = new AssignNodeToRandomFacultyStrategy(numberProvider);
         this.nodesToRemove = new ArrayList<>();
     }
@@ -86,7 +89,7 @@ public class NodeContributionService {
      */
     private void assignNodeToFaculty(Node node) {
         // pick faculty using strategy
-        List<FacultyTotalResources> list = this.dataProcessingService.getAssignedResourcesPerFaculty();
+        List<FacultyTotalResources> list = this.schedulingDataProcessingService.getAssignedResourcesPerFaculty();
         List<FacultyResourcesResponseModel> testableList = FacultyResourcesResponseModel
                 .convertAllFacultyTotalResourcesToResponseModels(list);
         String chosenId = strategy.pickFacultyToAssignNodeTo(testableList);
@@ -101,7 +104,7 @@ public class NodeContributionService {
      * @param node the node to be added.
      */
     public void addNodeAssignedToSpecificFacultyToCluster(Node node) {
-        this.dataProcessingService.save(node);
+        this.nodeDataProcessingService.save(node);
     }
 
     /**
@@ -114,7 +117,7 @@ public class NodeContributionService {
         this.assignNodeToFaculty(node);
 
         // persist to repository
-        this.dataProcessingService.save(node);
+        this.nodeDataProcessingService.save(node);
     }
 
     /**
@@ -135,9 +138,9 @@ public class NodeContributionService {
     public void removeNodesAtMidnight() {
         var removedNodes = new ArrayList<Node>();
         for (Node node : this.nodesToRemove) {
-            Node n = this.dataProcessingService.getByUrl(node.getUrl());
+            Node n = this.nodeDataProcessingService.getByUrl(node.getUrl());
             removedNodes.add(n);
-            this.dataProcessingService.deleteNode(n);
+            this.nodeDataProcessingService.deleteNode(n);
         }
 
         // all at once

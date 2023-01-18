@@ -13,9 +13,11 @@ import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
+import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
+import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
+import nl.tudelft.sem.template.cluster.domain.services.SchedulingDataProcessingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +27,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class DataProcessingServiceTest {
+public class SchedulingDataProcessingServiceTest {
 
     @Autowired
-    private transient DataProcessingService dataProcessingService;
+    private transient NodeRepository nodeRepository;
+
+    @Autowired
+    private transient JobScheduleRepository jobScheduleRepository;
+
+    private transient SchedulingDataProcessingService schedulingDataProcessingService;
 
     @Autowired
     private transient DateProvider dateProvider;
@@ -47,8 +54,10 @@ public class DataProcessingServiceTest {
      */
     @BeforeEach
     void setup() {
-        this.dataProcessingService.deleteAllNodes();
-        this.dataProcessingService.deleteAllJobsScheduled();
+        this.schedulingDataProcessingService = new SchedulingDataProcessingService(nodeRepository,
+                jobScheduleRepository, this.dateProvider);
+        this.schedulingDataProcessingService.deleteAllJobsScheduled();
+        this.nodeRepository.deleteAll();
 
         this.node1 = new NodeBuilder()
             .setNodeCpuResourceCapacityTo(0.0)
@@ -98,119 +107,30 @@ public class DataProcessingServiceTest {
     }
 
     @Test
-    public void saveNodeTest() {
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.getByUrl(node1.getUrl())).isEqualTo(node1);
-    }
-
-    @Test
-    public void getNumberOfNodesInRepoTest() {
-        assertThat(this.dataProcessingService.getNumberOfNodesInRepository()).isEqualTo(0);
-
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.getNumberOfNodesInRepository()).isEqualTo(1);
-    }
-
-    @Test
-    public void nodeNotFoundExistsByUrl() {
-        assertThat(this.dataProcessingService.existsByUrl(this.node1.getUrl())).isFalse();
-    }
-
-    @Test
-    public void nodeExistsByUrl() {
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.existsByUrl(node1.getUrl())).isTrue();
-    }
-
-    @Test
-    public void nodeNotFoundExistsByFacultyId() {
-        assertThat(this.dataProcessingService.existsByFacultyId(this.node1.getFacultyId())).isFalse();
-    }
-
-    @Test
-    public void nodeExistsByFacultyId() {
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.existsByFacultyId(this.node1.getFacultyId())).isTrue();
-    }
-
-    @Test
-    public void getByUrlTest() {
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.getByUrl(this.node1.getUrl())).isEqualTo(this.node1);
-    }
-
-    @Test
-    public void getByFacultyIdTest() {
-        List<Node> foundNode = new ArrayList<>();
-        foundNode.add(this.node1);
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.getByFacultyId(this.node1.getFacultyId()))
-            .isEqualTo(foundNode);
-    }
-
-    @Test
-    public void getAllNodesEmptyRepoTest() {
-        assertThat(this.dataProcessingService.getAllNodes()).isEqualTo(new ArrayList<>());
-    }
-
-    @Test
-    public void getAllNodesTest() {
-        this.dataProcessingService.save(this.node1);
-        this.dataProcessingService.save(this.node2);
-        this.dataProcessingService.save(this.node3);
-
-        List<Node> nodes = new ArrayList<>();
-        nodes.add(this.node1);
-        nodes.add(this.node2);
-        nodes.add(this.node3);
-
-        assertThat(this.dataProcessingService.getAllNodes()).isEqualTo(nodes);
-    }
-
-    @Test
-    public void deleteNodeTest() {
-        this.dataProcessingService.save(this.node1);
-        assertThat(this.dataProcessingService.getNumberOfNodesInRepository()).isEqualTo(1);
-
-        this.dataProcessingService.deleteNode(this.node1);
-        assertThat(this.dataProcessingService.getNumberOfNodesInRepository()).isEqualTo(0);
-    }
-
-    @Test
-    public void deleteAllNodesTest() {
-        this.dataProcessingService.save(this.node1);
-        this.dataProcessingService.save(this.node2);
-        this.dataProcessingService.save(this.node3);
-
-        this.dataProcessingService.deleteAllNodes();
-        assertThat(this.dataProcessingService.getNumberOfNodesInRepository()).isEqualTo(0);
-    }
-
-    @Test
     public void getAllFacultiesEmptyRepo() {
-        assertThat(this.dataProcessingService.getAllFaculties()).isEqualTo(new ArrayList<>());
+        assertThat(this.schedulingDataProcessingService.getAllFaculties()).isEqualTo(new ArrayList<>());
     }
 
     @Test
     public void getAllFaculties() {
-        this.dataProcessingService.save(this.node1);
-        this.dataProcessingService.save(this.node2);
+        this.nodeRepository.save(this.node1);
+        this.nodeRepository.save(this.node2);
 
         List<String> faculties = new ArrayList<>();
         faculties.add("EWI");
         faculties.add("TPM");
 
-        assertThat(this.dataProcessingService.getAllFaculties()).isEqualTo(faculties);
+        assertThat(this.schedulingDataProcessingService.getAllFaculties()).isEqualTo(faculties);
     }
 
     @Test
     public void getAssignedResourcesPerFaculty() {
-        this.dataProcessingService.save(this.node1);
-        this.dataProcessingService.save(this.node2);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node1);
+        this.nodeRepository.save(this.node2);
+        this.nodeRepository.save(this.node3);
 
         List<FacultyTotalResources> facultyResources =
-            this.dataProcessingService.getAssignedResourcesPerFaculty();
+            this.schedulingDataProcessingService.getAssignedResourcesPerFaculty();
 
         assertThat(facultyResources.get(0).getFaculty_Id()).isEqualTo("AE");
         assertThat(facultyResources.get(0).getCpu_Resources()).isEqualTo(0);
@@ -218,12 +138,12 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getAssignedResourcesForFacultyId() {
-        this.dataProcessingService.save(this.node1);
-        this.dataProcessingService.save(this.node2);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node1);
+        this.nodeRepository.save(this.node2);
+        this.nodeRepository.save(this.node3);
 
         FacultyTotalResources facultyResources =
-            this.dataProcessingService.getAssignedResourcesForGivenFaculty("EWI");
+            this.schedulingDataProcessingService.getAssignedResourcesForGivenFaculty("EWI");
 
         assertThat(facultyResources.getFaculty_Id()).isEqualTo("EWI");
         assertThat(facultyResources.getCpu_Resources()).isEqualTo(0);
@@ -231,56 +151,56 @@ public class DataProcessingServiceTest {
 
     @Test
     public void doesntExistInScheduleByFaculty() {
-        assertThat(this.dataProcessingService.existsInScheduleByFacultyId("EWI")).isFalse();
+        assertThat(this.schedulingDataProcessingService.existsInScheduleByFacultyId("EWI")).isFalse();
     }
 
     @Test
     public void existInScheduleByFaculty() {
-        this.dataProcessingService.saveInSchedule(job1);
-        assertThat(this.dataProcessingService.existsInScheduleByFacultyId("EWI")).isTrue();
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        assertThat(this.schedulingDataProcessingService.existsInScheduleByFacultyId("EWI")).isTrue();
     }
 
     @Test
     public void doesntExistInScheduleForGivenDate() {
         LocalDate date = LocalDate.of(2022, 12, 10);
-        assertThat(this.dataProcessingService.existsInScheduleByScheduledFor(date)).isFalse();
+        assertThat(this.schedulingDataProcessingService.existsInScheduleByScheduledFor(date)).isFalse();
     }
 
     @Test
     public void existInScheduleForGivenDate() {
-        this.dataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
 
         LocalDate date = LocalDate.of(2022, 12, 14);
-        assertThat(this.dataProcessingService.existsInScheduleByScheduledFor(date)).isTrue();
+        assertThat(this.schedulingDataProcessingService.existsInScheduleByScheduledFor(date)).isTrue();
     }
 
     @Test
     public void getAllJobsFromScheduleEmpty() {
-        assertThat(this.dataProcessingService.getAllJobsFromSchedule()).isEqualTo(new ArrayList<>());
+        assertThat(this.schedulingDataProcessingService.getAllJobsFromSchedule()).isEqualTo(new ArrayList<>());
     }
 
     @Test
     public void getAllJobsFromScheduleFilled() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
 
         List<Job> jobs = new ArrayList<>();
         jobs.add(job1);
         jobs.add(job2);
 
-        assertThat(this.dataProcessingService.getAllJobsFromSchedule()).isEqualTo(jobs);
+        assertThat(this.schedulingDataProcessingService.getAllJobsFromSchedule()).isEqualTo(jobs);
     }
 
     @Test
     public void getReservedResourcesPerFacultyPerDayTest() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         LocalDate date = LocalDate.of(2022, 12, 14);
 
-        FacultyDatedTotalResources ewi = this.dataProcessingService
+        FacultyDatedTotalResources ewi = this.schedulingDataProcessingService
             .getReservedResourcesPerFacultyPerDay().get(1);
         assertThat(ewi.getFaculty_Id()).isEqualTo("EWI");
         assertThat(ewi.getScheduled_Date()).isEqualTo(date);
@@ -289,20 +209,20 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getReservedResourcesPerFacultyForaGivenDateTest() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         LocalDate date = LocalDate.of(2022, 12, 14);
 
-        FacultyDatedTotalResources ewi = this.dataProcessingService
+        FacultyDatedTotalResources ewi = this.schedulingDataProcessingService
             .getReservedResourcesPerFacultyForGivenDay(date).get(1);
         assertThat(ewi.getFaculty_Id()).isEqualTo("EWI");
         assertThat(ewi.getScheduled_Date()).isEqualTo(date);
         assertThat(ewi.getCpu_Resources()).isEqualTo(9);
 
-        FacultyDatedTotalResources ae = this.dataProcessingService
+        FacultyDatedTotalResources ae = this.schedulingDataProcessingService
             .getReservedResourcesPerFacultyForGivenDay(date).get(0);
         assertThat(ae.getFaculty_Id()).isEqualTo("AE");
         assertThat(ae.getScheduled_Date()).isEqualTo(date);
@@ -311,14 +231,14 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getReservedResourcesPerDayForGivenFaculty() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         LocalDate date1 = LocalDate.of(2022, 12, 14);
 
-        FacultyDatedTotalResources ewi = this.dataProcessingService
+        FacultyDatedTotalResources ewi = this.schedulingDataProcessingService
             .getReservedResourcesPerDayForGivenFaculty("EWI").get(0);
         assertThat(ewi.getFaculty_Id()).isEqualTo("EWI");
         assertThat(ewi.getScheduled_Date()).isEqualTo(date1);
@@ -327,25 +247,25 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getReservedResourcesForGivenDayForGivenFaculty() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         LocalDate date1 = LocalDate.of(2022, 12, 14);
         LocalDate date2 = LocalDate.of(2022, 12, 15);
 
-        FacultyDatedTotalResources ewi = this.dataProcessingService
+        FacultyDatedTotalResources ewi = this.schedulingDataProcessingService
             .getReservedResourcesForGivenDayForGivenFaculty(date1, "EWI").get(0);
         assertThat(ewi.getFaculty_Id()).isEqualTo("EWI");
         assertThat(ewi.getScheduled_Date()).isEqualTo(date1);
         assertThat(ewi.getCpu_Resources()).isEqualTo(9);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getReservedResourcesForGivenDayForGivenFaculty(date2, "EWI"))
             .isEqualTo(new ArrayList<>());
 
-        FacultyDatedTotalResources ae = this.dataProcessingService
+        FacultyDatedTotalResources ae = this.schedulingDataProcessingService
             .getReservedResourcesForGivenDayForGivenFaculty(date1, "AE").get(0);
         assertThat(ae.getFaculty_Id()).isEqualTo("AE");
         assertThat(ae.getScheduled_Date()).isEqualTo(date1);
@@ -354,20 +274,20 @@ public class DataProcessingServiceTest {
 
     @Test
     public void findLatestDateWithReservedResourcesEmptySchedule() {
-        assertThat(this.dataProcessingService.findLatestDateWithReservedResources())
+        assertThat(this.schedulingDataProcessingService.findLatestDateWithReservedResources())
             .isEqualTo(dateProvider.getTomorrow());
     }
 
     @Test
     public void findLatestDateWithReservedResourcesFilledSchedule() {
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         LocalDate date = LocalDate.of(2022, 12, 14);
 
-        assertThat(this.dataProcessingService.findLatestDateWithReservedResources())
+        assertThat(this.schedulingDataProcessingService.findLatestDateWithReservedResources())
             .isEqualTo(date);
     }
 
@@ -378,7 +298,7 @@ public class DataProcessingServiceTest {
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
         LocalDate startDate = this.dateProvider.getTomorrow().plusDays(1);
 
@@ -386,10 +306,10 @@ public class DataProcessingServiceTest {
         this.job2.setScheduledFor(startDate);
         this.job3.setScheduledFor(startDate);
         this.job4.setScheduledFor(startDate);
-        this.dataProcessingService.saveInSchedule(job1);
-        this.dataProcessingService.saveInSchedule(job2);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job1);
+        this.schedulingDataProcessingService.saveInSchedule(job2);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
 
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
@@ -397,7 +317,7 @@ public class DataProcessingServiceTest {
         LocalDate endDate = this.dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
-            this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("EWI", endDate);
+            this.schedulingDataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("EWI", endDate);
 
         assertThat(availableResources.get(0).getAvailableCpu()).isEqualTo(10);
         assertThat(availableResources.get(1).getAvailableCpu()).isEqualTo(1);
@@ -409,21 +329,21 @@ public class DataProcessingServiceTest {
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node3);
 
         LocalDate startDate = this.dateProvider.getTomorrow().plusDays(1);
 
         this.job3.setScheduledFor(startDate);
         this.job4.setScheduledFor(startDate);
-        this.dataProcessingService.saveInSchedule(job3);
-        this.dataProcessingService.saveInSchedule(job4);
+        this.schedulingDataProcessingService.saveInSchedule(job3);
+        this.schedulingDataProcessingService.saveInSchedule(job4);
         /*Job job = this.dataProcessingService.getJobRepository().findByFacultyId("EWI").get(0);
         System.out.println(job.getScheduledFor().toString());*/
 
         LocalDate endDate = this.dateProvider.getTomorrow().plusDays(2);
 
         List<AvailableResourcesForDate> availableResources =
-            this.dataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("AE", endDate);
+            this.schedulingDataProcessingService.getAvailableResourcesForGivenFacultyUntilDay("AE", endDate);
 
         assertThat(availableResources.get(0).getAvailableCpu()).isEqualTo(10);
         assertThat(availableResources.get(1).getAvailableCpu()).isEqualTo(10);
@@ -432,7 +352,7 @@ public class DataProcessingServiceTest {
 
     @Test
     public void getAvailableResourcesForAllFacultiesForAllDaysEmptySchedule() {
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForAllDays()).isEqualTo(new ArrayList<>());
     }
 
@@ -445,40 +365,40 @@ public class DataProcessingServiceTest {
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node3);
 
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
         this.job1.setScheduledFor(startDate);
         this.job2.setScheduledFor(startDate);
         this.job3.setScheduledFor(startDate);
         this.job4.setScheduledFor(startDate);
-        this.dataProcessingService.saveInSchedule(this.job1);
-        this.dataProcessingService.saveInSchedule(this.job2);
-        this.dataProcessingService.saveInSchedule(this.job3);
-        this.dataProcessingService.saveInSchedule(this.job4);
+        this.schedulingDataProcessingService.saveInSchedule(this.job1);
+        this.schedulingDataProcessingService.saveInSchedule(this.job2);
+        this.schedulingDataProcessingService.saveInSchedule(this.job3);
+        this.schedulingDataProcessingService.saveInSchedule(this.job4);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForAllDays().get(0).getFacultyId()).isEqualTo("AE");
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForAllDays().get(0).getDate()).isEqualTo(startDate);
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForAllDays().get(0).getTotalCpu())
             .isEqualTo(8);
     }
 
     @Test
     public void getAvailableResourcesForGivenFacultyForAllDaysTest() {
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForGivenFacultyForAllDays("EWI").get(0).getFacultyId())
             .isEqualTo("EWI");
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForGivenFacultyForAllDays("EWI").get(0).getTotalCpu())
             .isEqualTo(0);
     }
@@ -488,19 +408,19 @@ public class DataProcessingServiceTest {
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node3);
 
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
         LocalDate lookupDate = LocalDate.of(2022, 12, 16);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForGivenDay(lookupDate).get(0).getTotalCpu())
             .isEqualTo(10);
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForGivenDay(lookupDate).get(1).getTotalCpu())
             .isEqualTo(10);
     }
@@ -510,22 +430,22 @@ public class DataProcessingServiceTest {
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node3);
 
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
         LocalDate lookupDate = this.dateProvider.getTomorrow();
 
         this.job1.setScheduledFor(lookupDate);
-        this.dataProcessingService.saveInSchedule(this.job1);
+        this.schedulingDataProcessingService.saveInSchedule(this.job1);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForGivenDay(lookupDate).get(0).getTotalCpu())
             .isEqualTo(10);
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForAllFacultiesForGivenDay(lookupDate).get(1).getTotalCpu())
             .isEqualTo(5);
     }
@@ -535,19 +455,19 @@ public class DataProcessingServiceTest {
         this.node3.setCpuResources(10);
         this.node3.setMemoryResources(10);
         this.node3.setGpuResources(10);
-        this.dataProcessingService.save(this.node3);
+        this.nodeRepository.save(this.node3);
 
         this.node1.setCpuResources(10);
         this.node1.setMemoryResources(10);
         this.node1.setGpuResources(10);
-        this.dataProcessingService.save(this.node1);
+        this.nodeRepository.save(this.node1);
 
         LocalDate lookupDate = this.dateProvider.getTomorrow();
 
         this.job1.setScheduledFor(lookupDate);
-        this.dataProcessingService.saveInSchedule(this.job1);
+        this.schedulingDataProcessingService.saveInSchedule(this.job1);
 
-        assertThat(this.dataProcessingService
+        assertThat(this.schedulingDataProcessingService
             .getAvailableResourcesForGivenFacultyForGivenDay(lookupDate, "EWI")
             .get(0).getTotalCpu()).isEqualTo(5);
     }
