@@ -67,7 +67,7 @@ public class ApprovingRequestsController {
      * This endpoint is responsible for accepting the ids of approved requests,
      * and see if the sender is legitimate and from the respective faculty.
      * Afterwards, the requests are sent to the cluster.
-     *  
+     *
      * @param headers             the headers
      * @param approvalInformation the approval information
      * @return                    the response entity

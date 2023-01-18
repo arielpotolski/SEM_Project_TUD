@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ClockUser;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -46,7 +45,8 @@ public class SendingRequestsController {
      */
     @Autowired
     public SendingRequestsController(AuthManager authManager, RequestAllocationService requestAllocationService,
-                                     RequestRepository requestRepository, ClockUser clockUser, ApprovingRequestsController approvingRequestsController) {
+                                     RequestRepository requestRepository, ClockUser clockUser,
+                                     ApprovingRequestsController approvingRequestsController) {
         this.authManager = authManager;
         this.requestAllocationService = requestAllocationService;
         this.requestRepository = requestRepository;
