@@ -258,7 +258,8 @@ public class JobSchedulingServiceTest {
 
         assertThat(this.jobSchedulingService.getSchedulingDataProcessingService()
                 .findLatestDateWithReservedResources().equals(dateProvider.getTomorrow())).isTrue();
-        assertThat(this.jobSchedulingService.getSchedulingDataProcessingService().existsInScheduleByFacultyId("AE")).isFalse();
+        assertThat(this.jobSchedulingService.getSchedulingDataProcessingService()
+                .existsInScheduleByFacultyId("AE")).isFalse();
     }
 
     @Test

@@ -54,7 +54,8 @@ public class SchedulingDataProcessingServiceTest {
      */
     @BeforeEach
     void setup() {
-        this.schedulingDataProcessingService = new SchedulingDataProcessingService(nodeRepository, jobScheduleRepository, this.dateProvider);
+        this.schedulingDataProcessingService = new SchedulingDataProcessingService(nodeRepository,
+                jobScheduleRepository, this.dateProvider);
         this.schedulingDataProcessingService.deleteAllJobsScheduled();
         this.nodeRepository.deleteAll();
 
