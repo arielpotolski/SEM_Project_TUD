@@ -7,11 +7,11 @@ import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.SchedulingDataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeDataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
+import nl.tudelft.sem.template.cluster.domain.services.SchedulingDataProcessingService;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.JobRequestModel;
@@ -241,7 +241,8 @@ public class ScheduleController {
         } else if (date != null && facultyId == null) {
 
             // for given date, for all faculties
-            return ResponseEntity.ok(this.schedulingDataProcessingService.getAvailableResourcesForAllFacultiesForGivenDay(date));
+            return ResponseEntity.ok(this.schedulingDataProcessingService
+                    .getAvailableResourcesForAllFacultiesForGivenDay(date));
         } else if (date == null && facultyId != null) {
             if (!this.schedulingDataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
