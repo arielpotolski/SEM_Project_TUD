@@ -244,7 +244,7 @@ public class JobSchedulingService {
             double memory = lackingResources.getAvailableMemory();
             while (!jobsOnProblematicDay.isEmpty() && (cpu < 0 || gpu < 0 || memory < 0)) {
                 var removedJob = jobsOnProblematicDay.remove(0); // the most costly job
-                this.dataProcessingService.deleteJob(removedJob);
+                this.schedulingDataProcessingService.deleteJob(removedJob);
 
                 // append to temp to reschedule
                 jobsToReschedule.add(removedJob);
