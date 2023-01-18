@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.cluster.application.cluster;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
+import nl.tudelft.sem.template.cluster.domain.services.JobReschedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -15,11 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodesWereRemovedEventListener implements ApplicationListener<NodesWereRemovedEvent> {
 
-    private final transient JobSchedulingService jobSchedulingService;
+    private final transient JobReschedulingService jobReschedulingService;
 
     @Autowired
-    public NodesWereRemovedEventListener(JobSchedulingService jobSchedulingService) {
-        this.jobSchedulingService = jobSchedulingService;
+    public NodesWereRemovedEventListener(JobReschedulingService jobReschedulingService) {
+        this.jobReschedulingService = jobReschedulingService;
     }
 
     /**
@@ -34,6 +35,6 @@ public class NodesWereRemovedEventListener implements ApplicationListener<NodesW
         }
         var faculties = event.getNodesRemovedFromCluster().stream()
                 .map(x -> x.getFacultyId()).distinct().collect(Collectors.toList());
-        this.jobSchedulingService.rescheduleJobsForFacultiesWithRemovedNodes(faculties);
+        this.jobReschedulingService.rescheduleJobsForFacultiesWithRemovedNodes(faculties);
     }
 }

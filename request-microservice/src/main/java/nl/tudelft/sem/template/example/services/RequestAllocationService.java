@@ -103,7 +103,6 @@ public class RequestAllocationService {
      * @return the list
      */
     public List<Resource> getReservedResource(String facultyName, LocalDate preferredDate, String token) {
-
         try {
             String url = "http://localhost:8082/resources/availableUntil/"
                     + preferredDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -114,22 +113,18 @@ public class RequestAllocationService {
             headers.setBearerAuth(token);
 
             HttpEntity<TokenRequestModel> entity = new HttpEntity<>(new TokenRequestModel(token), headers);
-            var result = restTemplate.exchange(url, HttpMethod.GET,
-                    entity, ResourceResponseModel[].class);
-            var listOfResources = Stream.of(result.getBody())
+            var result = restTemplate.exchange(url, HttpMethod.GET, entity, ResourceResponseModel[].class);
+            var listOfResources = Stream.of(Objects.requireNonNull(result.getBody()))
                     .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
                             x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList());
 
-            var availableResources = new AvailableResources(listOfResources);
-            return Objects.requireNonNull(availableResources).getResourceList();
-
+            return listOfResources;
         } catch (Exception e) {
-            System.out.println("error with post " + e);
+            System.err.println("Error getting reserved resources: " + e.getMessage());
+            return new ArrayList<>();
         }
-
-        return new ArrayList<>();
-
     }
+
 
     /**
      * Checks if there are enough computational resources for a given job to be executed.
