@@ -94,10 +94,7 @@ public class Job {
      * @return true if valid, false if invalid.
      */
     public boolean areResourcesNeededValid() {
-        if (this.requiredCpu < this.requiredGpu || this.requiredCpu < this.requiredMemory) {
-            return false;
-        }
-        return true;
+        return !(this.requiredCpu < this.requiredGpu) && !(this.requiredCpu < this.requiredMemory);
     }
 
     /**
