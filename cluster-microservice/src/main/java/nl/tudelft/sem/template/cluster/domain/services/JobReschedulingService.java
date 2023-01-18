@@ -1,5 +1,9 @@
 package nl.tudelft.sem.template.cluster.domain.services;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import nl.tudelft.sem.template.cluster.domain.cluster.AvailableResourcesForDate;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
@@ -8,10 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 @Getter
 @Service
 public class JobReschedulingService {
@@ -25,8 +25,18 @@ public class JobReschedulingService {
 
     private transient JobSchedulingService jobSchedulingService;
 
+
+    /**
+     * Constructor for JobReschedulingService that injects all needed services.
+     *
+     * @param schedulingDataProcessingService the service providing access to data.
+     * @param applicationEventPublisher the event listerner for sending notifications
+     * @param jobSchedulingService job scheduling service for scheduling new jobs
+     */
     @Autowired
-    public JobReschedulingService(SchedulingDataProcessingService schedulingDataProcessingService, ApplicationEventPublisher applicationEventPublisher, JobSchedulingService jobSchedulingService){
+    public JobReschedulingService(SchedulingDataProcessingService schedulingDataProcessingService,
+                                  ApplicationEventPublisher applicationEventPublisher,
+                                  JobSchedulingService jobSchedulingService) {
         this.jobSchedulingService = jobSchedulingService;
         this.schedulingDataProcessingService = schedulingDataProcessingService;
         this.publisher = applicationEventPublisher;
