@@ -82,15 +82,18 @@ public class JobRequestController {
      * @return ResponseEntity following the information
      * @throws JsonProcessingException when error.
      */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
     private ResponseEntity<String> getResponseEntity(String token, Request request)
             throws JsonProcessingException {
+        int shortTerm = 5;
+        int longTerm = 360;
         long minutes = getMinutes();
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
         if (clockUser.getTimeLd().isEqual(request.getPreferredDate())) {
             return ResponseEntity.ok().body("You cannot send requests for the same day.");
-        } else if (minutes <= 5) {
+        } else if (minutes <= shortTerm) {
             return ResponseEntity.ok().body("You cannot send requests 5 min before the following day.");
-        } else if (minutes <= 360) {
+        } else if (minutes <= longTerm) {
             if (requestAllocationService.enoughResourcesForJob(request, token)
                     && request.getPreferredDate().equals(clockUser.getTimeLd().plusDays(1L))
                     && (facultyUserFaculties.contains(request.getFaculty()))) {
