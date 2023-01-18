@@ -98,8 +98,7 @@ public class ScheduleController {
         }
 
         // the resources requested are cpu >= gpu and cpu >= memory
-        if (job.getRequiredCpu() < job.getRequiredGpu()
-                || job.getRequiredCpu() < job.getRequiredMemory()) {
+        if (!job.areResourcesNeededValid()) {
             return ResponseEntity.badRequest()
                     .body("The requested job cannot require more GPU or memory than CPU.");
         }
@@ -223,7 +222,7 @@ public class ScheduleController {
      * in the three categories, as well as the date and the facultyId.
      */
     @GetMapping(value = {"/resources/available", "/resources/available/{date}&{facultyId}",
-            "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
+        "/resources/available/{date}&", "/resources/available/&{facultyId}", "resources/available/&"})
     public ResponseEntity<List<FacultyDatedResourcesResponseModel>> getAvailableResourcesPerFacultyPerDay(
             @RequestHeader HttpHeaders headers,
             @PathVariable(value = "date", required = false) String rawDate,
