@@ -131,8 +131,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestForTodayNotApproved() throws Exception {
         // for returning
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("AE", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("AE", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -175,8 +175,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestTestNotInFaculty() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -260,8 +260,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -305,8 +305,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -350,8 +350,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -394,8 +394,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -436,8 +436,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestExactly6hTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -525,8 +525,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -574,8 +574,8 @@ public class SendingRequestsControllerTest {
         clockUser.setClock(clock);
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
@@ -619,8 +619,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestLessThan6hNoResourceTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-23/EWI"))
@@ -667,8 +667,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestLessThan6hTomorrowNotPreferredTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-25/EWI"))
@@ -715,8 +715,8 @@ public class SendingRequestsControllerTest {
     public void sendRequestWaitingApprovalTest() throws Exception {
 
         var resources = new ResourceResponseModel[]{
-                new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
-                new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
+            new ResourceResponseModel("EWI", 3.0, 2.0, 2.0),
+            new ResourceResponseModel("EWI", 1.0, 1.0, 2.0)};
         var resourcesString = JsonUtil.serialize(resources);
 
         // when asked for resources, enough will be available
