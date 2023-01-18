@@ -3,11 +3,9 @@ package nl.tudelft.sem.template.example.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.ApprovalInformation;
 import nl.tudelft.sem.template.example.domain.ClockUser;
 import nl.tudelft.sem.template.example.domain.Request;
@@ -34,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public class JobRequestController {
 
-    private final transient AuthManager authManager;
     private final RequestAllocationService requestAllocationService;
     private final RequestRepository requestRepository;
     private final ClockUser clockUser;
@@ -42,15 +39,13 @@ public class JobRequestController {
     /**
      * Instantiates a new controller.
      *
-     * @param authManager              Spring Security component used to authenticate and authorize the user
      * @param requestAllocationService the request allocation service
      * @param requestRepository        the request repository
      * @param clockUser                clock that can be configurable
      */
     @Autowired
-    public JobRequestController(AuthManager authManager, RequestAllocationService requestAllocationService,
+    public JobRequestController(RequestAllocationService requestAllocationService,
                                 RequestRepository requestRepository, ClockUser clockUser) {
-        this.authManager = authManager;
         this.requestAllocationService = requestAllocationService;
         this.requestRepository = requestRepository;
         this.clockUser = clockUser;
@@ -73,69 +68,80 @@ public class JobRequestController {
             return ResponseEntity.ok()
                     .body("You are not verified to send requests to this faculty");
         }
+        String token = headers.get("authorization").get(0).replace("Bearer ", "");
+        return getResponseEntity(token, request);
 
-        LocalDateTime preferredDate = request.getPreferredDate().atStartOfDay(ZoneId.systemDefault())
-                .toLocalDateTime();
-        LocalDate onlyDate = request.getPreferredDate();
+    }
+
+    /**
+     * Method to get the correct responseEnity from the user's request information.
+     *
+     * @param token token of the user account.
+     * @param request request of the user containing all information.
+     *
+     * @return ResponseEntity following the information
+     * @throws JsonProcessingException when error.
+     */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+    private ResponseEntity<String> getResponseEntity(String token, Request request)
+            throws JsonProcessingException {
+        int shortTerm = 5;
+        int longTerm = 360;
+        long minutes = getMinutes();
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
+        if (clockUser.getTimeLd().isEqual(request.getPreferredDate())) {
+            return ResponseEntity.ok().body("You cannot send requests for the same day.");
+        } else if (minutes <= shortTerm) {
+            return ResponseEntity.ok().body("You cannot send requests 5 min before the following day.");
+        } else if (minutes <= longTerm) {
+            if (requestAllocationService.enoughResourcesForJob(request, token)
+                    && request.getPreferredDate().equals(clockUser.getTimeLd().plusDays(1L))
+                    && (facultyUserFaculties.contains(request.getFaculty()))) {
+                setSaveAndPublishRequest(request, true);
+                this.requestAllocationService.sendRequestToCluster(request, token);
+                return ResponseEntity.ok()
+                        .body("The request is automatically forwarded "
+                                + "and will be completed if there are sufficient resources");
+            }
+            setSaveAndPublishRequest(request, false);
+            return ResponseEntity.ok()
+                    .body("Request forwarded, "
+                            + "but resources are insufficient or preferred date is not tomorrow");
+        } else if (facultyUserFaculties.contains(request.getFaculty())) {
+            setSaveAndPublishRequest(request, false);
+            return ResponseEntity.ok()
+                    .body("The request was sent. Now it is to be approved by faculty.");
+        } else {
+            return ResponseEntity.ok()
+                    .body("You are not assigned to this faculty.");
+        }
+    }
+
+    /**
+     * Method which sets the request to either approved or rejected, saves them to the repository,
+     * and lastly publishes them for further processing.
+     *
+     * @param request Request in question
+     * @param approved if it is approved or not
+     */
+    private void setSaveAndPublishRequest(Request request, boolean approved) {
+        request.setApproved(approved);
+        requestRepository.save(request);
+        publishRequest();
+    }
+
+    /**
+     * Method to calculate the amount of minutes the request until the next day.
+     *
+     * @return minutes until the next day,
+     */
+    private long getMinutes() {
 
         LocalDateTime d1 = clockUser.getTimeLdt();
         LocalDate d2 = clockUser.getTimeLd().plusDays(1L);
         LocalDateTime ref = d2.atStartOfDay();
 
-        int timeLimit1 = 5;
-        int timeLimit2 = 360;
-
-        String token = headers.get("authorization").get(0).replace("Bearer ", "");
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties(token);
-
-        long minutes = d1.until(ref, ChronoUnit.MINUTES);
-
-        if (clockUser.getTimeLd().isEqual(onlyDate)) {
-            return ResponseEntity.ok()
-                    .body("You cannot send requests for the same day.");
-        } else if (!clockUser.getTimeLd().isEqual(onlyDate)) {
-            if (minutes <= timeLimit1) {
-                return ResponseEntity.ok()
-                        .body("You cannot send requests 5 min before the following day.");
-
-            } else if (minutes <= timeLimit2) {
-                if (requestAllocationService.enoughResourcesForJob(request, token) && onlyDate.equals(d2)) {
-
-                    if (facultyUserFaculties.contains(request.getFaculty())) {
-                        request.setApproved(true);                // Doesn't require approval; First come, first served
-                        requestRepository.save(request);
-                        publishRequest();
-                        this.requestAllocationService.sendRequestToCluster(request, token);
-
-                        return ResponseEntity.ok()
-                                .body("The request is automatically forwarded "
-                                        + "and will be completed if there are sufficient resources");
-                    }
-
-                } else {
-                    request.setApproved(false);
-                    requestRepository.save(request);
-                    publishRequest();
-
-                    return ResponseEntity.ok()
-                            .body("Request forwarded, "
-                                    + "but resources are insufficient or preferred date is not tomorrow");
-                }
-            }
-        }
-
-        if (facultyUserFaculties.contains(request.getFaculty())) {
-            request.setApproved(false);
-            requestRepository.save(request);
-            publishRequest();
-
-            return ResponseEntity.ok()
-                    .body("The request was sent. Now it is to be approved by faculty.");
-        }
-
-        return ResponseEntity.ok()
-                .body("You are not assigned to this faculty.");
-
+        return d1.until(ref, ChronoUnit.MINUTES);
     }
 
     /**
