@@ -4,14 +4,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import nl.tudelft.sem.template.cluster.domain.builders.JobBuilder;
-import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
-import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.events.NotificationEvent;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
-import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
+import nl.tudelft.sem.template.cluster.domain.services.SchedulingDataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.JobSchedulingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeDataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.PrivilegeVerificationService;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
 import nl.tudelft.sem.template.cluster.models.FacultyResourcesResponseModel;
@@ -34,8 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScheduleController {
 
     private final transient JobSchedulingService scheduling;
-    private final transient NodeContributionService nodeContributionService;
-    private final transient DataProcessingService dataProcessingService;
+    private final transient NodeDataProcessingService nodeDataProcessingService;
+    private final transient SchedulingDataProcessingService schedulingDataProcessingService;
     private final transient PrivilegeVerificationService privilegeVerificationService;
 
     private final transient DateProvider dateProvider;
@@ -48,13 +47,14 @@ public class ScheduleController {
     @Autowired
     public ScheduleController(JobSchedulingService scheduling,
                               NodeContributionService nodeContributionService, DateProvider dateProvider,
-                              DataProcessingService dataProcessingService,
+                              NodeDataProcessingService nodeDataProcessingService,
+                              SchedulingDataProcessingService schedulingDataProcessingService,
                               PrivilegeVerificationService privilegeVerificationService,
                               ApplicationEventPublisher applicationEventPublisher) {
         this.scheduling = scheduling;
-        this.nodeContributionService = nodeContributionService;
+        this.nodeDataProcessingService = nodeDataProcessingService;
         this.dateProvider = dateProvider;
-        this.dataProcessingService = dataProcessingService;
+        this.schedulingDataProcessingService = schedulingDataProcessingService;
         this.privilegeVerificationService = privilegeVerificationService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -67,7 +67,7 @@ public class ScheduleController {
     @GetMapping("/schedule")
     @PreAuthorize("hasRole('SYSADMIN')")
     public List<Job> getSchedule() {
-        return this.dataProcessingService.getAllJobsFromSchedule();
+        return this.schedulingDataProcessingService.getAllJobsFromSchedule();
     }
 
     /**
@@ -142,11 +142,11 @@ public class ScheduleController {
         }
 
         if (facultyId == null) {
-            var rawResources = this.dataProcessingService.getAssignedResourcesPerFaculty();
+            var rawResources = this.schedulingDataProcessingService.getAssignedResourcesPerFaculty();
             return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
-        } else if (this.dataProcessingService.existsByFacultyId(facultyId)) {
-            var rawResources = List.of(this.dataProcessingService
+        } else if (this.nodeDataProcessingService.existsByFacultyId(facultyId)) {
+            var rawResources = List.of(this.schedulingDataProcessingService
                     .getAssignedResourcesForGivenFaculty(facultyId));
             return ResponseEntity.ok(FacultyResourcesResponseModel
                     .convertAllFacultyTotalResourcesToResponseModels(rawResources));
@@ -180,35 +180,35 @@ public class ScheduleController {
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                            .convertToResponseModels(this.dataProcessingService
+                            .convertToResponseModels(this.schedulingDataProcessingService
                             .getReservedResourcesPerFacultyPerDay()));
         } else if (date != null && facultyId == null) {
-            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)) {
+            if (!this.schedulingDataProcessingService.existsInScheduleByScheduledFor(date)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given date, for all faculties
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.dataProcessingService
+                    .convertToResponseModels(this.schedulingDataProcessingService
                             .getReservedResourcesPerFacultyForGivenDay(date)));
         } else if (date == null && facultyId != null) {
-            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+            if (!this.schedulingDataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for all dates
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.dataProcessingService
+                    .convertToResponseModels(this.schedulingDataProcessingService
                             .getReservedResourcesPerDayForGivenFaculty(facultyId)));
         } else {
-            if (!this.dataProcessingService.existsInScheduleByScheduledFor(date)
-                || !this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+            if (!this.schedulingDataProcessingService.existsInScheduleByScheduledFor(date)
+                || !this.schedulingDataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for given date
             return ResponseEntity.ok(FacultyDatedResourcesResponseModel
-                    .convertToResponseModels(this.dataProcessingService
+                    .convertToResponseModels(this.schedulingDataProcessingService
                             .getReservedResourcesForGivenDayForGivenFaculty(date, facultyId)));
         }
     }
@@ -237,26 +237,26 @@ public class ScheduleController {
         // functionality
         if (date == null && facultyId == null) {
             // for all dates, for all faculties
-            return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForAllDays());
+            return ResponseEntity.ok(this.schedulingDataProcessingService.getAvailableResourcesForAllFacultiesForAllDays());
         } else if (date != null && facultyId == null) {
 
             // for given date, for all faculties
-            return ResponseEntity.ok(this.dataProcessingService.getAvailableResourcesForAllFacultiesForGivenDay(date));
+            return ResponseEntity.ok(this.schedulingDataProcessingService.getAvailableResourcesForAllFacultiesForGivenDay(date));
         } else if (date == null && facultyId != null) {
-            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+            if (!this.schedulingDataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for all dates
-            return ResponseEntity.ok(this.dataProcessingService
+            return ResponseEntity.ok(this.schedulingDataProcessingService
                     .getAvailableResourcesForGivenFacultyForAllDays(facultyId));
         } else {
-            if (!this.dataProcessingService.existsInScheduleByFacultyId(facultyId)) {
+            if (!this.schedulingDataProcessingService.existsInScheduleByFacultyId(facultyId)) {
                 return ResponseEntity.badRequest().build();
             }
 
             // for given faculty, for given date
-            return ResponseEntity.ok(this.dataProcessingService
+            return ResponseEntity.ok(this.schedulingDataProcessingService
                     .getAvailableResourcesForGivenFacultyForGivenDay(date, facultyId));
         }
     }
@@ -280,10 +280,10 @@ public class ScheduleController {
         }
         LocalDate date = LocalDate.parse(rawDate);
         if (date.isBefore(this.dateProvider.getTomorrow())
-                || !this.dataProcessingService.existsByFacultyId(facultyId)) {
+                || !this.nodeDataProcessingService.existsByFacultyId(facultyId)) {
             return ResponseEntity.badRequest().build();
         }
-        var rawResources = this.dataProcessingService
+        var rawResources = this.schedulingDataProcessingService
                 .getAvailableResourcesForGivenFacultyUntilDay(facultyId, date);
         return ResponseEntity.ok(FacultyResourcesResponseModel
                 .convertForRequestService(rawResources, facultyId));
