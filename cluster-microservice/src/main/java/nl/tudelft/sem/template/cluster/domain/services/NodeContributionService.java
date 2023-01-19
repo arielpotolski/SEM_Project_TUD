@@ -83,6 +83,14 @@ public class NodeContributionService {
     }
 
     /**
+     * This method empties the list of nodes to be removed.
+     * It was added to ease the testing class implementation.
+     */
+    public void emptyListOfNodesToBeRemoved() {
+        this.nodesToRemove.removeAll(this.nodesToRemove);
+    }
+
+    /**
      * Uses the current strategy to pick a faculty to which to assign the given node.
      *
      * @param node the node to assign to a faculty.
