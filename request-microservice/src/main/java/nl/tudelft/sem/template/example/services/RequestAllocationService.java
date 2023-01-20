@@ -116,7 +116,7 @@ public class RequestAllocationService {
 
             return listOfResources;
         } catch (Exception e) {
-            System.err.println("Error getting reserved resources: " + e.getMessage());
+            System.out.println("Error getting reserved resources: " + e.getMessage());
             return new ArrayList<>();
         }
     }

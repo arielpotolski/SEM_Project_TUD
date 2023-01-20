@@ -14,7 +14,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +30,8 @@ import nl.tudelft.sem.template.example.domain.RequestRepository;
 import nl.tudelft.sem.template.example.domain.Resource;
 import nl.tudelft.sem.template.example.domain.ResourceResponseModel;
 import nl.tudelft.sem.template.example.services.RequestAllocationService;
+import org.eclipse.jetty.util.IO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,12 +80,18 @@ public class RequestAllocationServiceTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final PrintStream standardOut = System.out;
+//    private final PrintStream standardErr = System.err;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+
 
     /**
      * Don't need a specific token,so we can test with this setup.
      */
     @BeforeEach
     public void setup() {
+        System.setOut(new PrintStream(outputStreamCaptor));
+
         server = MockRestServiceServer.createServer(restTemplate);
         requestAllocationService.setRestTemplate(restTemplate);
 
@@ -89,7 +99,12 @@ public class RequestAllocationServiceTest {
         when(mockJwtTokenVerifier.validateToken(anyString())).thenReturn(true);
         when(mockJwtTokenVerifier.getNetIdFromToken(anyString())).thenReturn("Alexander");
         when(mockJwtTokenVerifier.getRoleFromToken(anyString())).thenReturn("ROLE_FACULTY");
+    }
 
+    @AfterEach
+    public void tearDown() {
+//        System.setOut(standardOut);
+        System.setOut(standardOut);
     }
 
     @Test
@@ -145,6 +160,8 @@ public class RequestAllocationServiceTest {
         assertThat(facultyUserFaculties).isEqualTo(Collections.emptyList());
         assertThat(facultyUserFaculties).isNotNull();
         assertThat(facultyUserFaculties).isEmpty();
+        String error = "error with post:org.springframework.web.client.ResourceAccessException: I/O error on POST request for \"http://localhost:8081/getUserFaculties\": null; nested exception is java.io.IOException";
+        assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
     }
 
     @Test
@@ -163,6 +180,22 @@ public class RequestAllocationServiceTest {
         assertThat(reservedResources).isEqualTo(List.of(resources).stream()
                 .map(x -> new Resource(x.getFacultyName(), x.getResourceCpu(),
                 x.getResourceGpu(), x.getResourceMemory())).collect(Collectors.toList()));
+    }
+
+    @Test
+    public void getReservedResourceExceptionTest() throws JsonProcessingException {
+        server.expect(manyTimes(), requestTo("http://localhost:8082/resources/availableUntil/2022-12-24/EWI"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withException(new IOException()));
+
+        List<Resource> reservedResources = requestAllocationService
+                .getReservedResource("EWI", LocalDate.parse("2022-12-24"), "");
+
+        assertThat(reservedResources).isEqualTo(new ArrayList<>());
+        assertThat(reservedResources).isEmpty();
+        String error = "Error getting reserved resources: I/O error on GET request for" +
+        " \"http://localhost:8082/resources/availableUntil/2022-12-24/EWI\": null; nested exception is java.io.IOException";
+        assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
     }
 
     @Test
