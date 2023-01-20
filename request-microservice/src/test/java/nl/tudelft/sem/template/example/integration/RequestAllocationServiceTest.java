@@ -2,20 +2,22 @@ package nl.tudelft.sem.template.example.integration;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.ParseException;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
@@ -108,7 +110,18 @@ public class RequestAllocationServiceTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
-        assertThat(requestAllocationService.getFacultyUserFaculties("")).isEqualTo(new ArrayList<>());
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+    }
+
+    @Test
+    public void getFacultyUserFacultiesRandomResult() {
+        server.expect(once(), requestTo("http://localhost:8081/getUserFaculties"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withSuccess("{\n\"faculties\": \"[a]\"}", MediaType.APPLICATION_JSON));
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(facultyUserFaculties).isEqualTo(List.of("a"));
     }
 
     @Test
@@ -118,8 +131,20 @@ public class RequestAllocationServiceTest {
                 .andRespond(withSuccess(", ", MediaType.APPLICATION_JSON));
 
         List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
-
         assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+    }
+
+    @Test
+    public void getFacultyUserFacultiesExceptionThrown() {
+        server.expect(once(), requestTo("http://localhost:8081/getUserFaculties"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withException(new IOException()));
+
+        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+        assertThat(facultyUserFaculties).isEqualTo(Collections.emptyList());
+        assertThat(facultyUserFaculties).isNotNull();
+        assertThat(facultyUserFaculties).isEmpty();
     }
 
     @Test

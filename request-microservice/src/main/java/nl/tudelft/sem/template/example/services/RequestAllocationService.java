@@ -78,15 +78,11 @@ public class RequestAllocationService {
             String string = result.getBody().getFaculties()
                     .replace("[", "").replace("]", "");
 
-            assert string != null;
             if (string.equals("")) {
                 return new ArrayList<>();
             }
-
-            // extract
-
-
             return Arrays.stream(string.split(", ")).collect(Collectors.toList());
+
         } catch (Exception e) {
             System.out.println("error with post:" + e);
         }
