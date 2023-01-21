@@ -6,8 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -39,12 +38,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
@@ -145,8 +147,8 @@ public class RequestAllocationServiceTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(", ", MediaType.APPLICATION_JSON));
 
-        List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
-        assertThat(facultyUserFaculties).isEqualTo(new ArrayList<>());
+        //List<String> facultyUserFaculties = requestAllocationService.getFacultyUserFaculties("");
+        assertThat(requestAllocationService.getFacultyUserFaculties("")).isEqualTo(new ArrayList<String>());
     }
 
     @Test
@@ -231,9 +233,30 @@ public class RequestAllocationServiceTest {
     }
 
     @Test
+    public void sendRequestToClusterTestException() {
+        server.expect(once(), requestTo("http://localhost:8082/request"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withException(new IOException()));
+
+        String dateString = "2025-12-12";
+
+        Request request = new Request(1L, "test", "name", "desc",
+                "Cs", 2.0, 3.0, 1.0, true, LocalDate.parse(dateString));
+
+        boolean b = requestAllocationService.sendRequestToCluster(request, "token");
+
+        assertThat(b).isFalse();
+        String error = "error with post: org.springframework.web.client.ResourceAccessException: I/O error on POST request" +
+                " for \"http://localhost:8082/request\": null; nested exception is java.io.IOException";
+        assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
+    }
+
+        @Test
     public void sendDeclinedRequestToUserService1() {
+
         server.expect(once(), requestTo("http://localhost:8081/notification"))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization","Bearer token"))
                 .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
         String dateString = "2025-12-12";
 
@@ -243,6 +266,26 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
 
         assertThat(b).isTrue();
+
+    }
+
+
+    @Test
+    public void sendDeclinedRequestToUserServiceException() {
+        server.expect(once(), requestTo("http://localhost:8081/notification"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withException(new IOException()));
+        String dateString = "2025-12-12";
+
+        Request request = new Request(1L, "test", "name", "desc",
+                "Cs", 4.0, 3.0, 1.0, false, LocalDate.parse(dateString));
+
+        boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
+
+        assertThat(b).isFalse();
+        String error = "error with post: org.springframework.web.client.ResourceAccessException:" +
+                " I/O error on POST request for \"http://localhost:8081/notification\": null; nested exception is java.io.IOException";
+        assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
 
     }
 
@@ -258,11 +301,12 @@ public class RequestAllocationServiceTest {
 
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
 
-        assertThat(b).isTrue();
-
+        assertThat(b).isFalse();
     }
 
-    @Test
+
+
+        @Test
     public void notEnoughCpuResourceForJobTest() throws JsonProcessingException {
         // reserved resources for 24th of December 2022 for ewi
         var resources = new ResourceResponseModel[] {
