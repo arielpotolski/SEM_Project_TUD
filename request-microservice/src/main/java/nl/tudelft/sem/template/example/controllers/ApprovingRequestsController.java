@@ -90,10 +90,11 @@ public class ApprovingRequestsController {
                 .filter(x -> facultiesOfFacultyUser.contains(x.getFaculty()))
                 .collect(Collectors.toList());
 
-        handleRequests(requests, token);
-        return ResponseEntity.ok().body(requests);
+        handleRequests(requests, token, requestAllocationService, requestRepository);
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
 
     }
+
 
 
     /**
@@ -104,7 +105,8 @@ public class ApprovingRequestsController {
      * @param token token of the current user
      * @throws JsonProcessingException the json processing exception
      */
-    public void handleRequests(List<Request> requests, String token)
+    public void handleRequests(List<Request> requests, String token,
+                               RequestAllocationService requestAllocationService, RequestRepository requestRepository)
             throws JsonProcessingException {
 
         for (Request request : requests) {
@@ -122,5 +124,9 @@ public class ApprovingRequestsController {
         // Deleting approved and sent entities
         requestRepository.deleteAll(requests);
     }
+
+
+
+
 
 }
