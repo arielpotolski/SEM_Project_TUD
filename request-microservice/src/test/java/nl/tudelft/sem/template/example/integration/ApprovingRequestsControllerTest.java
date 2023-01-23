@@ -237,7 +237,7 @@ public class ApprovingRequestsControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
 
         // test when there are no loaded requests
-        assertThat(response).isEqualTo("[{\"id\":1,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"},{\"id\":2,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"},{\"id\":3,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"}]");
+        assertThat(response).isEqualTo("[{\"id\":3,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2022-12-23\"},{\"id\":4,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"},{\"id\":5,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"},{\"id\":6,\"netId\":\"test\",\"name\":\"test\",\"description\":\"desc\",\"faculty\":\"EWI\",\"cpu\":3.0,\"gpu\":2.0,\"memory\":2.0,\"approved\":false,\"preferredDate\":\"2023-11-23\"}]");
     }
 
 
