@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.cluster.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,15 @@ public class SchedulingDataProcessingServiceTest {
 
         assertThat(facultyResources.getFaculty_Id()).isEqualTo("EWI");
         assertThat(facultyResources.getCpu_Resources()).isEqualTo(0);
+    }
+
+    @Test
+    public void getAssignedResourcesForFacultyIdException() {
+        this.nodeRepository.save(this.node1);
+        this.nodeRepository.save(this.node2);
+        this.nodeRepository.save(this.node3);
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> this.schedulingDataProcessingService.getAssignedResourcesForGivenFaculty("DWI"));
+        assertThat(exception.getMessage()).isEqualTo("Faculty does not exist.");
     }
 
     @Test
