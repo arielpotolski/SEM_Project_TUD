@@ -59,12 +59,12 @@ public class JobSchedulingServiceTest {
             .foundAtUrl("/" + "AE" + "/central-core")
             .byUserWithNetId("SYSTEM")
             .assignToFacultyWithId("AE").constructNodeInstance();
-        this.job1 = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2023, 1, 26))
+        this.job1 = new JobBuilder().preferredCompletedBeforeDate(dateProvider.getTomorrow())
             .needingMemoryResources(1.0).needingGpuResources(1.0).needingCpuResources(5.0).withDescription("desc")
             .havingName("job").requestedByUserWithNetId("ariel").requestedThroughFaculty("EWI")
             .constructJobInstance();
         this.job1.setScheduledFor(LocalDate.of(2022, 12, 14));
-        this.job2 = new JobBuilder().preferredCompletedBeforeDate(LocalDate.of(2023, 1, 26))
+        this.job2 = new JobBuilder().preferredCompletedBeforeDate(dateProvider.getTomorrow())
             .needingMemoryResources(1.0).needingGpuResources(1.0).needingCpuResources(2.0).withDescription("desc")
             .havingName("ob").requestedByUserWithNetId("ariel").requestedThroughFaculty("AE")
             .constructJobInstance();
@@ -150,5 +150,21 @@ public class JobSchedulingServiceTest {
             .existsInScheduleByFacultyId(this.job2.getFacultyId())).isTrue();
     }
 
+    @Test
+    public void mutantTest() {
+        this.jobSchedulingService.getNodeDataProcessingService().save(this.node2);
+
+        this.jobSchedulingService.scheduleJob(this.job2);
+        assertThat(this.jobSchedulingService.getSchedulingDataProcessingService()
+                .existsInScheduleByFacultyId(this.job2.getFacultyId())).isTrue();
+
+        this.job1 = new JobBuilder().preferredCompletedBeforeDate(dateProvider.getTomorrow())
+                .needingMemoryResources(10.0).needingGpuResources(10.0).needingCpuResources(10.0).withDescription("desc")
+                .havingName("jobb").requestedByUserWithNetId("ariel").requestedThroughFaculty("AE")
+                .constructJobInstance();
+
+        this.jobSchedulingService.scheduleJob(this.job1);
+        assertThat(this.job1.getScheduledFor()).isNotEqualTo(dateProvider.getTomorrow());
+    }
 
 }
