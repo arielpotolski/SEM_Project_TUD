@@ -6,97 +6,47 @@ import nl.tudelft.sem.template.cluster.authentication.AuthManager;
 import nl.tudelft.sem.template.cluster.domain.builders.NodeBuilder;
 import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.events.NodesWereRemovedEvent;
-import nl.tudelft.sem.template.cluster.domain.services.DataProcessingService;
 import nl.tudelft.sem.template.cluster.domain.services.NodeContributionService;
+import nl.tudelft.sem.template.cluster.domain.services.NodeDataProcessingService;
 import nl.tudelft.sem.template.cluster.models.NodeRequestModel;
-import nl.tudelft.sem.template.cluster.models.NodeResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * This restController class is responsible for containing all endpoints that are related to creating a new node,
+ * or deleting an existing node.
+ */
 @RestController
-public class NodeController {
+public class NodeCreationAndDeletionController {
 
     private final transient AuthManager authManager;
 
     private final transient NodeContributionService nodeContributionService;
-    private final transient DataProcessingService dataProcessingService;
+    private final transient NodeDataProcessingService dataProcessingService;
 
     @Autowired
     private transient ApplicationEventPublisher publisher;
 
     /**
-     * Instantiates a new controller.
+     * Instantiating the controller class.
      *
-     * @param authManager Spring Security component used to authenticate and authorize the user
+     * @param authManager Spring security manager.
      */
     @Autowired
-    public NodeController(AuthManager authManager,
-                             NodeContributionService nodeContributionService,
-                             DataProcessingService dataProcessingService) {
+    public NodeCreationAndDeletionController(AuthManager authManager,
+                          NodeContributionService nodeContributionService,
+                          NodeDataProcessingService dataProcessingService) {
         this.authManager = authManager;
         this.nodeContributionService = nodeContributionService;
         this.dataProcessingService = dataProcessingService;
-    }
-
-    /**
-     * Sets up the "central cores" of the existing faculties. They are nodes with 0 of each type of resource which
-     * serve as placeholders to ensure that the cluster knows which faculties exist and can, for example, be assigned
-     * nodes. This endpoint should be used by the User service as soon as both it and Cluster are online.
-     *
-     * @param faculties the list of faculties that exist in the User service's database.
-     *
-     * @return message of confirmation that the faculties have been received.
-     */
-    @PostMapping("/faculties")
-    public ResponseEntity<String> updateOnExistingFaculties(@RequestBody List<String> faculties) {
-        for (String faculty : faculties) {
-            if (this.dataProcessingService.existsByFacultyId(faculty)) {
-                continue;
-            }
-            Node core =  new NodeBuilder()
-                    .setNodeCpuResourceCapacityTo(0.0)
-                    .setNodeGpuResourceCapacityTo(0.0)
-                    .setNodeMemoryResourceCapacityTo(0.0)
-                    .withNodeName("FacultyCentralCore")
-                    .foundAtUrl("/" + faculty + "/central-core")
-                    .byUserWithNetId("SYSTEM")
-                    .assignToFacultyWithId(faculty).constructNodeInstance();
-            this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
-        }
-        return ResponseEntity.ok("Successfully acknowledged all existing faculties.");
-    }
-
-    /**
-     * Provides an endpoint for accessing nodes directly. This can be either all nodes or a node at specified url.
-     *
-     * @param request the url to look for the node at (if given).
-     *
-     * @return response entity containing the list of all relevant nodes (or the looked for node when url provided and
-     * exists in the database).
-     */
-    @GetMapping(value = {"/nodes", "/nodes/**"})
-    @PreAuthorize("hasRole('SYSADMIN')")
-    public ResponseEntity<List<NodeResponseModel>> getNodeInformation(HttpServletRequest request) {
-        String url = request.getRequestURI().replaceFirst("/nodes", "");
-        String slashCheck = "/";
-        if (url.isEmpty() || url.equals(slashCheck)) {
-            var rawNodes = this.dataProcessingService.getAllNodes();
-            return ResponseEntity.ok(NodeResponseModel.convertAllNodesToResponseModels(rawNodes));
-        } else if (this.dataProcessingService.existsByUrl(url)) {
-            return ResponseEntity.ok(NodeResponseModel
-                .convertAllNodesToResponseModels(List.of(this.dataProcessingService.getByUrl(url))));
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     /**
@@ -114,13 +64,13 @@ public class NodeController {
         if (this.dataProcessingService.getNumberOfNodesInRepository() == 0) {
             // Unknown faculties. All nodes will be assigned to the Board of Examiners until faculties become known.
             Node core =  new NodeBuilder()
-                .setNodeCpuResourceCapacityTo(0.0)
-                .setNodeGpuResourceCapacityTo(0.0)
-                .setNodeMemoryResourceCapacityTo(0.0)
-                .withNodeName("BoardCentralCore")
-                .foundAtUrl("/board-of-examiners/central-core")
-                .byUserWithNetId("SYSTEM")
-                .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
+                    .setNodeCpuResourceCapacityTo(0.0)
+                    .setNodeGpuResourceCapacityTo(0.0)
+                    .setNodeMemoryResourceCapacityTo(0.0)
+                    .withNodeName("BoardCentralCore")
+                    .foundAtUrl("/board-of-examiners/central-core")
+                    .byUserWithNetId("SYSTEM")
+                    .assignToFacultyWithId("Board of Examiners").constructNodeInstance();
             this.nodeContributionService.addNodeAssignedToSpecificFacultyToCluster(core);
         }
 
@@ -142,7 +92,6 @@ public class NodeController {
                 .byUserWithNetId(netId)
                 .constructNodeInstance();
 
-        // no preassigned faculty
         if (facultyId == null) {
             if (n.hasEnoughCpu().equals("Your node has been successfully added.")) {
                 this.nodeContributionService.addNodeToCluster(n);
@@ -183,15 +132,15 @@ public class NodeController {
 
         if (!this.dataProcessingService.existsByUrl(url)) {
             return ResponseEntity.badRequest().body("Could not find the node to be deleted."
-                + " Check if the url provided is correct.");
+                    + " Check if the url provided is correct.");
         } else if (!this.dataProcessingService.getByUrl(url).getUserNetId()
-            .equals(authManager.getNetId())) {
+                .equals(authManager.getNetId())) {
             return ResponseEntity.badRequest().body("You cannot remove nodes that"
-                + " other users have contributed to the cluster.");
+                    + " other users have contributed to the cluster.");
         }
 
         this.nodeContributionService
-            .addNodeToBeRemoved(this.dataProcessingService.getByUrl(url));
+                .addNodeToBeRemoved(this.dataProcessingService.getByUrl(url));
 
         return ResponseEntity.ok("Your node will be removed at midnight.");
     }
@@ -221,7 +170,7 @@ public class NodeController {
             return ResponseEntity.ok("The node has been successfully deleted");
         } else {
             return ResponseEntity.ok("Could not find the node to be deleted."
-                + " Check if the url provided is correct.");
+                    + " Check if the url provided is correct.");
         }
     }
 }

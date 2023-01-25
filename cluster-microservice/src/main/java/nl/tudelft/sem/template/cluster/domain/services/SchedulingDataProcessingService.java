@@ -10,7 +10,6 @@ import nl.tudelft.sem.template.cluster.domain.cluster.FacultyDatedTotalResources
 import nl.tudelft.sem.template.cluster.domain.cluster.FacultyTotalResources;
 import nl.tudelft.sem.template.cluster.domain.cluster.Job;
 import nl.tudelft.sem.template.cluster.domain.cluster.JobScheduleRepository;
-import nl.tudelft.sem.template.cluster.domain.cluster.Node;
 import nl.tudelft.sem.template.cluster.domain.cluster.NodeRepository;
 import nl.tudelft.sem.template.cluster.domain.providers.DateProvider;
 import nl.tudelft.sem.template.cluster.models.FacultyDatedResourcesResponseModel;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Service;
  * Provides access to information from the repositories and processes it for further use.
  */
 @Service
-public class DataProcessingService {
+public class SchedulingDataProcessingService {
 
     private final transient NodeRepository nodeRepository;
     private final transient JobScheduleRepository jobScheduleRepository;
@@ -39,49 +38,11 @@ public class DataProcessingService {
      * @param dateProvider the date provider for current date and tomorrow.
      */
     @Autowired
-    public DataProcessingService(NodeRepository nodeRepository, JobScheduleRepository jobScheduleRepository,
-                                 DateProvider dateProvider) {
+    public SchedulingDataProcessingService(NodeRepository nodeRepository, JobScheduleRepository jobScheduleRepository,
+                                           DateProvider dateProvider) {
         this.nodeRepository = nodeRepository;
         this.jobScheduleRepository = jobScheduleRepository;
         this.dateProvider = dateProvider;
-    }
-
-    // NODE SECTION
-
-    public int getNumberOfNodesInRepository() {
-        return (int) this.nodeRepository.count();
-    }
-
-    public boolean existsByUrl(String url) {
-        return this.nodeRepository.existsByUrl(url);
-    }
-
-    public boolean existsByFacultyId(String facultyId) {
-        return this.nodeRepository.existsByFacultyId(facultyId);
-    }
-
-    public Node getByUrl(String url) {
-        return this.nodeRepository.findByUrl(url);
-    }
-
-    public List<Node> getByFacultyId(String facultyId) {
-        return this.getAllNodes().stream().filter(x -> x.getFacultyId().equals(facultyId)).collect(Collectors.toList());
-    }
-
-    public List<Node> getAllNodes() {
-        return this.nodeRepository.findAll();
-    }
-
-    public void save(Node node) {
-        this.nodeRepository.save(node);
-    }
-
-    public void deleteNode(Node node) {
-        this.nodeRepository.delete(node);
-    }
-
-    public void deleteAllNodes() {
-        this.nodeRepository.deleteAll();
     }
 
     /**
@@ -109,7 +70,7 @@ public class DataProcessingService {
     public FacultyTotalResources getAssignedResourcesForGivenFaculty(String facultyId)
         throws IllegalArgumentException {
 
-        if (getAllFaculties().contains(facultyId)) {
+        if (this.getAllFaculties().contains(facultyId)) {
             return getAssignedResourcesPerFaculty().stream()
                 .filter(x -> x.getFaculty_Id().equals(facultyId))
                 .collect(Collectors.toList()).get(0);
@@ -117,8 +78,6 @@ public class DataProcessingService {
             throw new IllegalArgumentException("Faculty does not exist.");
         }
     }
-
-    // SCHEDULE/JOB SECTION
 
     /**
      * Checks whether a job requested through the faculty with the given id exists in the schedule.

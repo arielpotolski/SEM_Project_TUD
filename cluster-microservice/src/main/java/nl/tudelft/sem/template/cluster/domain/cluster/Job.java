@@ -87,6 +87,17 @@ public class Job {
     }
 
     /**
+     * This method calculates whether the amount of resources needed to execute the
+     * job are valid. Namely, if the amount gpu and memory required is at most the
+     * same as the amount of cpu required.
+     *
+     * @return true if valid, false if invalid.
+     */
+    public boolean areResourcesNeededValid() {
+        return !(this.requiredCpu < this.requiredGpu) && !(this.requiredCpu < this.requiredMemory);
+    }
+
+    /**
      * Compare this Job to another. Does not take scheduledFor into account, as if two equal jobs are scheduled
      * for two days independently, they are still nevertheless innately equal.
      *
