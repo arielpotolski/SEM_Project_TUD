@@ -1,11 +1,6 @@
 package nl.tudelft.sem.template.example.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import nl.tudelft.sem.template.example.domain.Request;
-import nl.tudelft.sem.template.example.domain.RequestRepository;
-import nl.tudelft.sem.template.example.services.RequestAllocationService;
 
-import java.util.List;
 
 /**
  * The type Utils.
