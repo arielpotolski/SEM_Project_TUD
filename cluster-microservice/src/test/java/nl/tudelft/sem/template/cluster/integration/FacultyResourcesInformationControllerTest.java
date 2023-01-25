@@ -386,4 +386,38 @@ public class FacultyResourcesInformationControllerTest {
         String response = result.andReturn().getResponse().getContentAsString();
         assertThat(response).isEqualTo(JsonUtil.serialize(List.of(testingModel)));
     }
+
+    @Test
+    void getAvailableResourcesForGivenFacultyBeforeGivenDateIsInvalidDate() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        this.job.setScheduledFor(this.dateProvider.getTomorrow());
+        jobScheduleRepository.save(job);
+
+        ResultActions result = mockMvc.perform(get("/resources/availableUntil/2022-12-14/EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAvailableResourcesForGivenFacultyBeforeGivenDateIsInvalidDateWordAsDate() throws Exception {
+        node1.setGpuResources(1);
+        node1.setMemoryResources(1);
+        node1.setCpuResources(5);
+        nodeRepository.save(node1);
+
+        this.job.setScheduledFor(this.dateProvider.getTomorrow());
+        jobScheduleRepository.save(job);
+
+        ResultActions result = mockMvc.perform(get("/resources/availableUntil/twenty/EWI")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer MockedToken"));
+
+        result.andExpect(status().isBadRequest());
+    }
 }
