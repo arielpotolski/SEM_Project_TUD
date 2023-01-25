@@ -155,7 +155,8 @@ public class SchedulingDataProcessingServiceTest {
         this.nodeRepository.save(this.node1);
         this.nodeRepository.save(this.node2);
         this.nodeRepository.save(this.node3);
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> this.schedulingDataProcessingService.getAssignedResourcesForGivenFaculty("DWI"));
+        Exception exception = assertThrows(IllegalArgumentException.class, ()
+                -> this.schedulingDataProcessingService.getAssignedResourcesForGivenFaculty("DWI"));
         assertThat(exception.getMessage()).isEqualTo("Faculty does not exist.");
     }
 
