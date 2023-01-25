@@ -3,8 +3,8 @@ package nl.tudelft.sem.template.example.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,19 +78,16 @@ public class RequestAllocationService {
             String string = result.getBody().getFaculties()
                     .replace("[", "").replace("]", "");
 
-            assert string != null;
             if (string.equals("")) {
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
 
-            // extract
-
-
             return Arrays.stream(string.split(", ")).collect(Collectors.toList());
+
         } catch (Exception e) {
             System.out.println("error with post:" + e);
         }
-        return new ArrayList<>();
+        return Collections.emptyList();
 
     }
 
@@ -120,8 +117,8 @@ public class RequestAllocationService {
 
             return listOfResources;
         } catch (Exception e) {
-            System.err.println("Error getting reserved resources: " + e.getMessage());
-            return new ArrayList<>();
+            System.out.println("Error getting reserved resources: " + e.getMessage());
+            return Collections.emptyList();
         }
     }
 
@@ -157,9 +154,8 @@ public class RequestAllocationService {
      * If the user is verified and there are enough resources available, the job request is forwarded to the cluster service.
      *
      * @param request the request
-     * @throws JsonProcessingException the json processing exception
      */
-    public boolean sendRequestToCluster(Request request, String token) throws JsonProcessingException {
+    public boolean sendRequestToCluster(Request request, String token) {
 
         try {
             String url = "http://localhost:8082/request";
@@ -210,10 +206,10 @@ public class RequestAllocationService {
                 return true;
             }
         } catch (Exception e) {
-            System.out.println("error with post" + e);
+            System.out.println("error with post: " + e);
             return false;
         }
-        return true;
+        return false;
 
 
     }
