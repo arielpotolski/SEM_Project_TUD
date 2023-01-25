@@ -61,4 +61,5 @@ public class NodeContributionServiceTest {
 
         assertThat(this.nodeContributionService.getNodesToRemove()).isEqualTo(list);
     }
+
 }
