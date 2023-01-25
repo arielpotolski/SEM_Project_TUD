@@ -6,13 +6,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -83,7 +84,6 @@ public class RequestAllocationServiceTest {
     private ObjectMapper objectMapper;
 
     private final PrintStream standardOut = System.out;
-//    private final PrintStream standardErr = System.err;
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
 
@@ -105,7 +105,6 @@ public class RequestAllocationServiceTest {
 
     @AfterEach
     public void tearDown() {
-//        System.setOut(standardOut);
         System.setOut(standardOut);
     }
 
@@ -195,8 +194,8 @@ public class RequestAllocationServiceTest {
 
         assertThat(reservedResources).isEqualTo(new ArrayList<>());
         assertThat(reservedResources).isEmpty();
-        String error = "Error getting reserved resources: I/O error on GET request for" +
-        " \"http://localhost:8082/resources/availableUntil/2022-12-24/EWI\": null; nested exception is java.io.IOException";
+        String error = "Error getting reserved resources: I/O error on GET request for"
+                + " \"http://localhost:8082/resources/availableUntil/2022-12-24/EWI\": null; nested exception is java.io.IOException";
         assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
     }
 
@@ -246,17 +245,17 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.sendRequestToCluster(request, "token");
 
         assertThat(b).isFalse();
-        String error = "error with post: org.springframework.web.client.ResourceAccessException: I/O error on POST request" +
-                " for \"http://localhost:8082/request\": null; nested exception is java.io.IOException";
+        String error = "error with post: org.springframework.web.client.ResourceAccessException: I/O error on POST request"
+                + " for \"http://localhost:8082/request\": null; nested exception is java.io.IOException";
         assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
     }
 
-        @Test
+    @Test
     public void sendDeclinedRequestToUserService1() {
 
         server.expect(once(), requestTo("http://localhost:8081/notification"))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header("Authorization","Bearer token"))
+                .andExpect(header("Authorization", "Bearer token"))
                 .andRespond(withSuccess("ok", MediaType.APPLICATION_JSON));
         String dateString = "2025-12-12";
 
@@ -283,8 +282,8 @@ public class RequestAllocationServiceTest {
         boolean b = requestAllocationService.sendDeclinedRequestToUserService(request, "token");
 
         assertThat(b).isFalse();
-        String error = "error with post: org.springframework.web.client.ResourceAccessException:" +
-                " I/O error on POST request for \"http://localhost:8081/notification\": null; nested exception is java.io.IOException";
+        String error = "error with post: org.springframework.web.client.ResourceAccessException:"
+                + " I/O error on POST request for \"http://localhost:8081/notification\": null; nested exception is java.io.IOException";
         assertThat(outputStreamCaptor.toString().trim()).isEqualTo(error);
 
     }
@@ -306,7 +305,7 @@ public class RequestAllocationServiceTest {
 
 
 
-        @Test
+    @Test
     public void notEnoughCpuResourceForJobTest() throws JsonProcessingException {
         // reserved resources for 24th of December 2022 for ewi
         var resources = new ResourceResponseModel[] {
